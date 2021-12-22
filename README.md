@@ -1,36 +1,44 @@
-# java-gradle-template
+# auto-handbrake-encoding
 
-[![build](https://github.com/wilmol/java-gradle-template/workflows/build/badge.svg?event=push)](https://github.com/wilmol/java-gradle-template/actions?query=workflow%3Abuild)
-[![codecov](https://codecov.io/gh/wilmol/java-gradle-template/branch/main/graph/badge.svg)](https://codecov.io/gh/wilmol/java-gradle-template)
+[![build](https://github.com/wilmol/auto-handbrake-encoding/workflows/build/badge.svg?event=push)](https://github.com/wilmol/auto-handbrake-encoding/actions?query=workflow%3Abuild)
+[![codecov](https://codecov.io/gh/wilmol/auto-handbrake-encoding/branch/main/graph/badge.svg)](https://codecov.io/gh/wilmol/auto-handbrake-encoding)
 
-template repository for Java projects using Gradle
+Automating HandBrake encoding
 
-## Usage
-* Just go to: https://github.com/wilmol/java-gradle-template/generate
-  * This will prompt you to create a new repository with all the files setup
-* Rename the root project (currently `java-gradle-template`) and group (currently `com.wilmol`) to your liking 
-* Create your README
-* Delete anything you won't use (sub projects, dependencies etc.)
+## Requirements
 
-### Build
+- Java 17
+- HandBrakeCLI
+
+## Use cases
+
+### Encoding Nvidia ShadowPlay recordings with a CFR preset
+
+#### Why?
+- Nvidia ShadowPlay records with a variable/peak frame rate (VFR), leading to audio sync issues
+- The recordings may also have a large file size
+
+#### How?
+1. Recursively scans directory for any `.mp4` files that haven't already been encoded
+2. Encodes `.mp4` files with a Constant Frame Rate (CFR) preset at 60 FPS
+   - Encoded files are named with the suffix `  - CFR 60 FPS.mp4`
+   - The preset doesn't change anything else, it keeps the original resolution etc.
+3. (optional) Deletes original recordings
+4. (optional) Shuts computer down after encoding
+
+#### Usage:
+- Build:
+```bash
+./gradlew build
 ```
-./gradlew spotlessApply build
+
+- Configure main [App class](nvidia-shadowplay/src/main/java/com/wilmol/handbrake/nvidia/shadowplay/App.java)
+  - Point to directory containing `.mp4` files
+  - Set flag if original recordings should be deleted
+  - Set flag if computer should shutdown after encoding
+
+
+- Run main [App class](nvidia-shadowplay/src/main/java/com/wilmol/handbrake/nvidia/shadowplay/App.java):
+```bash
+./gradlew :nvidia-shadowplay:app
 ```
-
-## Features
-* Java 17 LTS
-* Gradle 7
-  * Multi-project builds
-* [GitHub Actions CI](https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle) integration
-* [Codecov](https://codecov.io/) integration
-* [Spotless](https://github.com/diffplug/spotless) integration 
-  * With [google-java-format](https://github.com/google/google-java-format)
-* [Checkstyle](https://github.com/checkstyle/checkstyle) integration 
-  * With [google_checks](https://github.com/checkstyle/checkstyle/blob/master/src/main/resources/google_checks.xml)
-* [SpotBugs](https://spotbugs.github.io/) integration
-
-## Promise
-* Keep up to date with:
-  * Future Java versions
-  * Future Gradle versions
-  * Other dependency upgrades
