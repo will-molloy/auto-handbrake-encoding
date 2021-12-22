@@ -12,33 +12,38 @@ Automating HandBrake encoding
 
 ## Use cases
 
-### Encoding Nvidia ShadowPlay recordings with a CFR preset
+### Encoding Nvidia ShadowPlay videos with a CFR preset
 
 #### Why?
-- Nvidia ShadowPlay records with a variable/peak frame rate (VFR), leading to audio sync issues
-- The recordings may also have a large file size
+
+- Nvidia ShadowPlay records video with a variable/peak frame rate (VFR), leading to audio sync issues
+- The videos may also have a larger than necessary file size
 
 #### How?
+
 1. Recursively scans directory for any `.mp4` files that haven't already been encoded
 2. Encodes `.mp4` files with a Constant Frame Rate (CFR) preset at 60 FPS
-   - Encoded files are named with the suffix `  - CFR 60 FPS.mp4`
-   - The preset doesn't change anything else, it keeps the original resolution etc.
-3. (optional) Deletes original recordings
+    - Encoded files are named with the suffix `  - CFR 60 FPS.mp4`
+    - The preset doesn't change anything else, it keeps the original resolution etc.
+3. (optional) Deletes original videos
 4. (optional) Shuts computer down after encoding
 
 #### Usage:
+
 - Build:
+
 ```bash
 ./gradlew build
 ```
 
 - Configure main [App class](nvidia-shadowplay/src/main/java/com/wilmol/handbrake/nvidia/shadowplay/App.java)
-  - Point to directory containing `.mp4` files
-  - Set flag if original recordings should be deleted
-  - Set flag if computer should shutdown after encoding
+    - Point to directory containing `.mp4` files
+    - Set flag if original videos should be deleted
+    - Set flag if computer should shutdown after encoding
 
 
 - Run main [App class](nvidia-shadowplay/src/main/java/com/wilmol/handbrake/nvidia/shadowplay/App.java):
+
 ```bash
 ./gradlew :nvidia-shadowplay:app
 ```

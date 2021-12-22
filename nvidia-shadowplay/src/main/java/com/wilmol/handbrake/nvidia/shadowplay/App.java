@@ -1,5 +1,7 @@
 package com.wilmol.handbrake.nvidia.shadowplay;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.base.Stopwatch;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -17,50 +19,57 @@ class App {
 
   private static final Logger log = LogManager.getLogger();
 
-  private static final String ORIGINAL_SUFFIX = ".mp4";
-  private static final String ENCODED_SUFFIX = " - CFR 60 FPS.mp4";
+  private final HandBrake handBrake;
 
-  void run(Path recordingsPath, boolean deleteOriginalRecordings, boolean shutdownComputer)
-      throws IOException {
+  App(HandBrake handBrake) {
+    this.handBrake = checkNotNull(handBrake);
+  }
+
+  void run(Path videosPath, boolean deleteOriginalVideos, boolean shutdownComputer)
+      throws Exception {
     Stopwatch stopwatch = Stopwatch.createStarted();
     log.info(
-        "run(recordingsPath={}, deleteOriginalRecordings={}, shutdownComputer={}) started",
-        recordingsPath,
-        deleteOriginalRecordings,
+        "run(videosPath={}, deleteOriginalVideos={}, shutdownComputer={}) started",
+        videosPath,
+        deleteOriginalVideos,
         shutdownComputer);
 
-    List<Path> originalRecordings = scanFiles(recordingsPath);
-    for (Path path : originalRecordings) {
-      log.info("Detected: {}", path);
+    List<Video> videos = getVideosToEncode(videosPath);
+    log.info("Detected {} video(s) to encode", videos.size());
+    for (Video video : videos) {
+      log.info("Detected: {}", video.originalPath());
     }
 
-    for (Path path : originalRecordings) {
-      log.info("Processing: {}", path);
+    for (int i = 0; i < videos.size(); i++) {
+      Video video = videos.get(i);
+      log.info("Encoding ({}/{}): {}", i + 1, videos.size(), video.originalPath());
+      handBrake.encode(video);
+      log.info("Encoded ({}/{}): {}", i + 1, videos.size(), video.encodedPath());
     }
 
     log.info("run finished - elapsed: {}", stopwatch.elapsed());
   }
 
-  private List<Path> scanFiles(Path recordingsPath) throws IOException {
-    return Files.walk(recordingsPath)
+  private List<Video> getVideosToEncode(Path videosPath) throws IOException {
+    return Files.walk(videosPath)
         .filter(Files::isRegularFile)
-        .filter(
-            path ->
-                path.toString().endsWith(ORIGINAL_SUFFIX)
-                    && !path.toString().endsWith(ENCODED_SUFFIX))
+        .filter(path -> Video.isMp4(path) && !Video.isEncoded(path))
+        .map(Video::new)
+        .filter(video -> !video.isEncoded())
         .toList();
   }
 
-  public static void main(String[] args) throws Exception {
-    // Path to the directory containing the .mp4 recordings
-    Path recordingsPath = Path.of("D:\\Videos\\Gameplay");
-
-    // If original recordings should be deleted
-    boolean deleteOriginalRecordings = false;
-
-    // If the computer should be shutdown after encoding
+  public static void main(String[] args) {
+    Path videosPath = Path.of("D:\\Videos\\Gameplay");
+    boolean deleteOriginalVideos = false;
     boolean shutdownComputer = false;
 
-    new App().run(recordingsPath, deleteOriginalRecordings, shutdownComputer);
+    try {
+      App app = new App(new HandBrake(new Cli()));
+
+      app.run(videosPath, deleteOriginalVideos, shutdownComputer);
+    } catch (Exception e) {
+      log.fatal("Fatal error", e);
+    }
   }
 }
