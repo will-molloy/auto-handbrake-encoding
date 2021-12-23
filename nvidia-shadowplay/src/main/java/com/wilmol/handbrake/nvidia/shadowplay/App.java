@@ -62,7 +62,9 @@ class App {
     List<UnencodedVideo> alreadyEncodedVideos =
         videos.stream().filter(UnencodedVideo::hasBeenEncoded).toList();
 
-    log.info("Detected {} video(s) that have already been encoded", alreadyEncodedVideos.size());
+    log.info(
+        "Detected {} unencoded video(s) that have already been encoded",
+        alreadyEncodedVideos.size());
 
     for (int i = 0; i < alreadyEncodedVideos.size(); i++) {
       UnencodedVideo video = alreadyEncodedVideos.get(i);

@@ -1,11 +1,10 @@
 package com.wilmol.handbrake.nvidia.shadowplay;
 
-import static com.google.common.base.Verify.verify;
-
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.function.Consumer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,19 +18,27 @@ class Cli {
 
   private static final Logger log = LogManager.getLogger();
 
-  void executeCommand(String command) throws Exception {
-    log.info("Executing: {}", command);
+  /**
+   * Executes the given command.
+   *
+   * @param command command to execute
+   * @return {@code true} if execution was successful
+   */
+  boolean executeCommand(String... command) throws Exception {
+    log.info("Executing: {}", List.of(command));
 
-    Runtime runtime = Runtime.getRuntime();
+    Process process = new ProcessBuilder(command).redirectErrorStream(true).start();
 
-    Process process = runtime.exec(command);
-    runtime.addShutdownHook(new Thread(process::destroy));
+    Runtime.getRuntime().addShutdownHook(new Thread(process::destroy));
 
     consumeStream(process.getInputStream(), log::debug);
-    consumeStream(process.getErrorStream(), log::debug);
 
     int exitCode = process.waitFor();
-    verify(exitCode == 0, "Command (%s) executed with non-zero exit code: %s", command, exitCode);
+    if (exitCode != 0) {
+      log.error("Command executed with non-zero exit code: {}", exitCode);
+      return false;
+    }
+    return true;
   }
 
   private void consumeStream(InputStream inputStream, Consumer<String> consumer) {

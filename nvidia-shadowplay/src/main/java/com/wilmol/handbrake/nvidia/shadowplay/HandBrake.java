@@ -29,7 +29,7 @@ class HandBrake {
    * Encodes the given video.
    *
    * @param video video to encode
-   * @return true if encoding was successful
+   * @return {@code true} if encoding was successful
    */
   boolean encode(UnencodedVideo video) {
     if (video.hasBeenEncoded()) {
@@ -38,13 +38,21 @@ class HandBrake {
     }
 
     try {
-      cli.executeCommand(
-          "HandBrakeCLI.exe --preset-import-file \"%s\" -i \"%s\" -o \"%s\""
-              .formatted(preset, video.originalPath(), video.encodedPath()));
-      return true;
+      return cli.executeCommand(
+          "HandBrakeCLI",
+          "--preset-import-file",
+          quote(preset),
+          "-i",
+          quote(video.originalPath()),
+          "-o",
+          quote(video.encodedPath()));
     } catch (Exception e) {
       log.error("Error encoding video: %s".formatted(video.originalPath()), e);
       return false;
     }
+  }
+
+  private String quote(Object s) {
+    return "\"%s\"".formatted(s);
   }
 }
