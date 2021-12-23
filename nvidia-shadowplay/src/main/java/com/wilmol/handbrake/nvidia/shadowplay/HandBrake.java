@@ -3,7 +3,6 @@ package com.wilmol.handbrake.nvidia.shadowplay;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.io.Resources;
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import org.apache.logging.log4j.LogManager;
@@ -26,14 +25,26 @@ class HandBrake {
     this.cli = checkNotNull(cli);
   }
 
-  void encode(Video video) throws IOException, InterruptedException {
-    if (video.isEncoded()) {
-      log.warn("Encoded video ({}) already exists", video.encodedPath());
-      return;
+  /**
+   * Encodes the given video.
+   *
+   * @param video video to encode
+   * @return true if encoding was successful
+   */
+  boolean encode(UnencodedVideo video) {
+    if (video.hasBeenEncoded()) {
+      log.warn("Video ({}) has already been encoded", video.originalPath());
+      return true;
     }
 
-    cli.executeCommand(
-        "HandBrakeCLI.exe --preset-import-file \"%s\" -i \"%s\" -o \"%s\""
-            .formatted(preset, video.originalPath(), video.encodedPath()));
+    try {
+      cli.executeCommand(
+          "HandBrakeCLI.exe --preset-import-file \"%s\" -i \"%s\" -o \"%s\""
+              .formatted(preset, video.originalPath(), video.encodedPath()));
+      return true;
+    } catch (Exception e) {
+      log.error("Error encoding video: %s".formatted(video.originalPath()), e);
+      return false;
+    }
   }
 }

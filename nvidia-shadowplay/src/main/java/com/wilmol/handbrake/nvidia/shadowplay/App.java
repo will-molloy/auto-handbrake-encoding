@@ -34,37 +34,86 @@ class App {
         deleteOriginalVideos,
         shutdownComputer);
 
-    List<Video> videos = getVideosToEncode(videosPath);
-    log.info("Detected {} video(s) to encode", videos.size());
-    for (Video video : videos) {
-      log.info("Detected: {}", video.originalPath());
+    List<UnencodedVideo> unencodedVideos = getUnencodedVideos(videosPath);
+    log.info("Detected {} unencoded videos(s)", unencodedVideos.size());
+
+    if (deleteOriginalVideos) {
+      // while 'List<UnencodedVideo> unencodedVideos' represents unencoded videos,
+      // the corresponding encoded videos may already exist
+      deleteVideosThatHaveAlreadyBeenEncoded(unencodedVideos);
     }
 
-    for (int i = 0; i < videos.size(); i++) {
-      Video video = videos.get(i);
-      log.info("Encoding ({}/{}): {}", i + 1, videos.size(), video.originalPath());
-      handBrake.encode(video);
-      log.info("Encoded ({}/{}): {}", i + 1, videos.size(), video.encodedPath());
-    }
+    encodeVideos(unencodedVideos, deleteOriginalVideos);
 
     log.info("run finished - elapsed: {}", stopwatch.elapsed());
   }
 
-  private List<Video> getVideosToEncode(Path videosPath) throws IOException {
+  private List<UnencodedVideo> getUnencodedVideos(Path videosPath) throws IOException {
     return Files.walk(videosPath)
         .filter(Files::isRegularFile)
-        .filter(path -> Video.isMp4(path) && !Video.isEncoded(path))
-        .map(Video::new)
-        .filter(video -> !video.isEncoded())
+        // don't include paths that represent encoded videos
+        .filter(path -> UnencodedVideo.isMp4(path) && !UnencodedVideo.isEncodedMp4(path))
+        .map(UnencodedVideo::new)
         .toList();
   }
 
-  public static void main(String[] args) {
-    Path videosPath = Path.of("D:\\Videos\\Gameplay");
-    boolean deleteOriginalVideos = false;
-    boolean shutdownComputer = false;
+  private void deleteVideosThatHaveAlreadyBeenEncoded(List<UnencodedVideo> videos)
+      throws IOException {
+    List<UnencodedVideo> alreadyEncodedVideos =
+        videos.stream().filter(UnencodedVideo::hasBeenEncoded).toList();
 
+    log.info("Detected {} video(s) that have already been encoded", alreadyEncodedVideos.size());
+
+    for (int i = 0; i < alreadyEncodedVideos.size(); i++) {
+      UnencodedVideo video = alreadyEncodedVideos.get(i);
+
+      log.info("Deleting ({}/{}): {}", i + 1, alreadyEncodedVideos.size(), video.originalPath());
+      Files.delete(video.originalPath());
+    }
+  }
+
+  private void encodeVideos(List<UnencodedVideo> videos, boolean deleteOriginalVideos)
+      throws IOException {
+    List<UnencodedVideo> videosToEncode =
+        videos.stream().filter(video -> !video.hasBeenEncoded()).toList();
+
+    log.info("Detected {} video(s) to encode", videosToEncode.size());
+
+    for (int i = 0; i < videosToEncode.size(); i++) {
+      UnencodedVideo video = videosToEncode.get(i);
+
+      log.info("Detected ({}/{}): {}", i + 1, videosToEncode.size(), video.originalPath());
+    }
+
+    for (int i = 0; i < videosToEncode.size(); i++) {
+      UnencodedVideo video = videosToEncode.get(i);
+
+      log.info("Encoding ({}/{}): {}", i + 1, videosToEncode.size(), video.originalPath());
+      boolean encodeSuccessful = handBrake.encode(video);
+
+      if (encodeSuccessful) {
+        log.info("Encoded ({}/{}): {}", i + 1, videosToEncode.size(), video.encodedPath());
+
+        if (deleteOriginalVideos) {
+          log.info("Deleting: {}", video.originalPath());
+          Files.delete(video.originalPath());
+        }
+      } else {
+        log.error("Encode ({}/{}) failed: {}", i + 1, videosToEncode.size(), video.originalPath());
+
+        if (deleteOriginalVideos) {
+          log.error("Skipping deletion of: {}", video.originalPath());
+        }
+      }
+    }
+  }
+
+  public static void main(String[] args) {
     try {
+      Path videosPath = Path.of("D:\\Videos\\Gameplay");
+      boolean deleteOriginalVideos = true;
+      boolean shutdownComputer = false;
+
       App app = new App(new HandBrake(new Cli()));
 
       app.run(videosPath, deleteOriginalVideos, shutdownComputer);

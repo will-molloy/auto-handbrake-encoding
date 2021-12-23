@@ -7,11 +7,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
- * Represents a video (.mp4) file.
+ * Represents an unencoded video (.mp4 file).
  *
  * @author <a href=https://wilmol.com>Will Molloy</a>
  */
-class Video {
+class UnencodedVideo {
 
   private static final String MP4_SUFFIX = ".mp4";
   private static final String ENCODED_MP4_SUFFIX = " - CFR 60 FPS.mp4";
@@ -20,9 +20,9 @@ class Video {
 
   private final Path encodedPath;
 
-  Video(Path path) {
+  UnencodedVideo(Path path) {
     checkArgument(isMp4(path), "Path %s does not represent an .mp4 file", path);
-    checkArgument(!isEncoded(path), "Path %s already represents an encoded .mp4 file", path);
+    checkArgument(!isEncodedMp4(path), "Path %s already represents an encoded .mp4 file", path);
 
     originalPath = path;
 
@@ -35,11 +35,11 @@ class Video {
     return path.toString().endsWith(MP4_SUFFIX);
   }
 
-  public static boolean isEncoded(Path path) {
+  public static boolean isEncodedMp4(Path path) {
     return path.toString().endsWith(ENCODED_MP4_SUFFIX);
   }
 
-  public boolean isEncoded() {
+  public boolean hasBeenEncoded() {
     return Files.exists(encodedPath);
   }
 

@@ -3,7 +3,6 @@ package com.wilmol.handbrake.nvidia.shadowplay;
 import static com.google.common.base.Verify.verify;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
@@ -20,7 +19,7 @@ class Cli {
 
   private static final Logger log = LogManager.getLogger();
 
-  void executeCommand(String command) throws IOException, InterruptedException {
+  void executeCommand(String command) throws Exception {
     log.info("Executing: {}", command);
 
     Runtime runtime = Runtime.getRuntime();

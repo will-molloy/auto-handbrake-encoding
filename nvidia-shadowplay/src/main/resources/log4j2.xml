@@ -3,7 +3,7 @@
     <Appenders>
         <Console name="console" target="SYSTEM_OUT">
             <PatternLayout
-                    pattern="[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] [%c] - %msg%n"/>
+                    pattern="[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] [%c] [%M] - %msg%n"/>
         </Console>
     </Appenders>
 
@@ -12,6 +12,6 @@
             <AppenderRef ref="console"/>
         </Root>
 
-        <Logger name="com.wilmol" level="debug"/>
+        <Logger name="com.wilmol" level="info"/>
     </Loggers>
 </Configuration>
