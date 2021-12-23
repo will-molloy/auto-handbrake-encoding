@@ -24,10 +24,12 @@ class Cli {
     log.info("Executing: {}", command);
 
     Runtime runtime = Runtime.getRuntime();
-    Process process = runtime.exec(command);
 
-    consumeStream(process.getInputStream(), log::info);
-    consumeStream(process.getErrorStream(), log::warn);
+    Process process = runtime.exec(command);
+    runtime.addShutdownHook(new Thread(process::destroy));
+
+    consumeStream(process.getInputStream(), log::debug);
+    consumeStream(process.getErrorStream(), log::debug);
 
     int exitCode = process.waitFor();
     verify(exitCode == 0, "Command (%s) executed with non-zero exit code: %s", command, exitCode);
