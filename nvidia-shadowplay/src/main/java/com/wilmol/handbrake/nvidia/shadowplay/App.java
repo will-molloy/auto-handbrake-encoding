@@ -40,18 +40,38 @@ class App {
         deleteOriginalVideos,
         shutdownComputer);
 
+    // delete any incomplete encodings from a previous run
+    deleteIncompleteEncodings(videosPath);
+
     List<UnencodedVideo> unencodedVideos = getUnencodedVideos(videosPath);
     log.info("Detected {} unencoded videos(s)", unencodedVideos.size());
 
     if (deleteOriginalVideos) {
-      // while 'List<UnencodedVideo> unencodedVideos' represents unencoded videos,
-      // the corresponding encoded videos may already exist
+      // while 'List<UnencodedVideo> unencodedVideos' represents unencoded videos, the corresponding
+      // encoded videos may already exist
       deleteVideosThatHaveAlreadyBeenEncoded(unencodedVideos);
     }
 
     encodeVideos(unencodedVideos, deleteOriginalVideos);
 
     log.info("run finished - elapsed: {}", stopwatch.elapsed());
+  }
+
+  private void deleteIncompleteEncodings(Path videosPath) throws IOException {
+    List<Path> tempEncodings =
+        Files.walk(videosPath)
+            .filter(Files::isRegularFile)
+            .filter(UnencodedVideo::isTempEncodedMp4)
+            .toList();
+
+    log.warn("Detected {} incomplete encoding(s)", tempEncodings.size());
+
+    for (int i = 0; i < tempEncodings.size(); i++) {
+      Path path = tempEncodings.get(i);
+
+      log.warn("({}/{}) Deleting: {}", i + 1, tempEncodings.size(), path);
+      Files.delete(path);
+    }
   }
 
   private List<UnencodedVideo> getUnencodedVideos(Path videosPath) throws IOException {
@@ -97,22 +117,32 @@ class App {
       UnencodedVideo video = videosToEncode.get(i);
 
       log.info("({}/{}) Encoding: {}", i + 1, videosToEncode.size(), video.originalPath());
-      boolean encodeSuccessful =
-          handBrake.encode(video.originalPath(), video.encodedPath(), preset);
+      encodeVideo(video, deleteOriginalVideos);
+    }
+  }
 
-      if (encodeSuccessful) {
-        log.info("Encoded: {}", video.encodedPath());
+  private void encodeVideo(UnencodedVideo video, boolean deleteOriginalVideos) throws IOException {
+    // to avoid leaving encoded files in an 'incomplete' state, encode to a temp file in case
+    // something goes wrong
+    boolean encodeSuccessful =
+        handBrake.encode(video.originalPath(), video.tempEncodedPath(), preset);
 
-        if (deleteOriginalVideos) {
-          log.info("Deleting: {}", video.originalPath());
-          Files.delete(video.originalPath());
-        }
-      } else {
-        log.error("Encode failed: {}", video.originalPath());
+    if (encodeSuccessful) {
+      // only delete the original after renaming the temp file, then it'll never reach a state where
+      // the encoding is incomplete and the original doesn't exist
+      Files.move(video.tempEncodedPath(), video.encodedPath());
 
-        if (deleteOriginalVideos) {
-          log.error("Skipping deletion of: {}", video.originalPath());
-        }
+      log.info("Encoded: {}", video.encodedPath());
+
+      if (deleteOriginalVideos) {
+        log.info("Deleting: {}", video.originalPath());
+        Files.delete(video.originalPath());
+      }
+    } else {
+      log.error("Encode failed: {}", video.originalPath());
+
+      if (deleteOriginalVideos) {
+        log.error("Skipping deletion of: {}", video.originalPath());
       }
     }
   }
