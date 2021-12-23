@@ -3,7 +3,11 @@ package com.wilmol.handbrake.nvidia.shadowplay;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Stopwatch;
+import com.google.common.io.Resources;
+import com.wilmol.handbrake.core.Cli;
+import com.wilmol.handbrake.core.HandBrake;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -19,9 +23,11 @@ class App {
 
   private static final Logger log = LogManager.getLogger();
 
+  private final Path preset = Path.of(Resources.getResource("presets/cfr-60fps.json").toURI());
+
   private final HandBrake handBrake;
 
-  App(HandBrake handBrake) {
+  App(HandBrake handBrake) throws URISyntaxException {
     this.handBrake = checkNotNull(handBrake);
   }
 
@@ -91,7 +97,8 @@ class App {
       UnencodedVideo video = videosToEncode.get(i);
 
       log.info("({}/{}) Encoding: {}", i + 1, videosToEncode.size(), video.originalPath());
-      boolean encodeSuccessful = handBrake.encode(video);
+      boolean encodeSuccessful =
+          handBrake.encode(video.originalPath(), video.encodedPath(), preset);
 
       if (encodeSuccessful) {
         log.info("Encoded: {}", video.encodedPath());

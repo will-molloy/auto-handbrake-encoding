@@ -1,4 +1,4 @@
-package com.wilmol.handbrake.nvidia.shadowplay;
+package com.wilmol.handbrake.core;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -14,7 +14,7 @@ import org.apache.logging.log4j.Logger;
  *
  * @author <a href=https://wilmol.com>Will Molloy</a>
  */
-class Cli {
+public class Cli {
 
   private static final Logger log = LogManager.getLogger();
 

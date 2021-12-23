@@ -1,9 +1,8 @@
-package com.wilmol.handbrake.nvidia.shadowplay;
+package com.wilmol.handbrake.core;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.io.Resources;
-import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,27 +12,27 @@ import org.apache.logging.log4j.Logger;
  *
  * @author <a href=https://wilmol.com>Will Molloy</a>
  */
-class HandBrake {
+public class HandBrake {
 
   private static final Logger log = LogManager.getLogger();
 
-  private final Path preset = Path.of(Resources.getResource("presets/cfr-60fps.json").toURI());
-
   private final Cli cli;
 
-  HandBrake(Cli cli) throws URISyntaxException {
+  public HandBrake(Cli cli) {
     this.cli = checkNotNull(cli);
   }
 
   /**
-   * Encodes the given video.
+   * Runs HandBrake encoding.
    *
-   * @param video video to encode
+   * @param input input .mp4 file
+   * @param output output .mp4 file
+   * @param preset preset .json file
    * @return {@code true} if encoding was successful
    */
-  boolean encode(UnencodedVideo video) {
-    if (video.hasBeenEncoded()) {
-      log.warn("Video ({}) has already been encoded", video.originalPath());
+  public boolean encode(Path input, Path output, Path preset) {
+    if (Files.exists(output)) {
+      log.warn("Output ({}) already exists", output);
       return true;
     }
 
@@ -43,11 +42,11 @@ class HandBrake {
           "--preset-import-file",
           quote(preset),
           "-i",
-          quote(video.originalPath()),
+          quote(input),
           "-o",
-          quote(video.encodedPath()));
+          quote(output));
     } catch (Exception e) {
-      log.error("Error encoding video: %s".formatted(video.originalPath()), e);
+      log.error("Error encoding: %s".formatted(input), e);
       return false;
     }
   }
