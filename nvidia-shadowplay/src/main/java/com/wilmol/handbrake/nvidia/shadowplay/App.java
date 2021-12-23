@@ -67,7 +67,7 @@ class App {
     for (int i = 0; i < alreadyEncodedVideos.size(); i++) {
       UnencodedVideo video = alreadyEncodedVideos.get(i);
 
-      log.info("Deleting ({}/{}): {}", i + 1, alreadyEncodedVideos.size(), video.originalPath());
+      log.info("({}/{}) Deleting: {}", i + 1, alreadyEncodedVideos.size(), video.originalPath());
       Files.delete(video.originalPath());
     }
   }
@@ -82,24 +82,24 @@ class App {
     for (int i = 0; i < videosToEncode.size(); i++) {
       UnencodedVideo video = videosToEncode.get(i);
 
-      log.info("Detected ({}/{}): {}", i + 1, videosToEncode.size(), video.originalPath());
+      log.info("({}/{}) Detected: {}", i + 1, videosToEncode.size(), video.originalPath());
     }
 
     for (int i = 0; i < videosToEncode.size(); i++) {
       UnencodedVideo video = videosToEncode.get(i);
 
-      log.info("Encoding ({}/{}): {}", i + 1, videosToEncode.size(), video.originalPath());
+      log.info("({}/{}) Encoding: {}", i + 1, videosToEncode.size(), video.originalPath());
       boolean encodeSuccessful = handBrake.encode(video);
 
       if (encodeSuccessful) {
-        log.info("Encoded ({}/{}): {}", i + 1, videosToEncode.size(), video.encodedPath());
+        log.info("Encoded: {}", video.encodedPath());
 
         if (deleteOriginalVideos) {
           log.info("Deleting: {}", video.originalPath());
           Files.delete(video.originalPath());
         }
       } else {
-        log.error("Encode ({}/{}) failed: {}", i + 1, videosToEncode.size(), video.originalPath());
+        log.error("Encode failed: {}", video.originalPath());
 
         if (deleteOriginalVideos) {
           log.error("Skipping deletion of: {}", video.originalPath());
