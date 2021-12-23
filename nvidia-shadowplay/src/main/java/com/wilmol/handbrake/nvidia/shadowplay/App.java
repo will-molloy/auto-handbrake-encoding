@@ -6,7 +6,6 @@ import com.google.common.base.Stopwatch;
 import com.google.common.io.Resources;
 import com.wilmol.handbrake.core.Cli;
 import com.wilmol.handbrake.core.HandBrake;
-import com.wilmol.handbrake.util.IndexedObject;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -59,18 +58,19 @@ class App {
   }
 
   private void deleteIncompleteEncodings(Path videosPath) throws IOException {
-    List<IndexedObject<Path>> tempEncodings =
-        IndexedObject.oneIndexed(
-            Files.walk(videosPath)
-                .filter(Files::isRegularFile)
-                .filter(UnencodedVideo::isTempEncodedMp4)
-                .toList());
+    List<Path> tempEncodings =
+        Files.walk(videosPath)
+            .filter(Files::isRegularFile)
+            .filter(UnencodedVideo::isTempEncodedMp4)
+            .toList();
 
     log.warn("Detected {} incomplete encoding(s)", tempEncodings.size());
 
-    for (IndexedObject<Path> path : tempEncodings) {
-      log.warn("({}/{}) Deleting: {}", path.index(), tempEncodings.size(), path.object());
-      Files.delete(path.object());
+    for (int i = 0; i < tempEncodings.size(); i++) {
+      Path path = tempEncodings.get(i);
+
+      log.warn("({}/{}) Deleting: {}", i + 1, tempEncodings.size(), path);
+      Files.delete(path);
     }
   }
 
@@ -85,45 +85,39 @@ class App {
 
   private void deleteVideosThatHaveAlreadyBeenEncoded(List<UnencodedVideo> videos)
       throws IOException {
-    List<IndexedObject<UnencodedVideo>> alreadyEncodedVideos =
-        IndexedObject.oneIndexed(videos.stream().filter(UnencodedVideo::hasBeenEncoded).toList());
+    List<UnencodedVideo> alreadyEncodedVideos =
+        videos.stream().filter(UnencodedVideo::hasBeenEncoded).toList();
 
     log.info(
         "Detected {} unencoded video(s) that have already been encoded",
         alreadyEncodedVideos.size());
 
-    for (IndexedObject<UnencodedVideo> video : alreadyEncodedVideos) {
-      log.info(
-          "({}/{}) Deleting: {}",
-          video.index(),
-          alreadyEncodedVideos.size(),
-          video.object().originalPath());
-      Files.delete(video.object().originalPath());
+    for (int i = 0; i < alreadyEncodedVideos.size(); i++) {
+      UnencodedVideo video = alreadyEncodedVideos.get(i);
+
+      log.info("({}/{}) Deleting: {}", i + 1, alreadyEncodedVideos.size(), video.originalPath());
+      Files.delete(video.originalPath());
     }
   }
 
   private void encodeVideos(List<UnencodedVideo> videos, boolean deleteOriginalVideos)
       throws IOException {
-    List<IndexedObject<UnencodedVideo>> videosToEncode =
-        IndexedObject.oneIndexed(videos.stream().filter(video -> !video.hasBeenEncoded()).toList());
+    List<UnencodedVideo> videosToEncode =
+        videos.stream().filter(video -> !video.hasBeenEncoded()).toList();
 
     log.info("Detected {} video(s) to encode", videosToEncode.size());
 
-    for (IndexedObject<UnencodedVideo> video : videosToEncode) {
-      log.info(
-          "({}/{}) Detected: {}",
-          video.index(),
-          videosToEncode.size(),
-          video.object().originalPath());
+    for (int i = 0; i < videosToEncode.size(); i++) {
+      UnencodedVideo video = videosToEncode.get(i);
+
+      log.info("({}/{}) Detected: {}", i + 1, videosToEncode.size(), video.originalPath());
     }
 
-    for (IndexedObject<UnencodedVideo> video : videosToEncode) {
-      log.info(
-          "({}/{}) Encoding: {}",
-          video.index(),
-          videosToEncode.size(),
-          video.object().originalPath());
-      encodeVideo(video.object(), deleteOriginalVideos);
+    for (int i = 0; i < videosToEncode.size(); i++) {
+      UnencodedVideo video = videosToEncode.get(i);
+
+      log.info("({}/{}) Encoding: {}", i + 1, videosToEncode.size(), video.originalPath());
+      encodeVideo(video, deleteOriginalVideos);
     }
   }
 
