@@ -6,6 +6,7 @@
 
     <Appenders>
         <Console name="console" target="SYSTEM_OUT">
+            <ThresholdFilter level="info"/>
             <PatternLayout pattern="[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] [%c] [%M] - %msg%n"/>
         </Console>
 
@@ -20,6 +21,6 @@
             <AppenderRef ref="file"/>
         </Root>
 
-        <Logger name="com.wilmol" level="info"/>
+        <Logger name="com.wilmol" level="debug"/>
     </Loggers>
 </Configuration>
