@@ -1,6 +1,8 @@
 package com.wilmol.handbrake.nvidia.shadowplay;
 
-import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import com.google.common.io.Resources;
 import com.wilmol.handbrake.core.Cli;
@@ -14,10 +16,15 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.Answer;
 
 /**
- * Component test.
+ * AppTest.
  *
  * @author <a href=https://wilmol.com>Will Molloy</a>
  */
@@ -28,16 +35,16 @@ class AppTest {
   private Path testDirectory;
   private Path testVideo;
 
-  private App app;
+  @Mock private HandBrake mockHandBrake;
+
+  @Mock private Cli mockCli;
+
+  @InjectMocks private App app;
 
   @BeforeEach
   void setUp() throws Exception {
     testDirectory = Path.of("AppTest");
     testVideo = Path.of(Resources.getResource("test-video.mp4").toURI());
-
-    Cli cli = new Cli(ProcessBuilder::new);
-    HandBrake handBrake = new HandBrake(cli);
-    app = new App(handBrake, cli);
   }
 
   @AfterEach
@@ -46,48 +53,127 @@ class AppTest {
   }
 
   @Test
-  void notDeletingOriginalVideos_encodesVideoFilesAndKeepsOriginals() throws Exception {
-    // setup data
-    Files.createDirectories(testDirectory.resolve(Path.of("KeepOriginals/NestedFolder")));
-    Files.copy(testVideo, testDirectory.resolve(Path.of("KeepOriginals/video1.mp4")));
-    Files.copy(testVideo, testDirectory.resolve(Path.of("KeepOriginals/video2.mp4")));
-    Files.copy(testVideo, testDirectory.resolve(Path.of("KeepOriginals/NestedFolder/video3.mp4")));
+  void deleteOriginalVideos_encodesVideoFilesAndDeletesOriginals() throws Exception {
+    // Given
+    when(mockHandBrake.encode(any(), any(), any()))
+        .then(
+            (Answer<Boolean>)
+                invocation -> {
+                  // bit of an ugly hack...
+                  // need to create the temp encoded file as its expected as output from HandBrake
+                  Path handBrakeOutput = invocation.getArgument(1);
+                  Files.createFile(handBrakeOutput);
+                  return true;
+                });
 
-    Path videosPath = Path.of("AppTest/KeepOriginals");
-    app.run(videosPath, false, false);
+    Files.createDirectories(testDirectory.resolve("NestedFolder"));
+    Files.copy(testVideo, testDirectory.resolve("video1.mp4"));
+    Files.copy(testVideo, testDirectory.resolve("video2.mp4"));
+    Files.copy(testVideo, testDirectory.resolve("NestedFolder/video3.mp4"));
 
-    // originals still exist
-    assertThat(Files.exists(Path.of("AppTest/KeepOriginals/video1.mp4"))).isTrue();
-    assertThat(Files.exists(Path.of("AppTest/KeepOriginals/video2.mp4"))).isTrue();
-    assertThat(Files.exists(Path.of("AppTest/KeepOriginals/NestedFolder/video3.mp4"))).isTrue();
+    // When
+    app.run(testDirectory, true, false);
 
-    // encoded videos exist
-    assertThat(Files.exists(Path.of("AppTest/KeepOriginals/video1 - CFR 60 FPS.mp4"))).isTrue();
-    assertThat(Files.exists(Path.of("AppTest/KeepOriginals/video2 - CFR 60 FPS.mp4"))).isTrue();
-    assertThat(Files.exists(Path.of("AppTest/KeepOriginals/NestedFolder/video3 - CFR 60 FPS.mp4")))
-        .isTrue();
+    // Then
+    assertThat(Files.walk(testDirectory).filter(Files::isRegularFile))
+        .containsExactly(
+            testDirectory.resolve("video1 - CFR 60 FPS.mp4"),
+            testDirectory.resolve("video2 - CFR 60 FPS.mp4"),
+            testDirectory.resolve("NestedFolder/video3 - CFR 60 FPS.mp4"));
   }
 
   @Test
-  void deletingOriginalVideos_encodesVideoFilesAndDeletesOriginals() throws Exception {
-    // setup data
-    Files.createDirectories(testDirectory.resolve(Path.of("DeleteOriginals/NestedFolder")));
-    Files.copy(testVideo, testDirectory.resolve(Path.of("DeleteOriginals/video1.mp4")));
-    Files.copy(testVideo, testDirectory.resolve(Path.of("DeleteOriginals/video2.mp4")));
-    Files.copy(testVideo, testDirectory.resolve(Path.of("DeleteOriginals/NestedFolder/video3.mp4")));
+  void notDeleteOriginalVideos_encodesVideoFilesAndKeepsOriginals() throws Exception {
+    // Given
+    when(mockHandBrake.encode(any(), any(), any()))
+        .then(
+            (Answer<Boolean>)
+                invocation -> {
+                  // bit of an ugly hack...
+                  // need to create the temp encoded file as its expected as output from HandBrake
+                  Path handBrakeOutput = invocation.getArgument(1);
+                  Files.createFile(handBrakeOutput);
+                  return true;
+                });
 
-    Path videosPath = Path.of("AppTest/DeleteOriginals");
-    app.run(videosPath, true, false);
+    Files.createDirectories(testDirectory.resolve("NestedFolder"));
+    Files.copy(testVideo, testDirectory.resolve("video1.mp4"));
+    Files.copy(testVideo, testDirectory.resolve("video2.mp4"));
+    Files.copy(testVideo, testDirectory.resolve("NestedFolder/video3.mp4"));
 
-    // originals deleted
-    assertThat(Files.exists(Path.of("AppTest/DeleteOriginals/video1.mp4"))).isFalse();
-    assertThat(Files.exists(Path.of("AppTest/DeleteOriginals/video2.mp4"))).isFalse();
-    assertThat(Files.exists(Path.of("AppTest/DeleteOriginals/NestedFolder/video3.mp4"))).isFalse();
+    // When
+    app.run(testDirectory, false, false);
 
-    // encoded videos exist
-    assertThat(Files.exists(Path.of("AppTest/DeleteOriginals/video1 - CFR 60 FPS.mp4"))).isTrue();
-    assertThat(Files.exists(Path.of("AppTest/DeleteOriginals/video2 - CFR 60 FPS.mp4"))).isTrue();
-    assertThat(Files.exists(Path.of("AppTest/DeleteOriginals/NestedFolder/video3 - CFR 60 FPS.mp4")))
-            .isTrue();
+    // Then
+    assertThat(Files.walk(testDirectory).filter(Files::isRegularFile))
+        .containsExactly(
+            testDirectory.resolve("video1.mp4"),
+            testDirectory.resolve("video2.mp4"),
+            testDirectory.resolve("NestedFolder/video3.mp4"),
+            testDirectory.resolve("video1 - CFR 60 FPS.mp4"),
+            testDirectory.resolve("video2 - CFR 60 FPS.mp4"),
+            testDirectory.resolve("NestedFolder/video3 - CFR 60 FPS.mp4"));
+  }
+
+  @Test
+  void deleteOriginalVideos_deletesAlreadyEncodedVideos() throws Exception {
+    // Given
+    Files.createDirectories(testDirectory);
+    Files.copy(testVideo, testDirectory.resolve("video1.mp4"));
+    Files.copy(testVideo, testDirectory.resolve("video1 - CFR 60 FPS.mp4"));
+
+    // When
+    app.run(testDirectory, true, false);
+
+    // Then
+    assertThat(Files.walk(testDirectory).filter(Files::isRegularFile))
+        .containsExactly(testDirectory.resolve("video1 - CFR 60 FPS.mp4"));
+  }
+
+  @Test
+  void notDeleteOriginalVideos_keepsAlreadyEncodedVideos() throws Exception {
+    // Given
+    Files.createDirectories(testDirectory);
+    Files.copy(testVideo, testDirectory.resolve("video1.mp4"));
+    Files.copy(testVideo, testDirectory.resolve("video1 - CFR 60 FPS.mp4"));
+
+    // When
+    app.run(testDirectory, false, false);
+
+    // Then
+    assertThat(Files.walk(testDirectory).filter(Files::isRegularFile))
+        .containsExactly(
+            testDirectory.resolve("video1.mp4"), testDirectory.resolve("video1 - CFR 60 FPS.mp4"));
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = {true, false})
+  void retainsOriginalIfEncodingFails(boolean deleteOriginalVideos) throws Exception {
+    // Given
+    when(mockHandBrake.encode(any(), any(), any())).thenReturn(false);
+
+    Files.createDirectories(testDirectory);
+    Files.copy(testVideo, testDirectory.resolve("video1.mp4"));
+
+    // When
+    app.run(testDirectory, deleteOriginalVideos, false);
+
+    // Then
+    assertThat(Files.walk(testDirectory).filter(Files::isRegularFile))
+        .containsExactly(testDirectory.resolve("video1.mp4"));
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = {true, false})
+  void deletesIncompleteEncodings(boolean deleteOriginalVideos) throws Exception {
+    // Given
+    Files.createDirectories(testDirectory);
+    Files.copy(testVideo, testDirectory.resolve("video1 - CFR 60 FPS (incomplete).mp4"));
+
+    // When
+    app.run(testDirectory, deleteOriginalVideos, false);
+
+    // Then
+    assertThat(Files.walk(testDirectory).filter(Files::isRegularFile)).isEmpty();
   }
 }
