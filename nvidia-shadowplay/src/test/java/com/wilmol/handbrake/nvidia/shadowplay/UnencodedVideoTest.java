@@ -4,9 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.google.common.truth.StringSubject;
 import java.nio.file.Path;
-import java.util.Locale;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -34,12 +32,9 @@ class UnencodedVideoTest {
 
     IllegalArgumentException thrown =
         assertThrows(IllegalArgumentException.class, () -> new UnencodedVideo(path));
-    StringSubject messageThat = assertThat(thrown).hasMessageThat();
-    if (isWindows()) {
-      messageThat.isEqualTo("Path does not represent an .mp4 file: files\\file.mp3");
-    } else {
-      messageThat.isEqualTo("Path does not represent an .mp4 file: files/file.mp3");
-    }
+    assertThat(thrown)
+        .hasMessageThat()
+        .isEqualTo("Path does not represent an .mp4 file: files\\file.mp3");
   }
 
   @Test
@@ -48,12 +43,9 @@ class UnencodedVideoTest {
 
     IllegalArgumentException thrown =
         assertThrows(IllegalArgumentException.class, () -> new UnencodedVideo(path));
-    StringSubject messageThat = assertThat(thrown).hasMessageThat();
-    if (isWindows()) {
-      messageThat.isEqualTo("Path represents an encoded .mp4 file: files\\file - CFR 60 FPS.mp4");
-    } else {
-      messageThat.isEqualTo("Path represents an encoded .mp4 file: files/file - CFR 60 FPS.mp4");
-    }
+    assertThat(thrown)
+        .hasMessageThat()
+        .isEqualTo("Path represents an encoded .mp4 file: files\\file - CFR 60 FPS.mp4");
   }
 
   @Test
@@ -62,17 +54,9 @@ class UnencodedVideoTest {
 
     IllegalArgumentException thrown =
         assertThrows(IllegalArgumentException.class, () -> new UnencodedVideo(path));
-    StringSubject messageThat = assertThat(thrown).hasMessageThat();
-    if (isWindows()) {
-      messageThat.isEqualTo(
-          "Path represents an incomplete encoded .mp4 file: files\\file - CFR 60 FPS (incomplete).mp4");
-    } else {
-      messageThat.isEqualTo(
-          "Path represents an incomplete encoded .mp4 file: files/file - CFR 60 FPS (incomplete).mp4");
-    }
-  }
-
-  private boolean isWindows() {
-    return System.getProperty("os.name").toLowerCase(Locale.getDefault()).contains("win");
+    assertThat(thrown)
+        .hasMessageThat()
+        .isEqualTo(
+            "Path represents an incomplete encoded .mp4 file: files\\file - CFR 60 FPS (incomplete).mp4");
   }
 }

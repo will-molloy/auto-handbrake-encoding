@@ -74,7 +74,8 @@ class AppTest {
     Files.createDirectories(testDirectory.resolve(Path.of("DeleteOriginals/NestedFolder")));
     Files.copy(testVideo, testDirectory.resolve(Path.of("DeleteOriginals/video1.mp4")));
     Files.copy(testVideo, testDirectory.resolve(Path.of("DeleteOriginals/video2.mp4")));
-    Files.copy(testVideo, testDirectory.resolve(Path.of("DeleteOriginals/NestedFolder/video3.mp4")));
+    Files.copy(
+        testVideo, testDirectory.resolve(Path.of("DeleteOriginals/NestedFolder/video3.mp4")));
 
     Path videosPath = Path.of("AppTest/DeleteOriginals");
     app.run(videosPath, true, false);
@@ -87,7 +88,8 @@ class AppTest {
     // encoded videos exist
     assertThat(Files.exists(Path.of("AppTest/DeleteOriginals/video1 - CFR 60 FPS.mp4"))).isTrue();
     assertThat(Files.exists(Path.of("AppTest/DeleteOriginals/video2 - CFR 60 FPS.mp4"))).isTrue();
-    assertThat(Files.exists(Path.of("AppTest/DeleteOriginals/NestedFolder/video3 - CFR 60 FPS.mp4")))
-            .isTrue();
+    assertThat(
+            Files.exists(Path.of("AppTest/DeleteOriginals/NestedFolder/video3 - CFR 60 FPS.mp4")))
+        .isTrue();
   }
 }
