@@ -21,6 +21,22 @@ import org.apache.logging.log4j.Logger;
  */
 class App {
 
+  public static void main(String[] args) {
+    try {
+      Path videosPath = Path.of("D:\\Videos\\Gameplay");
+      boolean deleteOriginalVideos = true;
+      boolean shutdownComputer = false;
+
+      Cli cli = new Cli(ProcessBuilder::new);
+      HandBrake handBrake = new HandBrake(cli);
+      App app = new App(handBrake, cli);
+
+      app.run(videosPath, deleteOriginalVideos, shutdownComputer);
+    } catch (Exception e) {
+      log.fatal("Fatal error", e);
+    }
+  }
+
   private static final Logger log = LogManager.getLogger();
 
   private final Path preset;
@@ -158,22 +174,6 @@ class App {
       if (deleteOriginalVideos) {
         log.error("Skipping deletion of: {}", video.originalPath());
       }
-    }
-  }
-
-  public static void main(String[] args) {
-    try {
-      Path videosPath = Path.of("D:\\Videos\\Gameplay");
-      boolean deleteOriginalVideos = true;
-      boolean shutdownComputer = false;
-
-      Cli cli = new Cli(ProcessBuilder::new);
-      HandBrake handBrake = new HandBrake(cli);
-      App app = new App(handBrake, cli);
-
-      app.run(videosPath, deleteOriginalVideos, shutdownComputer);
-    } catch (Exception e) {
-      log.fatal("Fatal error", e);
     }
   }
 }
