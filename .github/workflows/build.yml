@@ -10,7 +10,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2.4.0
@@ -28,7 +28,7 @@ jobs:
         run: ./gradlew projects clean build jacocoTestReport --no-daemon --refresh-dependencies
 
       - name: Upload coverage to Codecov
-        if: matrix.os == 'windows-latest'
+        if: matrix.os == 'ubuntu-latest'
         uses: codecov/codecov-action@v2.1.0
         with:
           flags: unittests

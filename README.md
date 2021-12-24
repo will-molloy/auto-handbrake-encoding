@@ -9,7 +9,6 @@ Automating HandBrake encoding
 
 - Java 17
 - HandBrakeCLI
-- Windows
 
 ## Use cases
 
