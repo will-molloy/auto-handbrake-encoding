@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -37,14 +38,15 @@ public class HandBrake {
     }
 
     try {
-      return cli.executeCommand(
-          "HandBrakeCLI",
-          "--preset-import-file",
-          quote(preset),
-          "-i",
-          quote(input),
-          "-o",
-          quote(output));
+      return cli.execute(
+          List.of(
+              "HandBrakeCLI",
+              "--preset-import-file",
+              quote(preset),
+              "-i",
+              quote(input),
+              "-o",
+              quote(output)));
     } catch (Exception e) {
       log.error("Error encoding: %s".formatted(input), e);
       return false;

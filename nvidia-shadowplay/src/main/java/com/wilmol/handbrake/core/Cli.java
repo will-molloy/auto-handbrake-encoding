@@ -1,5 +1,6 @@
 package com.wilmol.handbrake.core;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -24,21 +25,27 @@ public class Cli {
    * @param command command to execute
    * @return {@code true} if execution was successful
    */
-  boolean executeCommand(String... command) throws Exception {
-    log.info("Executing: {}", List.of(command));
+  @SuppressFBWarnings("REC_CATCH_EXCEPTION")
+  public boolean execute(List<String> command) {
+    log.info("Executing: {}", command);
 
-    Process process = new ProcessBuilder(command).redirectErrorStream(true).start();
+    try {
+      Process process = new ProcessBuilder(command).redirectErrorStream(true).start();
 
-    Runtime.getRuntime().addShutdownHook(new Thread(process::destroy));
+      Runtime.getRuntime().addShutdownHook(new Thread(process::destroy));
 
-    consumeStream(process.getInputStream(), log::debug);
+      consumeStream(process.getInputStream(), log::debug);
 
-    int exitCode = process.waitFor();
-    if (exitCode != 0) {
-      log.error("Command executed with non-zero exit code: {}", exitCode);
+      int exitCode = process.waitFor();
+      if (exitCode != 0) {
+        log.error("Command executed with non-zero exit code: {}", exitCode);
+        return false;
+      }
+      return true;
+    } catch (Exception e) {
+      log.error("Error executing: %s".formatted(command), e);
       return false;
     }
-    return true;
   }
 
   private void consumeStream(InputStream inputStream, Consumer<String> consumer) {
