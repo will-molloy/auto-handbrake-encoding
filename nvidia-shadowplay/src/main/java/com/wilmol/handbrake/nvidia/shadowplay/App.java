@@ -23,12 +23,16 @@ class App {
 
   private static final Logger log = LogManager.getLogger();
 
-  private final Path preset = Path.of(Resources.getResource("presets/cfr-60fps.json").toURI());
+  private final Path preset;
 
   private final HandBrake handBrake;
 
-  App(HandBrake handBrake) throws URISyntaxException {
+  private final Cli cli;
+
+  App(HandBrake handBrake, Cli cli) throws URISyntaxException {
+    this.preset = Path.of(Resources.getResource("presets/cfr-60fps.json").toURI());
     this.handBrake = checkNotNull(handBrake);
+    this.cli = checkNotNull(cli);
   }
 
   void run(Path videosPath, boolean deleteOriginalVideos, boolean shutdownComputer)
@@ -39,6 +43,16 @@ class App {
         videosPath,
         deleteOriginalVideos,
         shutdownComputer);
+
+    if (shutdownComputer) {
+      Runtime.getRuntime()
+          .addShutdownHook(
+              new Thread(
+                  () -> {
+                    log.info("Shutting computer down");
+                    cli.execute(List.of("shutdown", "-s", "-t", "0"));
+                  }));
+    }
 
     // delete any incomplete encodings from a previous run
     deleteIncompleteEncodings(videosPath);
@@ -153,7 +167,9 @@ class App {
       boolean deleteOriginalVideos = true;
       boolean shutdownComputer = false;
 
-      App app = new App(new HandBrake(new Cli()));
+      Cli cli = new Cli();
+      HandBrake handBrake = new HandBrake(cli);
+      App app = new App(handBrake, cli);
 
       app.run(videosPath, deleteOriginalVideos, shutdownComputer);
     } catch (Exception e) {
