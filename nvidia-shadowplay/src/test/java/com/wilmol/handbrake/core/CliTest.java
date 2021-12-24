@@ -3,6 +3,7 @@ package com.wilmol.handbrake.core;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -46,6 +47,10 @@ class CliTest {
     when(mockProcess.waitFor()).thenReturn(0);
 
     assertThat(cli.execute(List.of("ls"))).isTrue();
+    verify(mockProcessBuilder).command(List.of("ls"));
+    verify(mockProcessBuilder).redirectErrorStream(true);
+    verify(mockProcessBuilder).start();
+    verify(mockProcess).getInputStream();
   }
 
   @Test
