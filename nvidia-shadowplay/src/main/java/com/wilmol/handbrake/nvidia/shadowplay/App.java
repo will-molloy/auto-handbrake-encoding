@@ -167,7 +167,7 @@ class App {
       boolean deleteOriginalVideos = true;
       boolean shutdownComputer = false;
 
-      Cli cli = new Cli();
+      Cli cli = new Cli(ProcessBuilder::new);
       HandBrake handBrake = new HandBrake(cli);
       App app = new App(handBrake, cli);
 

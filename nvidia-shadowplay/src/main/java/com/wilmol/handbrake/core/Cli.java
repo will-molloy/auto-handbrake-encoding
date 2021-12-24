@@ -1,5 +1,7 @@
 package com.wilmol.handbrake.core;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -7,6 +9,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -19,6 +22,12 @@ public class Cli {
 
   private static final Logger log = LogManager.getLogger();
 
+  private final Supplier<ProcessBuilder> processBuilderSupplier;
+
+  public Cli(Supplier<ProcessBuilder> processBuilderSupplier) {
+    this.processBuilderSupplier = checkNotNull(processBuilderSupplier);
+  }
+
   /**
    * Executes the given command.
    *
@@ -30,7 +39,8 @@ public class Cli {
     log.info("Executing: {}", command);
 
     try {
-      Process process = new ProcessBuilder(command).redirectErrorStream(true).start();
+      Process process =
+          processBuilderSupplier.get().command(command).redirectErrorStream(true).start();
 
       Runtime.getRuntime().addShutdownHook(new Thread(process::destroy));
 
