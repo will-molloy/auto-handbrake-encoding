@@ -28,6 +28,10 @@ public class Cli {
     this.processBuilderSupplier = checkNotNull(processBuilderSupplier);
   }
 
+  public Cli() {
+    this(ProcessBuilder::new);
+  }
+
   /**
    * Executes the given command.
    *

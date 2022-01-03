@@ -27,7 +27,7 @@ class App {
       boolean deleteOriginalVideos = true;
       boolean shutdownComputer = false;
 
-      Cli cli = new Cli(ProcessBuilder::new);
+      Cli cli = new Cli();
       HandBrake handBrake = new HandBrake(cli);
       App app = new App(handBrake, cli);
 
@@ -152,6 +152,8 @@ class App {
   }
 
   private void encodeVideo(UnencodedVideo video, boolean deleteOriginalVideos) throws IOException {
+    Stopwatch stopwatch = Stopwatch.createStarted();
+
     // to avoid leaving encoded files in an 'incomplete' state, encode to a temp file in case
     // something goes wrong
     boolean encodeSuccessful =
@@ -175,5 +177,7 @@ class App {
         log.error("Skipping deletion of: {}", video.originalPath());
       }
     }
+
+    log.info("Elapsed: {}", stopwatch.elapsed());
   }
 }
