@@ -17,7 +17,7 @@ Automating HandBrake encoding
 #### Why?
 
 - Nvidia ShadowPlay records video with a variable/peak frame rate (VFR), leading to audio sync issues
-- The videos may also have a larger than necessary file size
+- Also, the videos may have a larger than necessary file size
 
 #### How?
 
@@ -25,7 +25,7 @@ Automating HandBrake encoding
 2. Encodes `.mp4` files with a Constant Frame Rate (CFR) preset at 60 FPS
     - Encoded files are named with the suffix `  - CFR 60 FPS.mp4`
     - [The preset](nvidia-shadowplay/src/main/resources/presets/cfr-60fps.json) is based on HandBrake's YouTube 4k60 preset (H.264), with 2 changes: constant framerate and no resolution limit
-      - It seems to limit the bitrate at about 30-40Mbps
+      - It seems to limit the bitrate at about 40-50Mbps, depending on the source
 3. (optional) Deletes original videos
 4. (optional) Shuts computer down after encoding
 

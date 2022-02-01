@@ -99,7 +99,7 @@
       "VideoLevel": "5.2",
       "VideoOptionExtra": "keyint=30:min-keyint=15:ref=1:bframes=2:b-pyramid=none",
       "VideoQualityType": 2,
-      "VideoQualitySlider": 22,
+      "VideoQualitySlider": 20,
       "VideoQSVDecode": true,
       "VideoQSVAsyncDepth": 0,
       "VideoTwoPass": true,
