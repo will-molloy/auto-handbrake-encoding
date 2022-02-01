@@ -29,7 +29,7 @@
       "FileFormat": "av_mp4",
       "Folder": false,
       "FolderOpen": false,
-      "Mp4HttpOptimize": true,
+      "Mp4HttpOptimize": false,
       "Mp4iPodCompatible": false,
       "PictureAutoCrop": true,
       "PictureBottomCrop": 0,
