@@ -46,7 +46,8 @@ class App {
   private final Cli cli;
 
   App(HandBrake handBrake, Cli cli) throws URISyntaxException {
-    this.preset = Path.of(Resources.getResource("presets/custom-cfr-60fps.json").toURI());
+    this.preset =
+        Path.of(Resources.getResource("presets/custom-production-lossless-cfr-60fps.json").toURI());
     this.handBrake = checkNotNull(handBrake);
     this.cli = checkNotNull(cli);
   }
