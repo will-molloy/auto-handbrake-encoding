@@ -100,13 +100,10 @@ class App {
   private List<UnencodedVideo> getUnencodedVideos(Path videosPath) throws IOException {
     return Files.walk(videosPath)
         .filter(Files::isRegularFile)
+        .filter(UnencodedVideo::isMp4)
         // don't include paths that represent encoded or archived videos
-        // if somebody wants to encode again, they'll need to rename the archived video
-        .filter(
-            path ->
-                UnencodedVideo.isMp4(path)
-                    && !UnencodedVideo.isEncodedMp4(path)
-                    && !UnencodedVideo.isArchivedMp4(path))
+        // if somebody wants to encode again, they'll need to remove the 'Archived' suffix
+        .filter(path -> !UnencodedVideo.isEncodedMp4(path) && !UnencodedVideo.isArchivedMp4(path))
         .map(UnencodedVideo::new)
         .toList();
   }
