@@ -24,14 +24,13 @@ class App {
   public static void main(String[] args) {
     try {
       Path videosPath = Path.of("D:\\Videos\\Gameplay");
-      boolean deleteOriginalVideos = true;
       boolean shutdownComputer = false;
 
       Cli cli = new Cli();
       HandBrake handBrake = new HandBrake(cli);
       App app = new App(handBrake, cli);
 
-      app.run(videosPath, deleteOriginalVideos, shutdownComputer);
+      app.run(videosPath, shutdownComputer);
     } catch (Exception e) {
       log.fatal("Fatal error", e);
     }
@@ -52,14 +51,9 @@ class App {
     this.cli = checkNotNull(cli);
   }
 
-  void run(Path videosPath, boolean deleteOriginalVideos, boolean shutdownComputer)
-      throws Exception {
+  void run(Path videosPath, boolean shutdownComputer) throws Exception {
     Stopwatch stopwatch = Stopwatch.createStarted();
-    log.info(
-        "run(videosPath={}, deleteOriginalVideos={}, shutdownComputer={}) started",
-        videosPath,
-        deleteOriginalVideos,
-        shutdownComputer);
+    log.info("run(videosPath={}, shutdownComputer={}) started", videosPath, shutdownComputer);
 
     if (shutdownComputer) {
       Runtime.getRuntime()
@@ -71,19 +65,14 @@ class App {
                   }));
     }
 
-    // delete any incomplete encodings from a previous run
     deleteIncompleteEncodings(videosPath);
 
     List<UnencodedVideo> unencodedVideos = getUnencodedVideos(videosPath);
     log.info("Detected {} unencoded videos(s)", unencodedVideos.size());
 
-    if (deleteOriginalVideos) {
-      // while 'List<UnencodedVideo> unencodedVideos' represents unencoded videos, the corresponding
-      // encoded videos may already exist
-      deleteVideosThatHaveAlreadyBeenEncoded(unencodedVideos);
-    }
+    archiveVideosThatHaveAlreadyBeenEncoded(unencodedVideos);
 
-    encodeVideos(unencodedVideos, deleteOriginalVideos);
+    encodeVideos(unencodedVideos);
 
     log.info("run finished - elapsed: {}", stopwatch.elapsed());
   }
@@ -94,6 +83,9 @@ class App {
             .filter(Files::isRegularFile)
             .filter(UnencodedVideo::isTempEncodedMp4)
             .toList();
+    if (tempEncodings.isEmpty()) {
+      return;
+    }
 
     log.warn("Detected {} incomplete encoding(s)", tempEncodings.size());
 
@@ -108,13 +100,18 @@ class App {
   private List<UnencodedVideo> getUnencodedVideos(Path videosPath) throws IOException {
     return Files.walk(videosPath)
         .filter(Files::isRegularFile)
-        // don't include paths that represent encoded videos
-        .filter(path -> UnencodedVideo.isMp4(path) && !UnencodedVideo.isEncodedMp4(path))
+        // don't include paths that represent encoded or archived videos
+        // if somebody wants to encode again, they'll need to rename the archived video
+        .filter(
+            path ->
+                UnencodedVideo.isMp4(path)
+                    && !UnencodedVideo.isEncodedMp4(path)
+                    && !UnencodedVideo.isArchivedMp4(path))
         .map(UnencodedVideo::new)
         .toList();
   }
 
-  private void deleteVideosThatHaveAlreadyBeenEncoded(List<UnencodedVideo> videos)
+  private void archiveVideosThatHaveAlreadyBeenEncoded(List<UnencodedVideo> videos)
       throws IOException {
     List<UnencodedVideo> alreadyEncodedVideos =
         videos.stream().filter(UnencodedVideo::hasBeenEncoded).toList();
@@ -126,13 +123,12 @@ class App {
     for (int i = 0; i < alreadyEncodedVideos.size(); i++) {
       UnencodedVideo video = alreadyEncodedVideos.get(i);
 
-      log.info("({}/{}) Deleting: {}", i + 1, alreadyEncodedVideos.size(), video.originalPath());
-      Files.delete(video.originalPath());
+      log.info("({}/{}) Archiving: {}", i + 1, alreadyEncodedVideos.size(), video.originalPath());
+      Files.move(video.originalPath(), video.archivedPath());
     }
   }
 
-  private void encodeVideos(List<UnencodedVideo> videos, boolean deleteOriginalVideos)
-      throws IOException {
+  private void encodeVideos(List<UnencodedVideo> videos) throws IOException {
     List<UnencodedVideo> videosToEncode =
         videos.stream().filter(video -> !video.hasBeenEncoded()).toList();
 
@@ -148,11 +144,11 @@ class App {
       UnencodedVideo video = videosToEncode.get(i);
 
       log.info("({}/{}) Encoding: {}", i + 1, videosToEncode.size(), video.originalPath());
-      encodeVideo(video, deleteOriginalVideos);
+      encodeVideo(video);
     }
   }
 
-  private void encodeVideo(UnencodedVideo video, boolean deleteOriginalVideos) throws IOException {
+  private void encodeVideo(UnencodedVideo video) throws IOException {
     Stopwatch stopwatch = Stopwatch.createStarted();
 
     // to avoid leaving encoded files in an 'incomplete' state, encode to a temp file in case
@@ -161,22 +157,15 @@ class App {
         handBrake.encode(video.originalPath(), video.tempEncodedPath(), preset);
 
     if (encodeSuccessful) {
-      // only delete the original after renaming the temp file, then it'll never reach a state where
-      // the encoding is incomplete and the original doesn't exist
+      // only archive the original after renaming the temp file, then it'll never reach a state
+      // where the encoding is incomplete and the original doesn't exist
       Files.move(video.tempEncodedPath(), video.encodedPath());
-
       log.info("Encoded: {}", video.encodedPath());
 
-      if (deleteOriginalVideos) {
-        log.info("Deleting: {}", video.originalPath());
-        Files.delete(video.originalPath());
-      }
+      Files.move(video.originalPath(), video.archivedPath());
+      log.info("Archived: {}", video.archivedPath());
     } else {
       log.error("Encode failed: {}", video.originalPath());
-
-      if (deleteOriginalVideos) {
-        log.error("Skipping deletion of: {}", video.originalPath());
-      }
     }
 
     log.info("Elapsed: {}", stopwatch.elapsed());
