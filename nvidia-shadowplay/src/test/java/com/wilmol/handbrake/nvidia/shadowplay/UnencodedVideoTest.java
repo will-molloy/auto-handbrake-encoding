@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test;
 class UnencodedVideoTest {
 
   @Test
-  void acceptsUnencodedMp4FileAndGeneratesEncodedAndTempEncodedPaths() {
+  void acceptsUnencodedMp4FileAndGeneratesOtherPaths() {
     Path path = Path.of("files/file.mp4");
 
     UnencodedVideo unencodedVideo = new UnencodedVideo(path);
@@ -26,6 +26,7 @@ class UnencodedVideoTest {
     assertThat(unencodedVideo.encodedPath()).isEqualTo(Path.of("files/file - CFR 60 FPS.mp4"));
     assertThat(unencodedVideo.tempEncodedPath())
         .isEqualTo(Path.of("files/file - CFR 60 FPS (incomplete).mp4"));
+    assertThat(unencodedVideo.archivedPath()).isEqualTo(Path.of("files/file - Archived.mp4"));
   }
 
   @Test
@@ -69,6 +70,20 @@ class UnencodedVideoTest {
     } else {
       messageThat.isEqualTo(
           "Path represents an incomplete encoded .mp4 file: files/file - CFR 60 FPS (incomplete).mp4");
+    }
+  }
+
+  @Test
+  void rejectsArchivedMp4File() {
+    Path path = Path.of("files/file - Archived.mp4");
+
+    IllegalArgumentException thrown =
+        assertThrows(IllegalArgumentException.class, () -> new UnencodedVideo(path));
+    StringSubject messageThat = assertThat(thrown).hasMessageThat();
+    if (isWindows()) {
+      messageThat.isEqualTo("Path represents an archived .mp4 file: files\\file - Archived.mp4");
+    } else {
+      messageThat.isEqualTo("Path represents an archived .mp4 file: files/file - Archived.mp4");
     }
   }
 
