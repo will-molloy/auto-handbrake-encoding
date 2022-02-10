@@ -78,9 +78,9 @@ class AppTest {
             testDirectory.resolve("video1 - Archived.mp4"),
             testDirectory.resolve("video2 - Archived.mp4"),
             testDirectory.resolve("NestedFolder/video3 - Archived.mp4"),
-            testDirectory.resolve("video1 - CFR 60 FPS.mp4"),
-            testDirectory.resolve("video2 - CFR 60 FPS.mp4"),
-            testDirectory.resolve("NestedFolder/video3 - CFR 60 FPS.mp4"));
+            testDirectory.resolve("video1 - CFR.mp4"),
+            testDirectory.resolve("video2 - CFR.mp4"),
+            testDirectory.resolve("NestedFolder/video3 - CFR.mp4"));
   }
 
   @Test
@@ -88,7 +88,7 @@ class AppTest {
     // Given
     Files.createDirectories(testDirectory);
     Files.copy(testVideo, testDirectory.resolve("video1.mp4"));
-    Files.copy(testVideo, testDirectory.resolve("video1 - CFR 60 FPS.mp4"));
+    Files.copy(testVideo, testDirectory.resolve("video1 - CFR.mp4"));
 
     // When
     app.run(testDirectory, false);
@@ -97,7 +97,7 @@ class AppTest {
     assertThat(Files.walk(testDirectory).filter(Files::isRegularFile))
         .containsExactly(
             testDirectory.resolve("video1 - Archived.mp4"),
-            testDirectory.resolve("video1 - CFR 60 FPS.mp4"));
+            testDirectory.resolve("video1 - CFR.mp4"));
   }
 
   @Test
@@ -120,7 +120,7 @@ class AppTest {
   void deletesIncompleteEncodings() throws Exception {
     // Given
     Files.createDirectories(testDirectory);
-    Files.copy(testVideo, testDirectory.resolve("video1 - CFR 60 FPS (incomplete).mp4"));
+    Files.copy(testVideo, testDirectory.resolve("video1 - CFR (incomplete).mp4"));
 
     // When
     app.run(testDirectory, false);

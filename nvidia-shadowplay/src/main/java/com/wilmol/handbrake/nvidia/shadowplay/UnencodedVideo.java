@@ -14,8 +14,8 @@ import java.nio.file.Path;
 class UnencodedVideo {
 
   private static final String MP4_SUFFIX = ".mp4";
-  private static final String ENCODED_MP4_SUFFIX = " - CFR 60 FPS.mp4";
-  private static final String TEMP_ENCODED_MP4_SUFFIX = " - CFR 60 FPS (incomplete).mp4";
+  private static final String ENCODED_MP4_SUFFIX = " - CFR.mp4";
+  private static final String TEMP_ENCODED_MP4_SUFFIX = " - CFR (incomplete).mp4";
   private static final String ARCHIVED_SUFFIX = " - Archived.mp4";
 
   public static boolean isMp4(Path path) {

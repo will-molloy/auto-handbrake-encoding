@@ -23,9 +23,9 @@ class UnencodedVideoTest {
     UnencodedVideo unencodedVideo = new UnencodedVideo(path);
 
     assertThat(unencodedVideo.originalPath()).isSameInstanceAs(path);
-    assertThat(unencodedVideo.encodedPath()).isEqualTo(Path.of("files/file - CFR 60 FPS.mp4"));
+    assertThat(unencodedVideo.encodedPath()).isEqualTo(Path.of("files/file - CFR.mp4"));
     assertThat(unencodedVideo.tempEncodedPath())
-        .isEqualTo(Path.of("files/file - CFR 60 FPS (incomplete).mp4"));
+        .isEqualTo(Path.of("files/file - CFR (incomplete).mp4"));
     assertThat(unencodedVideo.archivedPath()).isEqualTo(Path.of("files/file - Archived.mp4"));
   }
 
@@ -45,31 +45,31 @@ class UnencodedVideoTest {
 
   @Test
   void rejectsEncodedMp4File() {
-    Path path = Path.of("files/file - CFR 60 FPS.mp4");
+    Path path = Path.of("files/file - CFR.mp4");
 
     IllegalArgumentException thrown =
         assertThrows(IllegalArgumentException.class, () -> new UnencodedVideo(path));
     StringSubject messageThat = assertThat(thrown).hasMessageThat();
     if (isWindows()) {
-      messageThat.isEqualTo("Path represents an encoded .mp4 file: files\\file - CFR 60 FPS.mp4");
+      messageThat.isEqualTo("Path represents an encoded .mp4 file: files\\file - CFR.mp4");
     } else {
-      messageThat.isEqualTo("Path represents an encoded .mp4 file: files/file - CFR 60 FPS.mp4");
+      messageThat.isEqualTo("Path represents an encoded .mp4 file: files/file - CFR.mp4");
     }
   }
 
   @Test
   void rejectsTempEncodedMp4File() {
-    Path path = Path.of("files/file - CFR 60 FPS (incomplete).mp4");
+    Path path = Path.of("files/file - CFR (incomplete).mp4");
 
     IllegalArgumentException thrown =
         assertThrows(IllegalArgumentException.class, () -> new UnencodedVideo(path));
     StringSubject messageThat = assertThat(thrown).hasMessageThat();
     if (isWindows()) {
       messageThat.isEqualTo(
-          "Path represents an incomplete encoded .mp4 file: files\\file - CFR 60 FPS (incomplete).mp4");
+          "Path represents an incomplete encoded .mp4 file: files\\file - CFR (incomplete).mp4");
     } else {
       messageThat.isEqualTo(
-          "Path represents an incomplete encoded .mp4 file: files/file - CFR 60 FPS (incomplete).mp4");
+          "Path represents an incomplete encoded .mp4 file: files/file - CFR (incomplete).mp4");
     }
   }
 
