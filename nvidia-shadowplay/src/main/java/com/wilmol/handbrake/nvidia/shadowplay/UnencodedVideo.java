@@ -14,7 +14,6 @@ import java.nio.file.Path;
 class UnencodedVideo {
 
   private static final String MP4_SUFFIX = ".mp4";
-  // TODO should just name it 'CFR' not necessarily 60FPS
   private static final String ENCODED_MP4_SUFFIX = " - CFR 60 FPS.mp4";
   private static final String TEMP_ENCODED_MP4_SUFFIX = " - CFR 60 FPS (incomplete).mp4";
   private static final String ARCHIVED_SUFFIX = " - Archived.mp4";
