@@ -17,6 +17,8 @@ public class HandBrake {
 
   private static final Logger log = LogManager.getLogger();
 
+  private static final String PRESET = "Production Max";
+
   private final Cli cli;
 
   public HandBrake(Cli cli) {
@@ -28,10 +30,9 @@ public class HandBrake {
    *
    * @param input input .mp4 file
    * @param output output .mp4 file
-   * @param preset preset .json file
    * @return {@code true} if encoding was successful
    */
-  public boolean encode(Path input, Path output, Path preset) {
+  public boolean encode(Path input, Path output) {
     if (Files.exists(output)) {
       log.warn("Output ({}) already exists", output);
       return true;
@@ -40,13 +41,7 @@ public class HandBrake {
     try {
       return cli.execute(
           List.of(
-              "HandBrakeCLI",
-              "--preset-import-file",
-              quote(preset),
-              "-i",
-              quote(input),
-              "-o",
-              quote(output)));
+              "HandBrakeCLI", "--preset", quote(PRESET), "-i", quote(input), "-o", quote(output)));
     } catch (Exception e) {
       log.error("Error encoding: %s".formatted(input), e);
       return false;

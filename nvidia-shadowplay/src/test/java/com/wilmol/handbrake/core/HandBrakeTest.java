@@ -31,17 +31,16 @@ class HandBrakeTest {
   void successfulEncodingReturnsTrue() {
     Path input = Path.of("input.mp4");
     Path output = Path.of("output.mp4");
-    Path preset = Path.of("preset.json");
 
     when(mockCli.execute(anyList())).thenReturn(true);
 
-    assertThat(handBrake.encode(input, output, preset)).isTrue();
+    assertThat(handBrake.encode(input, output)).isTrue();
     verify(mockCli)
         .execute(
             List.of(
                 "HandBrakeCLI",
-                "--preset-import-file",
-                "\"preset.json\"",
+                "--preset",
+                "\"Production Max\"",
                 "-i",
                 "\"input.mp4\"",
                 "-o",
@@ -52,11 +51,10 @@ class HandBrakeTest {
   void outputAlreadyExistsReturnsTrue() throws IOException {
     Path input = Path.of("input.mp4");
     Path output = Path.of("output.mp4");
-    Path preset = Path.of("preset.json");
 
     try {
       Files.createFile(output);
-      assertThat(handBrake.encode(input, output, preset)).isTrue();
+      assertThat(handBrake.encode(input, output)).isTrue();
     } finally {
       Files.delete(output);
     }
@@ -66,21 +64,19 @@ class HandBrakeTest {
   void unsuccessfulEncodingReturnsFalse() {
     Path input = Path.of("input.mp4");
     Path output = Path.of("output.mp4");
-    Path preset = Path.of("preset.json");
 
     when(mockCli.execute(anyList())).thenReturn(false);
 
-    assertThat(handBrake.encode(input, output, preset)).isFalse();
+    assertThat(handBrake.encode(input, output)).isFalse();
   }
 
   @Test
   void exceptionThrownReturnsFalse() {
     Path input = Path.of("input.mp4");
     Path output = Path.of("output.mp4");
-    Path preset = Path.of("preset.json");
 
     when(mockCli.execute(anyList())).thenThrow(new RuntimeException("error"));
 
-    assertThat(handBrake.encode(input, output, preset)).isFalse();
+    assertThat(handBrake.encode(input, output)).isFalse();
   }
 }

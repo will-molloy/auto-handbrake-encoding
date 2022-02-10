@@ -3,11 +3,9 @@ package com.wilmol.handbrake.nvidia.shadowplay;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.io.Resources;
 import com.wilmol.handbrake.core.Cli;
 import com.wilmol.handbrake.core.HandBrake;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -38,15 +36,11 @@ class App {
 
   private static final Logger log = LogManager.getLogger();
 
-  private final Path preset;
-
   private final HandBrake handBrake;
 
   private final Cli cli;
 
-  App(HandBrake handBrake, Cli cli) throws URISyntaxException {
-    this.preset =
-        Path.of(Resources.getResource("presets/custom-production-lossless-cfr-60fps.json").toURI());
+  App(HandBrake handBrake, Cli cli) {
     this.handBrake = checkNotNull(handBrake);
     this.cli = checkNotNull(cli);
   }
@@ -150,8 +144,7 @@ class App {
 
     // to avoid leaving encoded files in an 'incomplete' state, encode to a temp file in case
     // something goes wrong
-    boolean encodeSuccessful =
-        handBrake.encode(video.originalPath(), video.tempEncodedPath(), preset);
+    boolean encodeSuccessful = handBrake.encode(video.originalPath(), video.tempEncodedPath());
 
     if (encodeSuccessful) {
       // only archive the original after renaming the temp file, then it'll never reach a state

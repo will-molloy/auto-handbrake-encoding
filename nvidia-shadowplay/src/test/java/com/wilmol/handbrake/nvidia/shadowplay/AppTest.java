@@ -53,7 +53,7 @@ class AppTest {
   @Test
   void encodesVideoFilesAndArchivesOriginals() throws Exception {
     // Given
-    when(mockHandBrake.encode(any(), any(), any()))
+    when(mockHandBrake.encode(any(), any()))
         .then(
             (Answer<Boolean>)
                 invocation -> {
@@ -103,7 +103,7 @@ class AppTest {
   @Test
   void retainsOriginalIfEncodingFails() throws Exception {
     // Given
-    when(mockHandBrake.encode(any(), any(), any())).thenReturn(false);
+    when(mockHandBrake.encode(any(), any())).thenReturn(false);
 
     Files.createDirectories(testDirectory);
     Files.copy(testVideo, testDirectory.resolve("video1.mp4"));
