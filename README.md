@@ -16,17 +16,20 @@ Automating HandBrake encoding
 
 #### Why?
 
-- Nvidia ShadowPlay records video with a variable/peak frame rate (VFR), leading to audio sync issues
-- Also, the videos may have a larger than necessary file size
+- Nvidia ShadowPlay records video with a variable/peak frame rate (PFR), leading to audio sync issues in video editing software
 
 #### How?
 
-1. Recursively scans directory for any `.mp4` files that haven't already been encoded
-2. Encodes `.mp4` files with a Constant Frame Rate (CFR) preset at 60 FPS
-    - Encoded files are named with the suffix `  - CFR 60 FPS.mp4`
-    - [The preset](nvidia-shadowplay/src/main/resources/presets/cfr-60fps.json) is based on HandBrake's YouTube 4k60 preset (H.264), with 2 changes: constant framerate and no resolution limit
-      - It seems to limit the bitrate at about 40-50Mbps, depending on the source
-3. (optional) Deletes original videos
+1. Recursively scans input directory for any `.mp4` files that haven't already been encoded
+2. Encodes `.mp4` files with a Constant Frame Rate (CFR) preset
+    - Encoded files are named with the suffix ` - CFR.mp4`
+    - The preset is HandBrake's built-in "Production Max" preset (H.264)
+      - It works with any video resolution
+      - It works with any framerate
+      - It creates quite a large file afterwards, but it's ideal "as an intermediate format for video editing"
+      - I recommend deleting the encoded file after using it, and retaining the original archived file
+3. Archives original videos, by renaming them with the suffix ` - Archived.mp4`
+    - They won't be detected by the program again, if you want to encode again, remove this suffix first
 4. (optional) Shuts computer down after encoding
 
 #### Usage:
@@ -39,7 +42,6 @@ Automating HandBrake encoding
 
 - Configure main [App class](nvidia-shadowplay/src/main/java/com/wilmol/handbrake/nvidia/shadowplay/App.java)
     - Point to directory containing `.mp4` files
-    - Set flag if original videos should be deleted
     - Set flag if computer should shutdown after encoding
 
 
