@@ -2,6 +2,7 @@ package com.wilmol.handbrake.nvidia.shadowplay;
 
 import static com.google.common.truth.Truth8.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.io.Resources;
@@ -11,6 +12,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -127,5 +129,15 @@ class AppTest {
 
     // Then
     assertThat(Files.walk(testDirectory).filter(Files::isRegularFile)).isEmpty();
+  }
+
+  @Test
+  void shutsComputerDownIfRequested() throws Exception {
+    // When
+    Files.createDirectories(testDirectory);
+    app.run(testDirectory, true);
+
+    // Then
+    verify(mockCli).execute(List.of("shutdown", "-s", "-t", "30"));
   }
 }

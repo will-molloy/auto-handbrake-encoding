@@ -10,6 +10,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,29 +43,36 @@ class CliTest {
     cli = new Cli(() -> mockProcessBuilder);
   }
 
+  @AfterEach
+  void tearDown() throws Exception {
+    verify(mockProcessBuilder).redirectErrorStream(true);
+    verify(mockProcessBuilder).start();
+    verify(mockProcess).getInputStream();
+    verify(mockProcess).destroy();
+  }
+
   @Test
   void successfulExecutionOfCommandReturnsTrue() throws Exception {
     when(mockProcess.waitFor()).thenReturn(0);
 
     assertThat(cli.execute(List.of("ls"))).isTrue();
     verify(mockProcessBuilder).command(List.of("ls"));
-    verify(mockProcessBuilder).redirectErrorStream(true);
-    verify(mockProcessBuilder).start();
-    verify(mockProcess).getInputStream();
   }
 
   @Test
   void nonZeroExitCodeReturnsFalse() throws Exception {
     when(mockProcess.waitFor()).thenReturn(1);
 
-    assertThat(cli.execute(List.of("ls"))).isFalse();
+    assertThat(cli.execute(List.of("abc"))).isFalse();
+    verify(mockProcessBuilder).command(List.of("abc"));
   }
 
   @Test
   void exceptionThrownReturnsFalse() throws Exception {
     when(mockProcess.waitFor()).thenThrow(new RuntimeException("error"));
 
-    assertThat(cli.execute(List.of("ls"))).isFalse();
+    assertThat(cli.execute(List.of("xyz"))).isFalse();
+    verify(mockProcessBuilder).command(List.of("xyz"));
   }
 
   private static final class EmptyInputStream extends InputStream {

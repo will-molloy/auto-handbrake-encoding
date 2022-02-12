@@ -43,19 +43,20 @@ public class Cli {
     log.info("Executing: {}", command);
 
     try {
-      Process process =
-          processBuilderSupplier.get().command(command).redirectErrorStream(true).start();
+      ProcessBuilder processBuilder = processBuilderSupplier.get();
+      Process process = processBuilder.command(command).redirectErrorStream(true).start();
+      try {
+        consumeStream(process.getInputStream(), log::debug);
 
-      Runtime.getRuntime().addShutdownHook(new Thread(process::destroy));
-
-      consumeStream(process.getInputStream(), log::debug);
-
-      int exitCode = process.waitFor();
-      if (exitCode != 0) {
-        log.error("Command executed with non-zero exit code: {}", exitCode);
-        return false;
+        int exitCode = process.waitFor();
+        if (exitCode != 0) {
+          log.error("Command executed with non-zero exit code: {}", exitCode);
+          return false;
+        }
+        return true;
+      } finally {
+        process.destroy();
       }
-      return true;
     } catch (Exception e) {
       log.error("Error executing: %s".formatted(command), e);
       return false;

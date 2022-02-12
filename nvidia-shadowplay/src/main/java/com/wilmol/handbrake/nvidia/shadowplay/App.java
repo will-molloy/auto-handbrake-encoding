@@ -48,22 +48,19 @@ class App {
     Stopwatch stopwatch = Stopwatch.createStarted();
     log.info("run(videosPath={}, shutdownComputer={}) started", videosPath, shutdownComputer);
 
-    if (shutdownComputer) {
-      Runtime.getRuntime()
-          .addShutdownHook(
-              new Thread(
-                  () -> {
-                    log.info("Shutting computer down");
-                    cli.execute(List.of("shutdown", "-s", "-t", "0"));
-                  }));
+    try {
+      deleteIncompleteEncodings(videosPath);
+      List<UnencodedVideo> unencodedVideos = getUnencodedVideos(videosPath);
+      archiveVideosThatHaveAlreadyBeenEncoded(unencodedVideos);
+      encodeVideos(unencodedVideos);
+    } finally {
+      log.info("run finished - elapsed: {}", stopwatch.elapsed());
+
+      if (shutdownComputer) {
+        log.info("Shutting computer down");
+        cli.execute(List.of("shutdown", "-s", "-t", "30"));
+      }
     }
-
-    deleteIncompleteEncodings(videosPath);
-    List<UnencodedVideo> unencodedVideos = getUnencodedVideos(videosPath);
-    archiveVideosThatHaveAlreadyBeenEncoded(unencodedVideos);
-    encodeVideos(unencodedVideos);
-
-    log.info("run finished - elapsed: {}", stopwatch.elapsed());
   }
 
   private void deleteIncompleteEncodings(Path videosPath) throws IOException {
