@@ -37,7 +37,6 @@ class App {
   private static final Logger log = LogManager.getLogger();
 
   private final HandBrake handBrake;
-
   private final Cli cli;
 
   App(HandBrake handBrake, Cli cli) {
@@ -60,12 +59,8 @@ class App {
     }
 
     deleteIncompleteEncodings(videosPath);
-
     List<UnencodedVideo> unencodedVideos = getUnencodedVideos(videosPath);
-    log.info("Detected {} unencoded videos(s)", unencodedVideos.size());
-
     archiveVideosThatHaveAlreadyBeenEncoded(unencodedVideos);
-
     encodeVideos(unencodedVideos);
 
     log.info("run finished - elapsed: {}", stopwatch.elapsed());
@@ -85,35 +80,42 @@ class App {
 
     for (int i = 0; i < tempEncodings.size(); i++) {
       Path path = tempEncodings.get(i);
-
       log.warn("({}/{}) Deleting: {}", i + 1, tempEncodings.size(), path);
       Files.delete(path);
     }
   }
 
   private List<UnencodedVideo> getUnencodedVideos(Path videosPath) throws IOException {
-    return Files.walk(videosPath)
-        .filter(Files::isRegularFile)
-        .filter(UnencodedVideo::isMp4)
-        // don't include paths that represent encoded or archived videos
-        // if somebody wants to encode again, they'll need to remove the 'Archived' suffix
-        .filter(path -> !UnencodedVideo.isEncodedMp4(path) && !UnencodedVideo.isArchivedMp4(path))
-        .map(UnencodedVideo::new)
-        .toList();
+    List<UnencodedVideo> unencodedVideos =
+        Files.walk(videosPath)
+            .filter(Files::isRegularFile)
+            .filter(UnencodedVideo::isMp4)
+            // don't include paths that represent encoded or archived videos
+            // if somebody wants to encode again, they'll need to remove the 'Archived' suffix
+            .filter(
+                path -> !UnencodedVideo.isEncodedMp4(path) && !UnencodedVideo.isArchivedMp4(path))
+            .map(UnencodedVideo::new)
+            .toList();
+    log.info("Detected {} unencoded videos(s)", unencodedVideos.size());
+    return unencodedVideos;
   }
 
+  // While 'List<UnencodedVideo> videos' represents unencoded videos (NOT encoded videos) the
+  // corresponding encoded video may already exist
   private void archiveVideosThatHaveAlreadyBeenEncoded(List<UnencodedVideo> videos)
       throws IOException {
     List<UnencodedVideo> alreadyEncodedVideos =
         videos.stream().filter(UnencodedVideo::hasBeenEncoded).toList();
+    if (alreadyEncodedVideos.isEmpty()) {
+      return;
+    }
 
-    log.info(
+    log.warn(
         "Detected {} unencoded video(s) that have already been encoded",
         alreadyEncodedVideos.size());
 
     for (int i = 0; i < alreadyEncodedVideos.size(); i++) {
       UnencodedVideo video = alreadyEncodedVideos.get(i);
-
       log.info("({}/{}) Archiving: {}", i + 1, alreadyEncodedVideos.size(), video.originalPath());
       Files.move(video.originalPath(), video.archivedPath());
     }
@@ -127,13 +129,11 @@ class App {
 
     for (int i = 0; i < videosToEncode.size(); i++) {
       UnencodedVideo video = videosToEncode.get(i);
-
       log.info("({}/{}) Detected: {}", i + 1, videosToEncode.size(), video.originalPath());
     }
 
     for (int i = 0; i < videosToEncode.size(); i++) {
       UnencodedVideo video = videosToEncode.get(i);
-
       log.info("({}/{}) Encoding: {}", i + 1, videosToEncode.size(), video.originalPath());
       encodeVideo(video);
     }
