@@ -17,7 +17,7 @@ public class HandBrake {
 
   private static final Logger log = LogManager.getLogger();
 
-  private static final String PRESET = "Production Max";
+  private static final String PRESET = "Production Standard";
 
   private final Cli cli;
 

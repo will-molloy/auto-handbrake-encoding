@@ -79,7 +79,7 @@ class App {
 
     for (int i = 0; i < tempEncodings.size(); i++) {
       Path path = tempEncodings.get(i);
-      log.warn("({}/{}) Deleting: {}", i + 1, tempEncodings.size(), path);
+      log.warn("Deleting ({}/{}): {}", i + 1, tempEncodings.size(), path);
       Files.delete(path);
     }
   }
@@ -115,7 +115,7 @@ class App {
 
     for (int i = 0; i < alreadyEncodedVideos.size(); i++) {
       UnencodedVideo video = alreadyEncodedVideos.get(i);
-      log.info("({}/{}) Archiving: {}", i + 1, alreadyEncodedVideos.size(), video.originalPath());
+      log.info("Archiving ({}/{}): {}", i + 1, alreadyEncodedVideos.size(), video.originalPath());
       Files.move(video.originalPath(), video.archivedPath());
     }
   }
@@ -128,12 +128,12 @@ class App {
 
     for (int i = 0; i < videosToEncode.size(); i++) {
       UnencodedVideo video = videosToEncode.get(i);
-      log.info("({}/{}) Detected: {}", i + 1, videosToEncode.size(), video.originalPath());
+      log.info("Detected ({}/{}): {}", i + 1, videosToEncode.size(), video.originalPath());
     }
 
     for (int i = 0; i < videosToEncode.size(); i++) {
       UnencodedVideo video = videosToEncode.get(i);
-      log.info("({}/{}) Encoding: {}", i + 1, videosToEncode.size(), video.originalPath());
+      log.info("Encoding ({}/{}): {}", i + 1, videosToEncode.size(), video.originalPath());
       encodeVideo(video);
     }
   }

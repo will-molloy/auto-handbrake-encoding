@@ -48,7 +48,7 @@ public class FileRenamer {
       String newFileName = fileName.replace(oldSuffix, newSuffix);
       Path newPath = path.resolveSibling(newFileName);
 
-      log.info("({}/{}) Renaming {} -> {}", i + 1, paths.size(), path, newPath);
+      log.info("Renaming ({}/{}): {} -> {}", i + 1, paths.size(), path, newPath);
       Files.move(path, newPath);
     }
   }

@@ -40,7 +40,7 @@ class HandBrakeTest {
             List.of(
                 "HandBrakeCLI",
                 "--preset",
-                "\"Production Max\"",
+                "\"Production Standard\"",
                 "-i",
                 "\"input.mp4\"",
                 "-o",

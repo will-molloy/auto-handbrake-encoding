@@ -23,7 +23,7 @@ Automating HandBrake encoding
 1. Recursively scans input directory for any `.mp4` files that haven't already been encoded
 2. Encodes `.mp4` files with a Constant Frame Rate (CFR) preset
     - Encoded files are named with the suffix ` - CFR.mp4`
-    - The preset is HandBrake's built-in "Production Max" preset (H.264)
+    - The preset is HandBrake's built-in "Production Standard" preset (H.264)
       - It works with any video resolution
       - It works with any framerate
       - It creates quite a large file afterwards, but it's ideal "as an intermediate format for video editing"
