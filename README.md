@@ -34,19 +34,20 @@ Automating HandBrake encoding
 
 #### Usage:
 
-- Build:
+1. Build via Gradle:
+   ```bash
+   ./gradlew build
+   ```
 
-```bash
-./gradlew build
-```
-
-- Configure main [App class](nvidia-shadowplay/src/main/java/com/wilmol/handbrake/nvidia/shadowplay/App.java)
-    - Point to directory containing `.mp4` files
-    - Set flag if computer should shutdown after encoding
+2. Configure [Gradle task](nvidia-shadowplay/build.gradle)
+    - Set `videosPath` to directory containing `.mp4` files
 
 
-- Run main [App class](nvidia-shadowplay/src/main/java/com/wilmol/handbrake/nvidia/shadowplay/App.java):
-
-```bash
-./gradlew :nvidia-shadowplay:app
-```
+3. Run main [App class](nvidia-shadowplay/src/main/java/com/wilmol/handbrake/nvidia/shadowplay/App.java) via Gradle:
+   ```bash
+   ./gradlew :nvidia-shadowplay:run
+   ```
+   or to shutdown afterwards:
+   ```bash
+   ./gradlew :nvidia-shadowplay:runAndThenShutdownComputer
+   ```

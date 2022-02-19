@@ -1,5 +1,6 @@
 package com.wilmol.handbrake.nvidia.shadowplay;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Stopwatch;
@@ -21,8 +22,9 @@ class App {
 
   public static void main(String[] args) {
     try {
-      Path videosPath = Path.of("D:\\Videos\\Gameplay");
-      boolean shutdownComputer = false;
+      checkArgument(args.length == 2, "Expected 2 args to main method");
+      Path videosPath = Path.of(args[0]);
+      boolean shutdownComputer = Boolean.parseBoolean(args[1]);
 
       Cli cli = new Cli();
       HandBrake handBrake = new HandBrake(cli);
