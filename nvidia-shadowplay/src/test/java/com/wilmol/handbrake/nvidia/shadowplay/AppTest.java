@@ -1,6 +1,8 @@
 package com.wilmol.handbrake.nvidia.shadowplay;
 
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -87,7 +89,6 @@ class AppTest {
             inputDirectory.resolve("NestedFolder/video3 - Archived.mp4"),
             outputDirectory.resolve("video1 - CFR.mp4"),
             outputDirectory.resolve("video2 - CFR.mp4"),
-            // TODO retain input directory structure? What if file names conflict?
             outputDirectory.resolve("video3 - CFR.mp4"));
   }
 
@@ -150,6 +151,20 @@ class AppTest {
 
     // Then
     verify(mockCli).execute(List.of("shutdown", "-s", "-t", "30"));
+  }
+
+  @Test
+  void abortsIfOutputFileNamesConflict() throws Exception {
+    // Given
+    Files.createDirectories(inputDirectory.resolve("NestedFolder"));
+    Files.copy(testVideo, inputDirectory.resolve("video1.mp4"));
+    Files.copy(testVideo, inputDirectory.resolve("NestedFolder/video1.mp4"));
+
+    // Then
+    IllegalArgumentException thrown =
+        assertThrows(
+            IllegalArgumentException.class, () -> app.run(inputDirectory, outputDirectory, false));
+    assertThat(thrown).hasMessageThat().isEqualTo("Output file names conflict, aborting");
   }
 
   private StreamSubject assertThatTestDirectory() throws IOException {

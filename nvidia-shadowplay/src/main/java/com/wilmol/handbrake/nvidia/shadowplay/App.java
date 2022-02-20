@@ -103,6 +103,14 @@ class App {
             .map(path -> new UnencodedVideo(path, outputDirectory))
             .toList();
     log.info("Detected {} unencoded videos(s)", unencodedVideos.size());
+
+    long distinctCount =
+        unencodedVideos.stream()
+            .map(unencodedVideo -> unencodedVideo.encodedPath())
+            .distinct()
+            .count();
+    checkArgument(unencodedVideos.size() == distinctCount, "Output file names conflict, aborting");
+
     return unencodedVideos;
   }
 
