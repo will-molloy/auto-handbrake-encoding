@@ -40,7 +40,7 @@ Automating HandBrake encoding
    ```
 
 2. Configure [Gradle task](nvidia-shadowplay/build.gradle)
-    - Set `videosPath` to directory containing `.mp4` files
+    - Set `inputDirectory` to directory containing `.mp4` files
 
 
 3. Run main [App class](nvidia-shadowplay/src/main/java/com/wilmol/handbrake/nvidia/shadowplay/App.java) via Gradle:

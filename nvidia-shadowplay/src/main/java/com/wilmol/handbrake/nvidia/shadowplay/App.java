@@ -23,14 +23,14 @@ class App {
   public static void main(String[] args) {
     try {
       checkArgument(args.length == 2, "Expected 2 args to main method");
-      Path videosPath = Path.of(args[0]);
+      Path inputDirectory = Path.of(args[0]);
       boolean shutdownComputer = Boolean.parseBoolean(args[1]);
 
       Cli cli = new Cli();
       HandBrake handBrake = new HandBrake(cli);
       App app = new App(handBrake, cli);
 
-      app.run(videosPath, shutdownComputer);
+      app.run(inputDirectory, shutdownComputer);
     } catch (Exception e) {
       log.fatal("Fatal error", e);
     }
@@ -46,13 +46,13 @@ class App {
     this.cli = checkNotNull(cli);
   }
 
-  void run(Path videosPath, boolean shutdownComputer) throws Exception {
+  void run(Path inputDirectory, boolean shutdownComputer) throws Exception {
     Stopwatch stopwatch = Stopwatch.createStarted();
-    log.info("run(videosPath={}, shutdownComputer={}) started", videosPath, shutdownComputer);
+    log.info("run(inputDirectory={}, shutdownComputer={}) started", inputDirectory, shutdownComputer);
 
     try {
-      deleteIncompleteEncodings(videosPath);
-      List<UnencodedVideo> unencodedVideos = getUnencodedVideos(videosPath);
+      deleteIncompleteEncodings(inputDirectory);
+      List<UnencodedVideo> unencodedVideos = getUnencodedVideos(inputDirectory);
       archiveVideosThatHaveAlreadyBeenEncoded(unencodedVideos);
       encodeVideos(unencodedVideos);
     } finally {
@@ -65,9 +65,9 @@ class App {
     }
   }
 
-  private void deleteIncompleteEncodings(Path videosPath) throws IOException {
+  private void deleteIncompleteEncodings(Path inputDirectory) throws IOException {
     List<Path> tempEncodings =
-        Files.walk(videosPath)
+        Files.walk(inputDirectory)
             .filter(Files::isRegularFile)
             .filter(UnencodedVideo::isTempEncodedMp4)
             .toList();
@@ -84,9 +84,9 @@ class App {
     }
   }
 
-  private List<UnencodedVideo> getUnencodedVideos(Path videosPath) throws IOException {
+  private List<UnencodedVideo> getUnencodedVideos(Path inputDirectory) throws IOException {
     List<UnencodedVideo> unencodedVideos =
-        Files.walk(videosPath)
+        Files.walk(inputDirectory)
             .filter(Files::isRegularFile)
             .filter(UnencodedVideo::isMp4)
             // don't include paths that represent encoded or archived videos
