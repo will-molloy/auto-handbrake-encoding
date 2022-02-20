@@ -22,15 +22,16 @@ class App {
 
   public static void main(String[] args) {
     try {
-      checkArgument(args.length == 2, "Expected 2 args to main method");
+      checkArgument(args.length == 3, "Expected 3 args to main method");
       Path inputDirectory = Path.of(args[0]);
-      boolean shutdownComputer = Boolean.parseBoolean(args[1]);
+      Path outputDirectory = Path.of(args[1]);
+      boolean shutdownComputer = Boolean.parseBoolean(args[2]);
 
       Cli cli = new Cli();
       HandBrake handBrake = new HandBrake(cli);
       App app = new App(handBrake, cli);
 
-      app.run(inputDirectory, shutdownComputer);
+      app.run(inputDirectory, outputDirectory, shutdownComputer);
     } catch (Exception e) {
       log.fatal("Fatal error", e);
     }
@@ -46,9 +47,9 @@ class App {
     this.cli = checkNotNull(cli);
   }
 
-  void run(Path inputDirectory, boolean shutdownComputer) throws Exception {
+  void run(Path inputDirectory, Path outputDirectory, boolean shutdownComputer) throws Exception {
     Stopwatch stopwatch = Stopwatch.createStarted();
-    log.info("run(inputDirectory={}, shutdownComputer={}) started", inputDirectory, shutdownComputer);
+    log.info("run(inputDirectory={}, outputDirectory={}, shutdownComputer={}) started", inputDirectory, outputDirectory, shutdownComputer);
 
     try {
       deleteIncompleteEncodings(inputDirectory);

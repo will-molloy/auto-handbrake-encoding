@@ -33,6 +33,8 @@ import org.mockito.stubbing.Answer;
 class AppTest {
 
   private Path testDirectory;
+  private Path inputDirectory;
+  private Path outputDirectory;
   private Path testVideo;
 
   @Mock private HandBrake mockHandBrake;
@@ -44,6 +46,8 @@ class AppTest {
   @BeforeEach
   void setUp() throws Exception {
     testDirectory = Path.of("AppTest");
+    inputDirectory = testDirectory.resolve("input");
+    outputDirectory = testDirectory.resolve("output");
     testVideo = Path.of(Resources.getResource("test-video.mp4").toURI());
   }
 
@@ -66,40 +70,47 @@ class AppTest {
                   return true;
                 });
 
-    Files.createDirectories(testDirectory.resolve("NestedFolder"));
-    Files.copy(testVideo, testDirectory.resolve("video1.mp4"));
-    Files.copy(testVideo, testDirectory.resolve("video2.mp4"));
-    Files.copy(testVideo, testDirectory.resolve("NestedFolder/video3.mp4"));
+    Files.createDirectories(inputDirectory.resolve("NestedFolder"));
+    Files.copy(testVideo, inputDirectory.resolve("video1.mp4"));
+    Files.copy(testVideo, inputDirectory.resolve("video2.mp4"));
+    Files.copy(testVideo, inputDirectory.resolve("NestedFolder/video3.mp4"));
 
     // When
-    app.run(testDirectory, false);
+    app.run(inputDirectory, outputDirectory,false);
 
     // Then
-    assertThat(Files.walk(testDirectory).filter(Files::isRegularFile))
+    assertThat(Files.walk(inputDirectory).filter(Files::isRegularFile))
         .containsExactly(
-            testDirectory.resolve("video1 - Archived.mp4"),
-            testDirectory.resolve("video2 - Archived.mp4"),
-            testDirectory.resolve("NestedFolder/video3 - Archived.mp4"),
-            testDirectory.resolve("video1 - CFR.mp4"),
-            testDirectory.resolve("video2 - CFR.mp4"),
-            testDirectory.resolve("NestedFolder/video3 - CFR.mp4"));
+            inputDirectory.resolve("video1 - Archived.mp4"),
+            inputDirectory.resolve("video2 - Archived.mp4"),
+            inputDirectory.resolve("NestedFolder/video3 - Archived.mp4"),
+            outputDirectory.resolve("video1 - CFR.mp4"),
+            outputDirectory.resolve("video2 - CFR.mp4"),
+            // TODO retain input directory structure? What if file names conflict?
+            outputDirectory.resolve("video3 - CFR.mp4"));
   }
 
   @Test
   void archivesAlreadyEncodedVideos() throws Exception {
     // Given
-    Files.createDirectories(testDirectory);
-    Files.copy(testVideo, testDirectory.resolve("video1.mp4"));
-    Files.copy(testVideo, testDirectory.resolve("video1 - CFR.mp4"));
+    Files.createDirectories(inputDirectory.resolve("NestedFolder"));
+    Files.copy(testVideo, inputDirectory.resolve("video1.mp4"));
+    Files.copy(testVideo, inputDirectory.resolve("NestedFolder/video2.mp4"));
+
+    Files.createDirectories(outputDirectory);
+    Files.copy(testVideo, outputDirectory.resolve("video1 - CFR.mp4"));
+    Files.copy(testVideo, outputDirectory.resolve("video2 - CFR.mp4"));
 
     // When
-    app.run(testDirectory, false);
+    app.run(inputDirectory, outputDirectory,false);
 
     // Then
-    assertThat(Files.walk(testDirectory).filter(Files::isRegularFile))
+    assertThat(Files.walk(inputDirectory).filter(Files::isRegularFile))
         .containsExactly(
-            testDirectory.resolve("video1 - Archived.mp4"),
-            testDirectory.resolve("video1 - CFR.mp4"));
+            inputDirectory.resolve("video1 - Archived.mp4"),
+            inputDirectory.resolve("NestedFolder/video2 - Archived.mp4"),
+            outputDirectory.resolve("video1 - CFR.mp4"),
+            outputDirectory.resolve("video2 - CFR.mp4"));
   }
 
   @Test
@@ -107,35 +118,35 @@ class AppTest {
     // Given
     when(mockHandBrake.encode(any(), any())).thenReturn(false);
 
-    Files.createDirectories(testDirectory);
-    Files.copy(testVideo, testDirectory.resolve("video1.mp4"));
+    Files.createDirectories(inputDirectory);
+    Files.copy(testVideo, inputDirectory.resolve("video1.mp4"));
 
     // When
-    app.run(testDirectory, false);
+    app.run(inputDirectory, outputDirectory,false);
 
     // Then
-    assertThat(Files.walk(testDirectory).filter(Files::isRegularFile))
-        .containsExactly(testDirectory.resolve("video1.mp4"));
+    assertThat(Files.walk(inputDirectory).filter(Files::isRegularFile))
+        .containsExactly(inputDirectory.resolve("video1.mp4"));
   }
 
   @Test
   void deletesIncompleteEncodings() throws Exception {
     // Given
-    Files.createDirectories(testDirectory);
-    Files.copy(testVideo, testDirectory.resolve("video1 - CFR (incomplete).mp4"));
+    Files.createDirectories(inputDirectory);
+    Files.copy(testVideo, inputDirectory.resolve("video1 - CFR (incomplete).mp4"));
 
     // When
-    app.run(testDirectory, false);
+    app.run(inputDirectory, outputDirectory,false);
 
     // Then
-    assertThat(Files.walk(testDirectory).filter(Files::isRegularFile)).isEmpty();
+    assertThat(Files.walk(inputDirectory).filter(Files::isRegularFile)).isEmpty();
   }
 
   @Test
   void shutsComputerDownIfRequested() throws Exception {
     // When
-    Files.createDirectories(testDirectory);
-    app.run(testDirectory, true);
+    Files.createDirectories(inputDirectory);
+    app.run(inputDirectory, outputDirectory,true);
 
     // Then
     verify(mockCli).execute(List.of("shutdown", "-s", "-t", "30"));
