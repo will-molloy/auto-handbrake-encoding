@@ -1,13 +1,14 @@
 String inputDirectory = "D:\\Videos\\Gameplay"
+String outputDirectory = "S:"
 
 task run(type: JavaExec) {
-    classpath = sourceSets.main.runtimeClasspath
-    main = 'com.wilmol.handbrake.nvidia.shadowplay.App'
-    args = [inputDirectory, "false"]
+  classpath = sourceSets.main.runtimeClasspath
+  main = 'com.wilmol.handbrake.nvidia.shadowplay.App'
+  args = [inputDirectory, outputDirectory, "false"]
 }
 
 task runAndThenShutdownComputer(type: JavaExec) {
-    classpath = sourceSets.main.runtimeClasspath
-    main = 'com.wilmol.handbrake.nvidia.shadowplay.App'
-    args = [inputDirectory, "true"]
+  classpath = sourceSets.main.runtimeClasspath
+  main = 'com.wilmol.handbrake.nvidia.shadowplay.App'
+  args = [inputDirectory, outputDirectory, "true"]
 }

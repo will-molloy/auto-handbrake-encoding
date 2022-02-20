@@ -20,10 +20,10 @@ Automating HandBrake encoding
 
 #### How?
 
-1. Recursively scans input directory for any `.mp4` files that haven't already been encoded
+1. Recursively scans input directory for `.mp4` files to encode
 2. Encodes `.mp4` files with a Constant Frame Rate (CFR) preset
     - Encoded files are named with the suffix ` - CFR.mp4`
-    - The preset is HandBrake's built-in "Production Standard" preset (H.264)
+    - The preset used is HandBrake's built-in "Production Standard" preset (H.264)
       - It works with any video resolution
       - It works with any framerate
       - It creates quite a large file afterwards, but it's ideal "as an intermediate format for video editing"
@@ -41,6 +41,8 @@ Automating HandBrake encoding
 
 2. Configure [Gradle task](nvidia-shadowplay/build.gradle)
     - Set `inputDirectory` to directory containing `.mp4` files
+    - Set `outputDirectory` to where you want encoded files to be saved
+      - Note the input directory structure is not retained, if file names conflict the program will abort
 
 
 3. Run main [App class](nvidia-shadowplay/src/main/java/com/wilmol/handbrake/nvidia/shadowplay/App.java) via Gradle:
