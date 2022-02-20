@@ -40,16 +40,16 @@ Automating HandBrake encoding
    ```
 
 2. Configure [Gradle task](nvidia-shadowplay/build.gradle)
-    - Set `inputDirectory` to directory containing `.mp4` files
-    - Set `outputDirectory` to where you want encoded files to be saved
-      - Note the input directory structure is not retained, if file names conflict the program will abort
+    - Set `inputDirectory` to directory containing `.mp4` files to encode
+    - Set `outputDirectory` where you want encoded files to be saved
+      - Note files are saved here in a flat structure (input directory structure is not retained), so if file names conflict the program will abort
 
 
 3. Run main [App class](nvidia-shadowplay/src/main/java/com/wilmol/handbrake/nvidia/shadowplay/App.java) via Gradle:
    ```bash
    ./gradlew :nvidia-shadowplay:run
    ```
-   or to shutdown afterwards:
+   or to shutdown afterwards (e.g. running overnight):
    ```bash
    ./gradlew :nvidia-shadowplay:runAndThenShutdownComputer
    ```
