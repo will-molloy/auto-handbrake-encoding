@@ -39,25 +39,29 @@ class UnencodedVideo {
   private final Path tempEncodedPath;
   private final Path archivedPath;
 
-  UnencodedVideo(Path path) {
-    checkArgument(isMp4(path), "Path does not represent an .mp4 file: %s", path);
-    checkArgument(!isEncodedMp4(path), "Path represents an encoded .mp4 file: %s", path);
+  UnencodedVideo(Path videoPath, Path outputPath) {
+    checkArgument(isMp4(videoPath), "Video path does not represent an .mp4 file: %s", videoPath);
     checkArgument(
-        !isTempEncodedMp4(path), "Path represents an incomplete encoded .mp4 file: %s", path);
-    checkArgument(!isArchivedMp4(path), "Path represents an archived .mp4 file: %s", path);
+        !isEncodedMp4(videoPath), "Video path represents an encoded .mp4 file: %s", videoPath);
+    checkArgument(
+        !isTempEncodedMp4(videoPath),
+        "Video path represents an incomplete encoded .mp4 file: %s",
+        videoPath);
+    checkArgument(
+        !isArchivedMp4(videoPath), "Video path represents an archived .mp4 file: %s", videoPath);
 
-    originalPath = path;
+    originalPath = videoPath;
 
-    String fileName = checkNotNull(path.getFileName()).toString();
+    String fileName = checkNotNull(videoPath.getFileName()).toString();
 
     String encodedFileName = fileName.replace(MP4_SUFFIX, ENCODED_MP4_SUFFIX);
-    encodedPath = path.resolveSibling(encodedFileName);
+    encodedPath = outputPath.resolve(encodedFileName);
 
     String tempEncodedFileName = fileName.replace(MP4_SUFFIX, TEMP_ENCODED_MP4_SUFFIX);
-    tempEncodedPath = path.resolveSibling(tempEncodedFileName);
+    tempEncodedPath = outputPath.resolve(tempEncodedFileName);
 
     String archivedFileName = fileName.replace(MP4_SUFFIX, ARCHIVED_SUFFIX);
-    archivedPath = path.resolveSibling(archivedFileName);
+    archivedPath = videoPath.resolveSibling(archivedFileName);
   }
 
   public boolean hasBeenEncoded() {

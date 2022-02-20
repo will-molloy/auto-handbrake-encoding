@@ -49,11 +49,16 @@ class App {
 
   void run(Path inputDirectory, Path outputDirectory, boolean shutdownComputer) throws Exception {
     Stopwatch stopwatch = Stopwatch.createStarted();
-    log.info("run(inputDirectory={}, outputDirectory={}, shutdownComputer={}) started", inputDirectory, outputDirectory, shutdownComputer);
+    log.info(
+        "run(inputDirectory={}, outputDirectory={}, shutdownComputer={}) started",
+        inputDirectory,
+        outputDirectory,
+        shutdownComputer);
 
     try {
+      Files.createDirectories(outputDirectory);
       deleteIncompleteEncodings(inputDirectory);
-      List<UnencodedVideo> unencodedVideos = getUnencodedVideos(inputDirectory);
+      List<UnencodedVideo> unencodedVideos = getUnencodedVideos(inputDirectory, outputDirectory);
       archiveVideosThatHaveAlreadyBeenEncoded(unencodedVideos);
       encodeVideos(unencodedVideos);
     } finally {
@@ -85,7 +90,8 @@ class App {
     }
   }
 
-  private List<UnencodedVideo> getUnencodedVideos(Path inputDirectory) throws IOException {
+  private List<UnencodedVideo> getUnencodedVideos(Path inputDirectory, Path outputDirectory)
+      throws IOException {
     List<UnencodedVideo> unencodedVideos =
         Files.walk(inputDirectory)
             .filter(Files::isRegularFile)
@@ -94,7 +100,7 @@ class App {
             // if somebody wants to encode again, they'll need to remove the 'Archived' suffix
             .filter(
                 path -> !UnencodedVideo.isEncodedMp4(path) && !UnencodedVideo.isArchivedMp4(path))
-            .map(UnencodedVideo::new)
+            .map(path -> new UnencodedVideo(path, outputDirectory))
             .toList();
     log.info("Detected {} unencoded videos(s)", unencodedVideos.size());
     return unencodedVideos;

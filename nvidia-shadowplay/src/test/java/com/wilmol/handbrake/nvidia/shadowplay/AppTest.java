@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.io.Resources;
+import com.google.common.truth.StreamSubject;
 import com.wilmol.handbrake.core.Cli;
 import com.wilmol.handbrake.core.HandBrake;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -76,10 +77,10 @@ class AppTest {
     Files.copy(testVideo, inputDirectory.resolve("NestedFolder/video3.mp4"));
 
     // When
-    app.run(inputDirectory, outputDirectory,false);
+    app.run(inputDirectory, outputDirectory, false);
 
     // Then
-    assertThat(Files.walk(inputDirectory).filter(Files::isRegularFile))
+    assertThatTestDirectory()
         .containsExactly(
             inputDirectory.resolve("video1 - Archived.mp4"),
             inputDirectory.resolve("video2 - Archived.mp4"),
@@ -102,10 +103,10 @@ class AppTest {
     Files.copy(testVideo, outputDirectory.resolve("video2 - CFR.mp4"));
 
     // When
-    app.run(inputDirectory, outputDirectory,false);
+    app.run(inputDirectory, outputDirectory, false);
 
     // Then
-    assertThat(Files.walk(inputDirectory).filter(Files::isRegularFile))
+    assertThatTestDirectory()
         .containsExactly(
             inputDirectory.resolve("video1 - Archived.mp4"),
             inputDirectory.resolve("NestedFolder/video2 - Archived.mp4"),
@@ -122,11 +123,10 @@ class AppTest {
     Files.copy(testVideo, inputDirectory.resolve("video1.mp4"));
 
     // When
-    app.run(inputDirectory, outputDirectory,false);
+    app.run(inputDirectory, outputDirectory, false);
 
     // Then
-    assertThat(Files.walk(inputDirectory).filter(Files::isRegularFile))
-        .containsExactly(inputDirectory.resolve("video1.mp4"));
+    assertThatTestDirectory().containsExactly(inputDirectory.resolve("video1.mp4"));
   }
 
   @Test
@@ -136,19 +136,23 @@ class AppTest {
     Files.copy(testVideo, inputDirectory.resolve("video1 - CFR (incomplete).mp4"));
 
     // When
-    app.run(inputDirectory, outputDirectory,false);
+    app.run(inputDirectory, outputDirectory, false);
 
     // Then
-    assertThat(Files.walk(inputDirectory).filter(Files::isRegularFile)).isEmpty();
+    assertThatTestDirectory().isEmpty();
   }
 
   @Test
   void shutsComputerDownIfRequested() throws Exception {
     // When
     Files.createDirectories(inputDirectory);
-    app.run(inputDirectory, outputDirectory,true);
+    app.run(inputDirectory, outputDirectory, true);
 
     // Then
     verify(mockCli).execute(List.of("shutdown", "-s", "-t", "30"));
+  }
+
+  private StreamSubject assertThatTestDirectory() throws IOException {
+    return assertThat(Files.walk(testDirectory).filter(Files::isRegularFile));
   }
 }
