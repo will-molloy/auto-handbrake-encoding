@@ -3,6 +3,7 @@ package com.wilmol.handbrake.nvidia.shadowplay;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -104,5 +105,10 @@ class UnencodedVideo {
 
   private Path relativePathFromInput() {
     return inputDirectory.relativize(videoPath);
+  }
+
+  public void archive() throws IOException {
+    Files.createDirectories(checkNotNull(archivedPath().getParent()));
+    Files.move(originalPath(), archivedPath());
   }
 }

@@ -136,9 +136,7 @@ class App {
           alreadyEncodedVideos.size(),
           video.originalPath(),
           video.archivedPath());
-      // TODO move the logic into UnencodedVideo
-      Files.createDirectories(checkNotNull(video.archivedPath().getParent()));
-      Files.move(video.originalPath(), video.archivedPath());
+      video.archive();
     }
   }
 
@@ -173,8 +171,7 @@ class App {
       Files.move(video.tempEncodedPath(), video.encodedPath());
       log.info("Encoded: {} -> {}", video.originalPath(), video.encodedPath());
 
-      Files.createDirectories(checkNotNull(video.archivedPath().getParent()));
-      Files.move(video.originalPath(), video.archivedPath());
+      video.archive();
       log.info("Archived: {} -> {}", video.originalPath(), video.archivedPath());
     } else {
       log.error("Failed to encode: {}", video.originalPath());
