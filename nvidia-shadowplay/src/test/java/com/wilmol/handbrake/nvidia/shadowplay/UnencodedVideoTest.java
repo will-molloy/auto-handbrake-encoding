@@ -3,7 +3,6 @@ package com.wilmol.handbrake.nvidia.shadowplay;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -38,6 +37,8 @@ class UnencodedVideoTest {
 
   @Mock private HandBrake mockHandBrake;
 
+  private UnencodedVideo.Factory unencodedVideoFactory;
+
   @BeforeEach
   void setUp() throws Exception {
     testDirectory = Path.of(UnencodedVideoTest.class.getSimpleName());
@@ -49,6 +50,9 @@ class UnencodedVideoTest {
     Files.createDirectories(inputDirectory);
     Files.createDirectories(outputDirectory);
     Files.createDirectories(archiveDirectory);
+
+    unencodedVideoFactory =
+        new UnencodedVideo.Factory(inputDirectory, outputDirectory, archiveDirectory);
   }
 
   @AfterEach
@@ -73,8 +77,7 @@ class UnencodedVideoTest {
 
     Path unencodedMp4File = Files.copy(testVideo, inputDirectory.resolve("file.mp4"));
 
-    UnencodedVideo unencodedVideo =
-        new UnencodedVideo(unencodedMp4File, inputDirectory, outputDirectory, archiveDirectory);
+    UnencodedVideo unencodedVideo = unencodedVideoFactory.newUnencodedVideo(unencodedMp4File);
 
     // When
     unencodedVideo.encode(mockHandBrake);
@@ -104,8 +107,7 @@ class UnencodedVideoTest {
     Files.createDirectories(inputDirectory.resolve("Halo/Campaign"));
     Path unencodedMp4File = Files.copy(testVideo, inputDirectory.resolve("Halo/Campaign/file.mp4"));
 
-    UnencodedVideo unencodedVideo =
-        new UnencodedVideo(unencodedMp4File, inputDirectory, outputDirectory, archiveDirectory);
+    UnencodedVideo unencodedVideo = unencodedVideoFactory.newUnencodedVideo(unencodedMp4File);
 
     // When
     unencodedVideo.encode(mockHandBrake);
@@ -118,14 +120,13 @@ class UnencodedVideoTest {
   }
 
   @Test
-  void encode_whenHandBrakeUnsuccessful_retainsOriginal() throws IOException {
+  void encode_retainsOriginalIfEncodingFails() throws IOException {
     // Given
     when(mockHandBrake.encode(any(), any())).thenReturn(false);
 
     Path unencodedMp4File = Files.copy(testVideo, inputDirectory.resolve("file.mp4"));
 
-    UnencodedVideo unencodedVideo =
-        new UnencodedVideo(unencodedMp4File, inputDirectory, outputDirectory, archiveDirectory);
+    UnencodedVideo unencodedVideo = unencodedVideoFactory.newUnencodedVideo(unencodedMp4File);
 
     // When
     unencodedVideo.encode(mockHandBrake);
@@ -139,8 +140,7 @@ class UnencodedVideoTest {
     // Given
     Path unencodedMp4File = Files.copy(testVideo, inputDirectory.resolve("file.mp4"));
 
-    UnencodedVideo unencodedVideo =
-        new UnencodedVideo(unencodedMp4File, inputDirectory, outputDirectory, archiveDirectory);
+    UnencodedVideo unencodedVideo = unencodedVideoFactory.newUnencodedVideo(unencodedMp4File);
 
     // When
     unencodedVideo.archive();
@@ -155,8 +155,7 @@ class UnencodedVideoTest {
     Files.createDirectories(inputDirectory.resolve("Halo/Campaign"));
     Path unencodedMp4File = Files.copy(testVideo, inputDirectory.resolve("Halo/Campaign/file.mp4"));
 
-    UnencodedVideo unencodedVideo =
-        new UnencodedVideo(unencodedMp4File, inputDirectory, outputDirectory, archiveDirectory);
+    UnencodedVideo unencodedVideo = unencodedVideoFactory.newUnencodedVideo(unencodedMp4File);
 
     // When
     unencodedVideo.archive();
@@ -167,142 +166,11 @@ class UnencodedVideoTest {
   }
 
   @Test
-  void constructor_rejectsNonMp4File() {
-    // Given
-    Path mp3File = inputDirectory.resolve("file.mp3");
-
-    // When & Then
-    IllegalArgumentException thrown =
-        assertThrows(
-            IllegalArgumentException.class,
-            () -> new UnencodedVideo(mp3File, inputDirectory, outputDirectory, archiveDirectory));
-    assertThat(thrown)
-        .hasMessageThat()
-        .isEqualTo("videoPath (%s) does not represent an .mp4 file".formatted(mp3File));
-  }
-
-  @Test
-  void constructor_rejectsEncodedMp4File() {
-    // Given
-    Path encodedMp4File = inputDirectory.resolve("file - CFR.mp4");
-
-    // When & Then
-    IllegalArgumentException thrown =
-        assertThrows(
-            IllegalArgumentException.class,
-            () ->
-                new UnencodedVideo(
-                    encodedMp4File, inputDirectory, outputDirectory, archiveDirectory));
-    assertThat(thrown)
-        .hasMessageThat()
-        .isEqualTo("videoPath (%s) represents an encoded .mp4 file".formatted(encodedMp4File));
-  }
-
-  @Test
-  void constructor_rejectsTempEncodedMp4File() {
-    // Given
-    Path tempEncodedMp4File = inputDirectory.resolve("file - CFR (incomplete).mp4");
-
-    // When & Then
-    IllegalArgumentException thrown =
-        assertThrows(
-            IllegalArgumentException.class,
-            () ->
-                new UnencodedVideo(
-                    tempEncodedMp4File, inputDirectory, outputDirectory, archiveDirectory));
-    assertThat(thrown)
-        .hasMessageThat()
-        .isEqualTo(
-            "videoPath (%s) represents an incomplete encoded .mp4 file"
-                .formatted(tempEncodedMp4File));
-  }
-
-  @Test
-  void constructor_rejectsArchivedMp4File() {
-    // Given
-    Path archivedMp4File = inputDirectory.resolve("file - Archived.mp4");
-
-    // When & Then
-    IllegalArgumentException thrown =
-        assertThrows(
-            IllegalArgumentException.class,
-            () ->
-                new UnencodedVideo(
-                    archivedMp4File, inputDirectory, outputDirectory, archiveDirectory));
-    assertThat(thrown)
-        .hasMessageThat()
-        .isEqualTo("videoPath (%s) represents an archived .mp4 file".formatted(archivedMp4File));
-  }
-
-  @Test
-  void constructor_rejectsNonDirectoryInputDirectory() {
-    // Given
-    Path mp4File = inputDirectory.resolve("file.mp4");
-
-    // When & Then
-    IllegalArgumentException thrown =
-        assertThrows(
-            IllegalArgumentException.class,
-            () -> new UnencodedVideo(mp4File, mp4File, outputDirectory, archiveDirectory));
-    assertThat(thrown)
-        .hasMessageThat()
-        .isEqualTo("inputDirectory (%s) is not a directory".formatted(mp4File));
-  }
-
-  @Test
-  void constructor_rejectsNonDirectoryOutputDirectory() {
-    // Given
-    Path mp4File = inputDirectory.resolve("file.mp4");
-
-    // When & Then
-    IllegalArgumentException thrown =
-        assertThrows(
-            IllegalArgumentException.class,
-            () -> new UnencodedVideo(mp4File, inputDirectory, mp4File, archiveDirectory));
-    assertThat(thrown)
-        .hasMessageThat()
-        .isEqualTo("outputDirectory (%s) is not a directory".formatted(mp4File));
-  }
-
-  @Test
-  void constructor_rejectsNonDirectoryArchiveDirectory() {
-    // Given
-    Path mp4File = inputDirectory.resolve("file.mp4");
-
-    // When & Then
-    IllegalArgumentException thrown =
-        assertThrows(
-            IllegalArgumentException.class,
-            () -> new UnencodedVideo(mp4File, inputDirectory, outputDirectory, mp4File));
-    assertThat(thrown)
-        .hasMessageThat()
-        .isEqualTo("archiveDirectory (%s) is not a directory".formatted(mp4File));
-  }
-
-  @Test
-  void constructor_rejectsVideoPathIfNotChildOfInputDirectory() {
-    // Given
-    Path mp4File = outputDirectory.resolve("file.mp4");
-
-    // When & Then
-    IllegalArgumentException thrown =
-        assertThrows(
-            IllegalArgumentException.class,
-            () -> new UnencodedVideo(mp4File, inputDirectory, outputDirectory, archiveDirectory));
-    assertThat(thrown)
-        .hasMessageThat()
-        .isEqualTo(
-            "videoPath (%s) is not a child of inputDirectory (%s)"
-                .formatted(mp4File, inputDirectory));
-  }
-
-  @Test
   void toString_returnsOriginalPath() {
     // Given
     Path mp4File = inputDirectory.resolve("file.mp4");
 
-    UnencodedVideo unencodedVideo =
-        new UnencodedVideo(mp4File, inputDirectory, outputDirectory, archiveDirectory);
+    UnencodedVideo unencodedVideo = unencodedVideoFactory.newUnencodedVideo(mp4File);
 
     // When & Then
     assertThat(unencodedVideo.toString()).isEqualTo(mp4File.toString());

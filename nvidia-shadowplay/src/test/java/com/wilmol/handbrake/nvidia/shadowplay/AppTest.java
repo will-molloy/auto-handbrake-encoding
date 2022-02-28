@@ -21,7 +21,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
@@ -45,7 +44,7 @@ class AppTest {
 
   @Mock private Cli mockCli;
 
-  @InjectMocks private App app;
+  private App app;
 
   @BeforeEach
   void setUp() throws Exception {
@@ -53,7 +52,17 @@ class AppTest {
     inputDirectory = testDirectory.resolve("input");
     outputDirectory = testDirectory.resolve("output");
     archiveDirectory = testDirectory.resolve("archive");
+
     testVideo = Path.of(Resources.getResource("test-video.mp4").toURI());
+
+    Files.createDirectories(inputDirectory);
+    Files.createDirectories(outputDirectory);
+    Files.createDirectories(archiveDirectory);
+
+    UnencodedVideo.Factory unencodedVideoFactory =
+        new UnencodedVideo.Factory(inputDirectory, outputDirectory, archiveDirectory);
+
+    app = new App(mockHandBrake, mockCli, unencodedVideoFactory);
   }
 
   @AfterEach

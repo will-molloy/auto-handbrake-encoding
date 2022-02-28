@@ -30,7 +30,9 @@ class App {
 
       Cli cli = new Cli();
       HandBrake handBrake = new HandBrake(cli);
-      App app = new App(handBrake, cli);
+      UnencodedVideo.Factory unencodedVideoFactory =
+          new UnencodedVideo.Factory(inputDirectory, outputDirectory, archiveDirectory);
+      App app = new App(handBrake, cli, unencodedVideoFactory);
 
       app.run(inputDirectory, outputDirectory, archiveDirectory, shutdownComputer);
     } catch (Exception e) {
@@ -42,10 +44,12 @@ class App {
 
   private final HandBrake handBrake;
   private final Cli cli;
+  private final UnencodedVideo.Factory unencodedVideoFactory;
 
-  App(HandBrake handBrake, Cli cli) {
+  App(HandBrake handBrake, Cli cli, UnencodedVideo.Factory unencodedVideoFactory) {
     this.handBrake = checkNotNull(handBrake);
     this.cli = checkNotNull(cli);
+    this.unencodedVideoFactory = checkNotNull(unencodedVideoFactory);
   }
 
   void run(
@@ -60,12 +64,8 @@ class App {
         shutdownComputer);
 
     try {
-      Files.createDirectories(outputDirectory);
-      Files.createDirectories(archiveDirectory);
-
       deleteIncompleteEncodings(inputDirectory);
-      List<UnencodedVideo> unencodedVideos =
-          getUnencodedVideos(inputDirectory, outputDirectory, archiveDirectory);
+      List<UnencodedVideo> unencodedVideos = getUnencodedVideos(inputDirectory);
       archiveVideosThatHaveAlreadyBeenEncoded(unencodedVideos);
       encodeVideos(unencodedVideos);
     } finally {
@@ -82,7 +82,7 @@ class App {
     List<Path> tempEncodings =
         Files.walk(inputDirectory)
             .filter(Files::isRegularFile)
-            .filter(UnencodedVideo::isTempEncodedMp4)
+            .filter(UnencodedVideo.Factory::isTempEncodedMp4)
             .toList();
     if (tempEncodings.isEmpty()) {
       return;
@@ -97,18 +97,18 @@ class App {
     }
   }
 
-  private List<UnencodedVideo> getUnencodedVideos(
-      Path inputDirectory, Path outputDirectory, Path archiveDirectory) throws IOException {
+  private List<UnencodedVideo> getUnencodedVideos(Path inputDirectory) throws IOException {
     List<UnencodedVideo> unencodedVideos =
         Files.walk(inputDirectory)
             .filter(Files::isRegularFile)
-            .filter(UnencodedVideo::isMp4)
+            .filter(UnencodedVideo.Factory::isMp4)
             // don't include paths that represent encoded or archived videos
             // if somebody wants to encode again, they'll need to remove the 'Archived' suffix
             .filter(
-                path -> !UnencodedVideo.isEncodedMp4(path) && !UnencodedVideo.isArchivedMp4(path))
-            .map(
-                path -> new UnencodedVideo(path, inputDirectory, outputDirectory, archiveDirectory))
+                path ->
+                    !UnencodedVideo.Factory.isEncodedMp4(path)
+                        && !UnencodedVideo.Factory.isArchivedMp4(path))
+            .map(unencodedVideoFactory::newUnencodedVideo)
             .toList();
     log.info("Detected {} unencoded videos(s)", unencodedVideos.size());
     return unencodedVideos;
