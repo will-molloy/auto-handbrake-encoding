@@ -82,44 +82,15 @@ class UnencodedVideo {
     this.archiveDirectory = archiveDirectory;
   }
 
-  public boolean hasBeenEncoded() {
-    return Files.exists(encodedPath());
-  }
-
-  public Path originalPath() {
-    return videoPath;
-  }
-
-  public Path encodedPath() {
-    String encodedFileName = fileName().replace(MP4_SUFFIX, ENCODED_MP4_SUFFIX);
-    return outputDirectory.resolve(relativePathFromInput()).resolveSibling(encodedFileName);
-  }
-
-  public Path tempEncodedPath() {
-    String tempEncodedFileName = fileName().replace(MP4_SUFFIX, TEMP_ENCODED_MP4_SUFFIX);
-    return outputDirectory.resolve(relativePathFromInput()).resolveSibling(tempEncodedFileName);
-  }
-
-  public Path archivedPath() {
-    String archivedFileName = fileName().replace(MP4_SUFFIX, ARCHIVED_SUFFIX);
-    return archiveDirectory.resolve(relativePathFromInput()).resolveSibling(archivedFileName);
-  }
-
-  private String fileName() {
-    return checkNotNull(videoPath.getFileName()).toString();
-  }
-
-  private Path relativePathFromInput() {
-    return inputDirectory.relativize(videoPath);
-  }
-
-  void archive() throws IOException {
+  public void archive() throws IOException {
+    log.info("Archiving: {} -> {}", originalPath(), archivedPath());
     Files.createDirectories(checkNotNull(archivedPath().getParent()));
     Files.move(originalPath(), archivedPath());
     log.info("Archived: {} -> {}", originalPath(), archivedPath());
   }
 
-  void encode(HandBrake handBrake) throws IOException {
+  public void encode(HandBrake handBrake) throws IOException {
+    log.info("Encoding: {} -> {}", originalPath(), encodedPath());
     Stopwatch stopwatch = Stopwatch.createStarted();
 
     // to avoid leaving encoded files in an 'incomplete' state, encode to a temp file in case
@@ -138,5 +109,41 @@ class UnencodedVideo {
     }
 
     log.info("Elapsed: {}", stopwatch.elapsed());
+  }
+
+  public boolean hasBeenEncoded() {
+    return Files.exists(encodedPath());
+  }
+
+  public Path originalPath() {
+    return videoPath;
+  }
+
+  private Path encodedPath() {
+    String encodedFileName = fileName().replace(MP4_SUFFIX, ENCODED_MP4_SUFFIX);
+    return outputDirectory.resolve(relativePathFromInput()).resolveSibling(encodedFileName);
+  }
+
+  private Path tempEncodedPath() {
+    String tempEncodedFileName = fileName().replace(MP4_SUFFIX, TEMP_ENCODED_MP4_SUFFIX);
+    return outputDirectory.resolve(relativePathFromInput()).resolveSibling(tempEncodedFileName);
+  }
+
+  private Path archivedPath() {
+    String archivedFileName = fileName().replace(MP4_SUFFIX, ARCHIVED_SUFFIX);
+    return archiveDirectory.resolve(relativePathFromInput()).resolveSibling(archivedFileName);
+  }
+
+  private String fileName() {
+    return checkNotNull(videoPath.getFileName()).toString();
+  }
+
+  private Path relativePathFromInput() {
+    return inputDirectory.relativize(videoPath);
+  }
+
+  @Override
+  public String toString() {
+    return originalPath().toString();
   }
 }

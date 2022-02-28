@@ -130,12 +130,7 @@ class App {
 
     int i = 0;
     for (UnencodedVideo video : alreadyEncodedVideos) {
-      log.info(
-          "Archiving ({}/{}): {} -> {}",
-          ++i,
-          alreadyEncodedVideos.size(),
-          video.originalPath(),
-          video.archivedPath());
+      log.info("Archiving ({}/{})", ++i, alreadyEncodedVideos.size());
       video.archive();
     }
   }
@@ -148,12 +143,13 @@ class App {
 
     int i = 0;
     for (UnencodedVideo video : videosToEncode) {
-      log.info("Detected ({}/{}): {}", ++i, videosToEncode.size(), video.originalPath());
+      log.info("Detected ({}/{})", ++i, videosToEncode.size());
+      log.info("Detected: {}", video);
     }
 
     i = 0;
     for (UnencodedVideo video : videosToEncode) {
-      log.info("Encoding ({}/{}): {}", ++i, videosToEncode.size(), video.originalPath());
+      log.info("Encoding ({}/{})", ++i, videosToEncode.size());
       video.encode(handBrake);
     }
   }
