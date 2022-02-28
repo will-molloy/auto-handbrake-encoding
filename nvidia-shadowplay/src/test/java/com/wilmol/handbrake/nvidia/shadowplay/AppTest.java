@@ -48,7 +48,7 @@ class AppTest {
 
   @BeforeEach
   void setUp() throws Exception {
-    testDirectory = Path.of("AppTest");
+    testDirectory = Path.of(AppTest.class.getSimpleName());
     inputDirectory = testDirectory.resolve("input");
     outputDirectory = testDirectory.resolve("output");
     testVideo = Path.of(Resources.getResource("test-video.mp4").toURI());

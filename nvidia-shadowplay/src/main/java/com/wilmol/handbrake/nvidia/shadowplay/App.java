@@ -58,7 +58,7 @@ class App {
     try {
       Files.createDirectories(outputDirectory);
       deleteIncompleteEncodings(inputDirectory);
-      List<UnencodedVideo> unencodedVideos = getUnencodedVideos(inputDirectory, outputDirectory);
+      List<UnencodedVideo> unencodedVideos = getUnencodedVideos(inputDirectory, null, null);
       archiveVideosThatHaveAlreadyBeenEncoded(unencodedVideos);
       encodeVideos(unencodedVideos);
     } finally {
@@ -90,8 +90,8 @@ class App {
     }
   }
 
-  private List<UnencodedVideo> getUnencodedVideos(Path inputDirectory, Path outputDirectory)
-      throws IOException {
+  private List<UnencodedVideo> getUnencodedVideos(
+      Path inputDirectory, Path outputDirectory, Path archiveDirectory) throws IOException {
     List<UnencodedVideo> unencodedVideos =
         Files.walk(inputDirectory)
             .filter(Files::isRegularFile)
@@ -100,7 +100,8 @@ class App {
             // if somebody wants to encode again, they'll need to remove the 'Archived' suffix
             .filter(
                 path -> !UnencodedVideo.isEncodedMp4(path) && !UnencodedVideo.isArchivedMp4(path))
-            .map(path -> new UnencodedVideo(path, outputDirectory))
+            .map(
+                path -> new UnencodedVideo(path, inputDirectory, outputDirectory, archiveDirectory))
             .toList();
     log.info("Detected {} unencoded videos(s)", unencodedVideos.size());
 

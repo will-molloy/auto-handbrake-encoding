@@ -39,29 +39,49 @@ class UnencodedVideo {
   private final Path tempEncodedPath;
   private final Path archivedPath;
 
-  UnencodedVideo(Path videoPath, Path outputPath) {
-    checkArgument(isMp4(videoPath), "Video path does not represent an .mp4 file: %s", videoPath);
+  UnencodedVideo(Path videoPath, Path inputDirectory, Path outputDirectory, Path archiveDirectory) {
+    checkArgument(isMp4(videoPath), "videoPath (%s) does not represent an .mp4 file", videoPath);
     checkArgument(
-        !isEncodedMp4(videoPath), "Video path represents an encoded .mp4 file: %s", videoPath);
+        !isEncodedMp4(videoPath), "videoPath (%s) represents an encoded .mp4 file", videoPath);
     checkArgument(
         !isTempEncodedMp4(videoPath),
-        "Video path represents an incomplete encoded .mp4 file: %s",
+        "videoPath (%s) represents an incomplete encoded .mp4 file",
         videoPath);
     checkArgument(
-        !isArchivedMp4(videoPath), "Video path represents an archived .mp4 file: %s", videoPath);
+        !isArchivedMp4(videoPath), "videoPath (%s) represents an archived .mp4 file", videoPath);
+
+    checkArgument(
+        Files.isDirectory(inputDirectory),
+        "inputDirectory (%s) is not a directory",
+        inputDirectory);
+    checkArgument(
+        Files.isDirectory(outputDirectory),
+        "outputDirectory (%s) is not a directory",
+        outputDirectory);
+    checkArgument(
+        Files.isDirectory(archiveDirectory),
+        "archiveDirectory (%s) is not a directory",
+        archiveDirectory);
+
+    checkArgument(
+        videoPath.startsWith(inputDirectory),
+        "videoPath (%s) is not a child of inputDirectory (%s)",
+        videoPath,
+        inputDirectory);
 
     originalPath = videoPath;
-
     String fileName = checkNotNull(videoPath.getFileName()).toString();
 
+    Path commonPath = inputDirectory.relativize(videoPath);
+
     String encodedFileName = fileName.replace(MP4_SUFFIX, ENCODED_MP4_SUFFIX);
-    encodedPath = outputPath.resolve(encodedFileName);
+    encodedPath = outputDirectory.resolve(commonPath).resolveSibling(encodedFileName);
 
     String tempEncodedFileName = fileName.replace(MP4_SUFFIX, TEMP_ENCODED_MP4_SUFFIX);
-    tempEncodedPath = outputPath.resolve(tempEncodedFileName);
+    tempEncodedPath = outputDirectory.resolve(commonPath).resolveSibling(tempEncodedFileName);
 
     String archivedFileName = fileName.replace(MP4_SUFFIX, ARCHIVED_SUFFIX);
-    archivedPath = videoPath.resolveSibling(archivedFileName);
+    archivedPath = archiveDirectory.resolve(commonPath).resolveSibling(archivedFileName);
   }
 
   public boolean hasBeenEncoded() {
