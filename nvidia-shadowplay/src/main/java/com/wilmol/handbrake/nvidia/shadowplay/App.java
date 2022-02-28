@@ -154,29 +154,7 @@ class App {
     i = 0;
     for (UnencodedVideo video : videosToEncode) {
       log.info("Encoding ({}/{}): {}", ++i, videosToEncode.size(), video.originalPath());
-      encodeVideo(video);
+      video.encode(handBrake);
     }
-  }
-
-  private void encodeVideo(UnencodedVideo video) throws IOException {
-    Stopwatch stopwatch = Stopwatch.createStarted();
-
-    // to avoid leaving encoded files in an 'incomplete' state, encode to a temp file in case
-    // something goes wrong
-    boolean encodeSuccessful = handBrake.encode(video.originalPath(), video.tempEncodedPath());
-
-    if (encodeSuccessful) {
-      // only archive the original after renaming the temp file, then it'll never reach a state
-      // where the encoding is incomplete and the original doesn't exist
-      Files.move(video.tempEncodedPath(), video.encodedPath());
-      log.info("Encoded: {} -> {}", video.originalPath(), video.encodedPath());
-
-      video.archive();
-      log.info("Archived: {} -> {}", video.originalPath(), video.archivedPath());
-    } else {
-      log.error("Failed to encode: {}", video.originalPath());
-    }
-
-    log.info("Elapsed: {}", stopwatch.elapsed());
   }
 }

@@ -3,9 +3,13 @@ package com.wilmol.handbrake.nvidia.shadowplay;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.Stopwatch;
+import com.wilmol.handbrake.core.HandBrake;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Represents an unencoded, unarchived video (.mp4 file).
@@ -13,6 +17,8 @@ import java.nio.file.Path;
  * @author <a href=https://wilmol.com>Will Molloy</a>
  */
 class UnencodedVideo {
+
+  private static final Logger log = LogManager.getLogger();
 
   private static final String MP4_SUFFIX = ".mp4";
   private static final String ENCODED_MP4_SUFFIX = " - CFR.mp4";
@@ -107,8 +113,30 @@ class UnencodedVideo {
     return inputDirectory.relativize(videoPath);
   }
 
-  public void archive() throws IOException {
+  void archive() throws IOException {
     Files.createDirectories(checkNotNull(archivedPath().getParent()));
     Files.move(originalPath(), archivedPath());
+    log.info("Archived: {} -> {}", originalPath(), archivedPath());
+  }
+
+  void encode(HandBrake handBrake) throws IOException {
+    Stopwatch stopwatch = Stopwatch.createStarted();
+
+    // to avoid leaving encoded files in an 'incomplete' state, encode to a temp file in case
+    // something goes wrong
+    boolean encodeSuccessful = handBrake.encode(originalPath(), tempEncodedPath());
+
+    if (encodeSuccessful) {
+      // only archive the original after renaming the temp file, then it'll never reach a state
+      // where the encoding is incomplete and the original doesn't exist
+      Files.move(tempEncodedPath(), encodedPath());
+      log.info("Encoded: {} -> {}", originalPath(), encodedPath());
+
+      archive();
+    } else {
+      log.error("Failed to encode: {}", originalPath());
+    }
+
+    log.info("Elapsed: {}", stopwatch.elapsed());
   }
 }
