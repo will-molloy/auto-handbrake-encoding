@@ -1,7 +1,6 @@
 package com.wilmol.handbrake.nvidia.shadowplay;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,10 +33,10 @@ class UnencodedVideo {
     return path.toString().endsWith(ARCHIVED_SUFFIX);
   }
 
-  private final Path originalPath;
-  private final Path encodedPath;
-  private final Path tempEncodedPath;
-  private final Path archivedPath;
+  private final Path videoPath;
+  private final Path inputDirectory;
+  private final Path outputDirectory;
+  private final Path archiveDirectory;
 
   UnencodedVideo(Path videoPath, Path inputDirectory, Path outputDirectory, Path archiveDirectory) {
     checkArgument(isMp4(videoPath), "videoPath (%s) does not represent an .mp4 file", videoPath);
@@ -69,38 +68,40 @@ class UnencodedVideo {
         videoPath,
         inputDirectory);
 
-    originalPath = videoPath;
-    String fileName = checkNotNull(videoPath.getFileName()).toString();
-
-    Path commonPath = inputDirectory.relativize(videoPath);
-
-    String encodedFileName = fileName.replace(MP4_SUFFIX, ENCODED_MP4_SUFFIX);
-    encodedPath = outputDirectory.resolve(commonPath).resolveSibling(encodedFileName);
-
-    String tempEncodedFileName = fileName.replace(MP4_SUFFIX, TEMP_ENCODED_MP4_SUFFIX);
-    tempEncodedPath = outputDirectory.resolve(commonPath).resolveSibling(tempEncodedFileName);
-
-    String archivedFileName = fileName.replace(MP4_SUFFIX, ARCHIVED_SUFFIX);
-    archivedPath = archiveDirectory.resolve(commonPath).resolveSibling(archivedFileName);
+    this.videoPath = videoPath;
+    this.inputDirectory = inputDirectory;
+    this.outputDirectory = outputDirectory;
+    this.archiveDirectory = archiveDirectory;
   }
 
   public boolean hasBeenEncoded() {
-    return Files.exists(encodedPath);
+    return Files.exists(encodedPath());
   }
 
   public Path originalPath() {
-    return originalPath;
+    return videoPath;
   }
 
   public Path encodedPath() {
-    return encodedPath;
+    String encodedFileName = fileName().replace(MP4_SUFFIX, ENCODED_MP4_SUFFIX);
+    return outputDirectory.resolve(relativePathFromInput()).resolveSibling(encodedFileName);
   }
 
   public Path tempEncodedPath() {
-    return tempEncodedPath;
+    String tempEncodedFileName = fileName().replace(MP4_SUFFIX, TEMP_ENCODED_MP4_SUFFIX);
+    return outputDirectory.resolve(relativePathFromInput()).resolveSibling(tempEncodedFileName);
   }
 
   public Path archivedPath() {
-    return archivedPath;
+    String archivedFileName = fileName().replace(MP4_SUFFIX, ARCHIVED_SUFFIX);
+    return archiveDirectory.resolve(relativePathFromInput()).resolveSibling(archivedFileName);
+  }
+
+  private String fileName() {
+    return videoPath.getFileName().toString();
+  }
+
+  private Path relativePathFromInput() {
+    return inputDirectory.relativize(videoPath);
   }
 }
