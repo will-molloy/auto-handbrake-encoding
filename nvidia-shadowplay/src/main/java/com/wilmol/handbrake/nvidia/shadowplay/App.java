@@ -22,7 +22,7 @@ class App {
 
   public static void main(String[] args) {
     try {
-      checkArgument(args.length == 4, "Expected 3 args to main method");
+      checkArgument(args.length == 4, "Expected 4 args to main method");
       Path inputDirectory = Path.of(args[0]);
       Path outputDirectory = Path.of(args[1]);
       Path archiveDirectory = Path.of(args[2]);
@@ -90,9 +90,9 @@ class App {
 
     log.warn("Detected {} incomplete encoding(s)", tempEncodings.size());
 
-    for (int i = 0; i < tempEncodings.size(); i++) {
-      Path path = tempEncodings.get(i);
-      log.warn("Deleting ({}/{}): {}", i + 1, tempEncodings.size(), path);
+    int i = 0;
+    for (Path path : tempEncodings) {
+      log.warn("Deleting ({}/{}): {}", ++i, tempEncodings.size(), path);
       Files.delete(path);
     }
   }
@@ -111,7 +111,6 @@ class App {
                 path -> new UnencodedVideo(path, inputDirectory, outputDirectory, archiveDirectory))
             .toList();
     log.info("Detected {} unencoded videos(s)", unencodedVideos.size());
-
     return unencodedVideos;
   }
 
@@ -129,7 +128,6 @@ class App {
         "Detected {} unencoded video(s) that have already been encoded",
         alreadyEncodedVideos.size());
 
-    // TODO write all loops like this
     int i = 0;
     for (UnencodedVideo video : alreadyEncodedVideos) {
       log.info(
@@ -150,14 +148,14 @@ class App {
 
     log.info("Detected {} video(s) to encode", videosToEncode.size());
 
-    for (int i = 0; i < videosToEncode.size(); i++) {
-      UnencodedVideo video = videosToEncode.get(i);
-      log.info("Detected ({}/{}): {}", i + 1, videosToEncode.size(), video.originalPath());
+    int i = 0;
+    for (UnencodedVideo video : videosToEncode) {
+      log.info("Detected ({}/{}): {}", ++i, videosToEncode.size(), video.originalPath());
     }
 
-    for (int i = 0; i < videosToEncode.size(); i++) {
-      UnencodedVideo video = videosToEncode.get(i);
-      log.info("Encoding ({}/{}): {}", i + 1, videosToEncode.size(), video.originalPath());
+    i = 0;
+    for (UnencodedVideo video : videosToEncode) {
+      log.info("Encoding ({}/{}): {}", ++i, videosToEncode.size(), video.originalPath());
       encodeVideo(video);
     }
   }
@@ -173,13 +171,13 @@ class App {
       // only archive the original after renaming the temp file, then it'll never reach a state
       // where the encoding is incomplete and the original doesn't exist
       Files.move(video.tempEncodedPath(), video.encodedPath());
-      log.info("Encoded: {}", video.encodedPath());
+      log.info("Encoded: {} -> {}", video.originalPath(), video.encodedPath());
 
       Files.createDirectories(checkNotNull(video.archivedPath().getParent()));
       Files.move(video.originalPath(), video.archivedPath());
-      log.info("Archived: {}", video.archivedPath());
+      log.info("Archived: {} -> {}", video.originalPath(), video.archivedPath());
     } else {
-      log.error("Encode failed: {}", video.originalPath());
+      log.error("Failed to encode: {}", video.originalPath());
     }
 
     log.info("Elapsed: {}", stopwatch.elapsed());
