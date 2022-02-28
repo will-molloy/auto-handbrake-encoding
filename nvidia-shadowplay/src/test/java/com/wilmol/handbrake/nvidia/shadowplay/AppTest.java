@@ -1,8 +1,8 @@
 package com.wilmol.handbrake.nvidia.shadowplay;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -38,6 +38,7 @@ class AppTest {
   private Path testDirectory;
   private Path inputDirectory;
   private Path outputDirectory;
+  private Path archiveDirectory;
   private Path testVideo;
 
   @Mock private HandBrake mockHandBrake;
@@ -51,6 +52,7 @@ class AppTest {
     testDirectory = Path.of(AppTest.class.getSimpleName());
     inputDirectory = testDirectory.resolve("input");
     outputDirectory = testDirectory.resolve("output");
+    archiveDirectory = testDirectory.resolve("archive");
     testVideo = Path.of(Resources.getResource("test-video.mp4").toURI());
   }
 
@@ -69,6 +71,7 @@ class AppTest {
                   // bit of an ugly hack...
                   // need to create the temp encoded file as its expected as output from HandBrake
                   Path handBrakeOutput = invocation.getArgument(1);
+                  Files.createDirectories(checkNotNull(handBrakeOutput.getParent()));
                   Files.createFile(handBrakeOutput);
                   return true;
                 });
@@ -79,17 +82,17 @@ class AppTest {
     Files.copy(testVideo, inputDirectory.resolve("NestedFolder/video3.mp4"));
 
     // When
-    app.run(inputDirectory, outputDirectory, false);
+    app.run(inputDirectory, outputDirectory, archiveDirectory, false);
 
     // Then
     assertThatTestDirectory()
         .containsExactly(
-            inputDirectory.resolve("video1 - Archived.mp4"),
-            inputDirectory.resolve("video2 - Archived.mp4"),
-            inputDirectory.resolve("NestedFolder/video3 - Archived.mp4"),
+            archiveDirectory.resolve("video1 - Archived.mp4"),
+            archiveDirectory.resolve("video2 - Archived.mp4"),
+            archiveDirectory.resolve("NestedFolder/video3 - Archived.mp4"),
             outputDirectory.resolve("video1 - CFR.mp4"),
             outputDirectory.resolve("video2 - CFR.mp4"),
-            outputDirectory.resolve("video3 - CFR.mp4"));
+            outputDirectory.resolve("NestedFolder/video3 - CFR.mp4"));
   }
 
   @Test
@@ -99,20 +102,20 @@ class AppTest {
     Files.copy(testVideo, inputDirectory.resolve("video1.mp4"));
     Files.copy(testVideo, inputDirectory.resolve("NestedFolder/video2.mp4"));
 
-    Files.createDirectories(outputDirectory);
+    Files.createDirectories(outputDirectory.resolve("NestedFolder"));
     Files.copy(testVideo, outputDirectory.resolve("video1 - CFR.mp4"));
-    Files.copy(testVideo, outputDirectory.resolve("video2 - CFR.mp4"));
+    Files.copy(testVideo, outputDirectory.resolve("NestedFolder/video2 - CFR.mp4"));
 
     // When
-    app.run(inputDirectory, outputDirectory, false);
+    app.run(inputDirectory, outputDirectory, archiveDirectory, false);
 
     // Then
     assertThatTestDirectory()
         .containsExactly(
-            inputDirectory.resolve("video1 - Archived.mp4"),
-            inputDirectory.resolve("NestedFolder/video2 - Archived.mp4"),
+            archiveDirectory.resolve("video1 - Archived.mp4"),
+            archiveDirectory.resolve("NestedFolder/video2 - Archived.mp4"),
             outputDirectory.resolve("video1 - CFR.mp4"),
-            outputDirectory.resolve("video2 - CFR.mp4"));
+            outputDirectory.resolve("NestedFolder/video2 - CFR.mp4"));
   }
 
   @Test
@@ -124,7 +127,7 @@ class AppTest {
     Files.copy(testVideo, inputDirectory.resolve("video1.mp4"));
 
     // When
-    app.run(inputDirectory, outputDirectory, false);
+    app.run(inputDirectory, outputDirectory, archiveDirectory, false);
 
     // Then
     assertThatTestDirectory().containsExactly(inputDirectory.resolve("video1.mp4"));
@@ -137,7 +140,7 @@ class AppTest {
     Files.copy(testVideo, inputDirectory.resolve("video1 - CFR (incomplete).mp4"));
 
     // When
-    app.run(inputDirectory, outputDirectory, false);
+    app.run(inputDirectory, outputDirectory, archiveDirectory, false);
 
     // Then
     assertThatTestDirectory().isEmpty();
@@ -147,24 +150,10 @@ class AppTest {
   void shutsComputerDownIfRequested() throws Exception {
     // When
     Files.createDirectories(inputDirectory);
-    app.run(inputDirectory, outputDirectory, true);
+    app.run(inputDirectory, outputDirectory, archiveDirectory, true);
 
     // Then
     verify(mockCli).execute(List.of("shutdown", "-s", "-t", "30"));
-  }
-
-  @Test
-  void abortsIfOutputFileNamesConflict() throws Exception {
-    // Given
-    Files.createDirectories(inputDirectory.resolve("NestedFolder"));
-    Files.copy(testVideo, inputDirectory.resolve("video1.mp4"));
-    Files.copy(testVideo, inputDirectory.resolve("NestedFolder/video1.mp4"));
-
-    // Then
-    IllegalArgumentException thrown =
-        assertThrows(
-            IllegalArgumentException.class, () -> app.run(inputDirectory, outputDirectory, false));
-    assertThat(thrown).hasMessageThat().isEqualTo("Output file names conflict, aborting");
   }
 
   private StreamSubject assertThatTestDirectory() throws IOException {

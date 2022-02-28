@@ -22,16 +22,17 @@ class App {
 
   public static void main(String[] args) {
     try {
-      checkArgument(args.length == 3, "Expected 3 args to main method");
+      checkArgument(args.length == 4, "Expected 3 args to main method");
       Path inputDirectory = Path.of(args[0]);
       Path outputDirectory = Path.of(args[1]);
+      Path archiveDirectory = Path.of(args[2]);
       boolean shutdownComputer = Boolean.parseBoolean(args[2]);
 
       Cli cli = new Cli();
       HandBrake handBrake = new HandBrake(cli);
       App app = new App(handBrake, cli);
 
-      app.run(inputDirectory, outputDirectory, shutdownComputer);
+      app.run(inputDirectory, outputDirectory, archiveDirectory, shutdownComputer);
     } catch (Exception e) {
       log.fatal("Fatal error", e);
     }
@@ -47,18 +48,24 @@ class App {
     this.cli = checkNotNull(cli);
   }
 
-  void run(Path inputDirectory, Path outputDirectory, boolean shutdownComputer) throws Exception {
+  void run(
+      Path inputDirectory, Path outputDirectory, Path archiveDirectory, boolean shutdownComputer)
+      throws Exception {
     Stopwatch stopwatch = Stopwatch.createStarted();
     log.info(
-        "run(inputDirectory={}, outputDirectory={}, shutdownComputer={}) started",
+        "run(inputDirectory={}, outputDirectory={}, archiveDirectory={}, shutdownComputer={}) started",
         inputDirectory,
         outputDirectory,
+        archiveDirectory,
         shutdownComputer);
 
     try {
       Files.createDirectories(outputDirectory);
+      Files.createDirectories(archiveDirectory);
+
       deleteIncompleteEncodings(inputDirectory);
-      List<UnencodedVideo> unencodedVideos = getUnencodedVideos(inputDirectory, null, null);
+      List<UnencodedVideo> unencodedVideos =
+          getUnencodedVideos(inputDirectory, outputDirectory, archiveDirectory);
       archiveVideosThatHaveAlreadyBeenEncoded(unencodedVideos);
       encodeVideos(unencodedVideos);
     } finally {
@@ -105,13 +112,6 @@ class App {
             .toList();
     log.info("Detected {} unencoded videos(s)", unencodedVideos.size());
 
-    long distinctCount =
-        unencodedVideos.stream()
-            .map(unencodedVideo -> unencodedVideo.encodedPath())
-            .distinct()
-            .count();
-    checkArgument(unencodedVideos.size() == distinctCount, "Output file names conflict, aborting");
-
     return unencodedVideos;
   }
 
@@ -129,9 +129,17 @@ class App {
         "Detected {} unencoded video(s) that have already been encoded",
         alreadyEncodedVideos.size());
 
-    for (int i = 0; i < alreadyEncodedVideos.size(); i++) {
-      UnencodedVideo video = alreadyEncodedVideos.get(i);
-      log.info("Archiving ({}/{}): {}", i + 1, alreadyEncodedVideos.size(), video.originalPath());
+    // TODO write all loops like this
+    int i = 0;
+    for (UnencodedVideo video : alreadyEncodedVideos) {
+      log.info(
+          "Archiving ({}/{}): {} -> {}",
+          ++i,
+          alreadyEncodedVideos.size(),
+          video.originalPath(),
+          video.archivedPath());
+      // TODO move the logic into UnencodedVideo
+      Files.createDirectories(checkNotNull(video.archivedPath().getParent()));
       Files.move(video.originalPath(), video.archivedPath());
     }
   }
@@ -167,6 +175,7 @@ class App {
       Files.move(video.tempEncodedPath(), video.encodedPath());
       log.info("Encoded: {}", video.encodedPath());
 
+      Files.createDirectories(checkNotNull(video.archivedPath().getParent()));
       Files.move(video.originalPath(), video.archivedPath());
       log.info("Archived: {}", video.archivedPath());
     } else {

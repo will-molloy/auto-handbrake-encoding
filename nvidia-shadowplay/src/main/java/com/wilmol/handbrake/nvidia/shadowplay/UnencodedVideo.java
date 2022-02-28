@@ -1,6 +1,7 @@
 package com.wilmol.handbrake.nvidia.shadowplay;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -98,7 +99,7 @@ class UnencodedVideo {
   }
 
   private String fileName() {
-    return videoPath.getFileName().toString();
+    return checkNotNull(videoPath.getFileName()).toString();
   }
 
   private Path relativePathFromInput() {
