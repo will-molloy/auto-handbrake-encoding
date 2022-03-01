@@ -8,10 +8,12 @@ import com.wilmol.handbrake.core.Cli;
 import com.wilmol.handbrake.core.Computer;
 import com.wilmol.handbrake.core.HandBrake;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -117,7 +119,7 @@ class App {
     return unencodedVideos;
   }
 
-  private void encodeVideos(List<UnencodedVideo> videos) throws IOException {
+  private void encodeVideos(List<UnencodedVideo> videos) {
     log.info("Detected {} video(s) to encode", videos.size());
 
     int i = 0;
@@ -125,11 +127,17 @@ class App {
       log.info("Detected ({}/{}): {}", ++i, videos.size(), video);
     }
 
-    i = 0;
-    for (UnencodedVideo video : videos) {
-      log.info("Encoding ({}/{}): {}", ++i, videos.size(), video);
-      video.encode(handBrake);
-    }
+    AtomicInteger atomicInt = new AtomicInteger();
+    videos.parallelStream()
+        .forEach(
+            video -> {
+              log.info("Encoding ({}/{}): {}", atomicInt.getAndIncrement(), videos.size(), video);
+              try {
+                video.encode(handBrake);
+              } catch (IOException e) {
+                throw new UncheckedIOException(e);
+              }
+            });
   }
 
   public static void main(String... args) {
