@@ -5,6 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Stopwatch;
 import com.wilmol.handbrake.core.Cli;
+import com.wilmol.handbrake.core.Computer;
 import com.wilmol.handbrake.core.HandBrake;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -25,11 +26,11 @@ class App {
   private static final Logger log = LogManager.getLogger();
 
   private final HandBrake handBrake;
-  private final Cli cli;
+  private final Computer computer;
 
-  App(HandBrake handBrake, Cli cli) {
+  App(HandBrake handBrake, Computer computer) {
     this.handBrake = checkNotNull(handBrake);
-    this.cli = checkNotNull(cli);
+    this.computer = checkNotNull(computer);
   }
 
   void run(
@@ -53,8 +54,7 @@ class App {
       log.info("run finished - elapsed: {}", stopwatch.elapsed());
 
       if (shutdownComputer) {
-        log.info("Shutting computer down");
-        cli.execute(List.of("shutdown", "-s", "-t", "30"));
+        computer.shutdown();
       }
     }
   }
@@ -142,7 +142,8 @@ class App {
 
       Cli cli = new Cli();
       HandBrake handBrake = new HandBrake(cli);
-      App app = new App(handBrake, cli);
+      Computer computer = new Computer(cli);
+      App app = new App(handBrake, computer);
 
       app.run(inputDirectory, outputDirectory, archiveDirectory, shutdownComputer);
     } catch (Exception e) {

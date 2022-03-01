@@ -8,13 +8,12 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.io.Resources;
 import com.google.common.truth.StreamSubject;
-import com.wilmol.handbrake.core.Cli;
+import com.wilmol.handbrake.core.Computer;
 import com.wilmol.handbrake.core.HandBrake;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,7 +41,7 @@ class AppTest {
 
   @Mock private HandBrake mockHandBrake;
 
-  @Mock private Cli mockCli;
+  @Mock private Computer mockComputer;
 
   @InjectMocks private App app;
 
@@ -154,7 +153,7 @@ class AppTest {
     app.run(inputDirectory, outputDirectory, archiveDirectory, true);
 
     // Then
-    verify(mockCli).execute(List.of("shutdown", "-s", "-t", "30"));
+    verify(mockComputer).shutdown();
   }
 
   private StreamSubject assertThatTestDirectory() throws IOException {
