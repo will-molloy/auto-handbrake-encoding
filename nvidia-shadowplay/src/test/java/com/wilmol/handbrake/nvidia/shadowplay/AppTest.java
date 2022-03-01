@@ -1,7 +1,6 @@
 package com.wilmol.handbrake.nvidia.shadowplay;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -21,6 +20,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
@@ -44,7 +44,7 @@ class AppTest {
 
   @Mock private Cli mockCli;
 
-  private App app;
+  @InjectMocks private App app;
 
   @BeforeEach
   void setUp() throws Exception {
@@ -58,11 +58,6 @@ class AppTest {
     Files.createDirectories(inputDirectory);
     Files.createDirectories(outputDirectory);
     Files.createDirectories(archiveDirectory);
-
-    UnencodedVideo.Factory unencodedVideoFactory =
-        new UnencodedVideo.Factory(inputDirectory, outputDirectory, archiveDirectory);
-
-    app = new App(mockHandBrake, mockCli, unencodedVideoFactory);
   }
 
   @AfterEach
@@ -132,7 +127,6 @@ class AppTest {
     // Given
     when(mockHandBrake.encode(any(), any())).thenReturn(false);
 
-    Files.createDirectories(inputDirectory);
     Files.copy(testVideo, inputDirectory.resolve("video1.mp4"));
 
     // When
@@ -145,8 +139,7 @@ class AppTest {
   @Test
   void deletesIncompleteEncodings() throws Exception {
     // Given
-    Files.createDirectories(inputDirectory);
-    Files.copy(testVideo, inputDirectory.resolve("video1 - CFR (incomplete).mp4"));
+    Files.copy(testVideo, outputDirectory.resolve("video1 - CFR (incomplete).mp4"));
 
     // When
     app.run(inputDirectory, outputDirectory, archiveDirectory, false);
@@ -158,7 +151,6 @@ class AppTest {
   @Test
   void shutsComputerDownIfRequested() throws Exception {
     // When
-    Files.createDirectories(inputDirectory);
     app.run(inputDirectory, outputDirectory, archiveDirectory, true);
 
     // Then

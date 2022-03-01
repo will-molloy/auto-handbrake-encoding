@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -30,9 +32,7 @@ class App {
 
       Cli cli = new Cli();
       HandBrake handBrake = new HandBrake(cli);
-      UnencodedVideo.Factory unencodedVideoFactory =
-          new UnencodedVideo.Factory(inputDirectory, outputDirectory, archiveDirectory);
-      App app = new App(handBrake, cli, unencodedVideoFactory);
+      App app = new App(handBrake, cli);
 
       app.run(inputDirectory, outputDirectory, archiveDirectory, shutdownComputer);
     } catch (Exception e) {
@@ -44,12 +44,10 @@ class App {
 
   private final HandBrake handBrake;
   private final Cli cli;
-  private final UnencodedVideo.Factory unencodedVideoFactory;
 
-  App(HandBrake handBrake, Cli cli, UnencodedVideo.Factory unencodedVideoFactory) {
+  App(HandBrake handBrake, Cli cli) {
     this.handBrake = checkNotNull(handBrake);
     this.cli = checkNotNull(cli);
-    this.unencodedVideoFactory = checkNotNull(unencodedVideoFactory);
   }
 
   void run(
@@ -64,9 +62,10 @@ class App {
         shutdownComputer);
 
     try {
-      deleteIncompleteEncodings(inputDirectory);
-      List<UnencodedVideo> unencodedVideos = getUnencodedVideos(inputDirectory);
-      archiveVideosThatHaveAlreadyBeenEncoded(unencodedVideos);
+      deleteIncompleteEncodings(outputDirectory);
+      List<UnencodedVideo> unencodedVideos =
+          getUnencodedVideos(inputDirectory, outputDirectory, archiveDirectory);
+      unencodedVideos = archiveVideosThatHaveAlreadyBeenEncoded(unencodedVideos);
       encodeVideos(unencodedVideos);
     } finally {
       log.info("run finished - elapsed: {}", stopwatch.elapsed());
@@ -78,78 +77,75 @@ class App {
     }
   }
 
-  private void deleteIncompleteEncodings(Path inputDirectory) throws IOException {
+  private void deleteIncompleteEncodings(Path outputDirectory) throws IOException {
     List<Path> tempEncodings =
-        Files.walk(inputDirectory)
+        Files.walk(outputDirectory)
             .filter(Files::isRegularFile)
             .filter(UnencodedVideo.Factory::isTempEncodedMp4)
             .toList();
-    if (tempEncodings.isEmpty()) {
-      return;
-    }
 
-    log.warn("Detected {} incomplete encoding(s)", tempEncodings.size());
+    if (!tempEncodings.isEmpty()) {
+      log.warn("Detected {} incomplete encoding(s)", tempEncodings.size());
 
-    int i = 0;
-    for (Path path : tempEncodings) {
-      log.warn("Deleting ({}/{}): {}", ++i, tempEncodings.size(), path);
-      Files.delete(path);
+      int i = 0;
+      for (Path path : tempEncodings) {
+        log.warn("Deleting ({}/{}): {}", ++i, tempEncodings.size(), path);
+        Files.delete(path);
+      }
     }
   }
 
-  private List<UnencodedVideo> getUnencodedVideos(Path inputDirectory) throws IOException {
-    List<UnencodedVideo> unencodedVideos =
-        Files.walk(inputDirectory)
-            .filter(Files::isRegularFile)
-            .filter(UnencodedVideo.Factory::isMp4)
-            // don't include paths that represent encoded or archived videos
-            // if somebody wants to encode again, they'll need to remove the 'Archived' suffix
-            .filter(
-                path ->
-                    !UnencodedVideo.Factory.isEncodedMp4(path)
-                        && !UnencodedVideo.Factory.isArchivedMp4(path))
-            .map(unencodedVideoFactory::newUnencodedVideo)
-            .toList();
-    log.info("Detected {} unencoded videos(s)", unencodedVideos.size());
+  private List<UnencodedVideo> getUnencodedVideos(
+      Path inputDirectory, Path outputDirectory, Path archiveDirectory) throws IOException {
+    UnencodedVideo.Factory factory =
+        new UnencodedVideo.Factory(inputDirectory, outputDirectory, archiveDirectory);
+
+    return Files.walk(inputDirectory)
+        .filter(Files::isRegularFile)
+        .filter(UnencodedVideo.Factory::isMp4)
+        // don't include paths that represent encoded or archived videos
+        // if somebody wants to encode again, they'll need to remove the 'Archived' suffix
+        .filter(
+            path ->
+                !UnencodedVideo.Factory.isEncodedMp4(path)
+                    && !UnencodedVideo.Factory.isArchivedMp4(path))
+        .map(factory::newUnencodedVideo)
+        .toList();
+  }
+
+  // the corresponding encoded video(s) may already exist
+  private List<UnencodedVideo> archiveVideosThatHaveAlreadyBeenEncoded(List<UnencodedVideo> videos)
+      throws IOException {
+    Map<Boolean, List<UnencodedVideo>> partition =
+        videos.stream().collect(Collectors.partitioningBy(UnencodedVideo::hasBeenEncoded));
+    List<UnencodedVideo> encodedVideos = partition.get(true);
+    List<UnencodedVideo> unencodedVideos = partition.get(false);
+
+    if (!encodedVideos.isEmpty()) {
+      log.warn(
+          "Detected {} unencoded video(s) that have already been encoded", encodedVideos.size());
+
+      int i = 0;
+      for (UnencodedVideo video : encodedVideos) {
+        log.info("Archiving ({}/{}): {}", ++i, encodedVideos, video);
+        video.archive();
+      }
+    }
+
     return unencodedVideos;
   }
 
-  // While 'List<UnencodedVideo> videos' represents unencoded videos (NOT encoded videos) the
-  // corresponding encoded video may already exist
-  private void archiveVideosThatHaveAlreadyBeenEncoded(List<UnencodedVideo> videos)
-      throws IOException {
-    List<UnencodedVideo> alreadyEncodedVideos =
-        videos.stream().filter(UnencodedVideo::hasBeenEncoded).toList();
-    if (alreadyEncodedVideos.isEmpty()) {
-      return;
-    }
-
-    log.warn(
-        "Detected {} unencoded video(s) that have already been encoded",
-        alreadyEncodedVideos.size());
-
-    int i = 0;
-    for (UnencodedVideo video : alreadyEncodedVideos) {
-      log.info("Archiving ({}/{})", ++i, alreadyEncodedVideos.size());
-      video.archive();
-    }
-  }
-
   private void encodeVideos(List<UnencodedVideo> videos) throws IOException {
-    List<UnencodedVideo> videosToEncode =
-        videos.stream().filter(video -> !video.hasBeenEncoded()).toList();
-
-    log.info("Detected {} video(s) to encode", videosToEncode.size());
+    log.info("Detected {} video(s) to encode", videos.size());
 
     int i = 0;
-    for (UnencodedVideo video : videosToEncode) {
-      log.info("Detected ({}/{})", ++i, videosToEncode.size());
-      log.info("Detected: {}", video);
+    for (UnencodedVideo video : videos) {
+      log.info("Detected ({}/{}): {}", ++i, videos.size(), video);
     }
 
     i = 0;
-    for (UnencodedVideo video : videosToEncode) {
-      log.info("Encoding ({}/{})", ++i, videosToEncode.size());
+    for (UnencodedVideo video : videos) {
+      log.info("Encoding ({}/{}): {}", ++i, videos.size(), video);
       video.encode(handBrake);
     }
   }

@@ -1,7 +1,6 @@
 package com.wilmol.handbrake.nvidia.shadowplay;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;

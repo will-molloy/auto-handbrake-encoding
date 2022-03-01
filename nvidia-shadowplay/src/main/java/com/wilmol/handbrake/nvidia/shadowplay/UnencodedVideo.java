@@ -35,14 +35,12 @@ final class UnencodedVideo {
   }
 
   public void archive() throws IOException {
-    log.info("Archiving: {} -> {}", originalPath, archivedPath);
     Files.createDirectories(checkNotNull(archivedPath.getParent()));
     Files.move(originalPath, archivedPath);
     log.info("Archived: {} -> {}", originalPath, archivedPath);
   }
 
   public void encode(HandBrake handBrake) throws IOException {
-    log.info("Encoding: {} -> {}", originalPath, encodedPath);
     Stopwatch stopwatch = Stopwatch.createStarted();
 
     // to avoid leaving encoded files in an 'incomplete' state, encode to a temp file in case

@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.io.Resources;
@@ -87,6 +88,8 @@ class UnencodedVideoTest {
         .containsExactly(
             outputDirectory.resolve("file - CFR.mp4"),
             archiveDirectory.resolve("file - Archived.mp4"));
+    verify(mockHandBrake)
+        .encode(unencodedMp4File, outputDirectory.resolve("file - CFR (incomplete).mp4"));
   }
 
   @Test
