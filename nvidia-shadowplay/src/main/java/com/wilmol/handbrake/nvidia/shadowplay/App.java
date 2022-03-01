@@ -22,24 +22,6 @@ import org.apache.logging.log4j.Logger;
  */
 class App {
 
-  public static void main(String[] args) {
-    try {
-      checkArgument(args.length == 4, "Expected 4 args to main method");
-      Path inputDirectory = Path.of(args[0]);
-      Path outputDirectory = Path.of(args[1]);
-      Path archiveDirectory = Path.of(args[2]);
-      boolean shutdownComputer = Boolean.parseBoolean(args[2]);
-
-      Cli cli = new Cli();
-      HandBrake handBrake = new HandBrake(cli);
-      App app = new App(handBrake, cli);
-
-      app.run(inputDirectory, outputDirectory, archiveDirectory, shutdownComputer);
-    } catch (Exception e) {
-      log.fatal("Fatal error", e);
-    }
-  }
-
   private static final Logger log = LogManager.getLogger();
 
   private final HandBrake handBrake;
@@ -147,6 +129,24 @@ class App {
     for (UnencodedVideo video : videos) {
       log.info("Encoding ({}/{}): {}", ++i, videos.size(), video);
       video.encode(handBrake);
+    }
+  }
+
+  public static void main(String... args) {
+    try {
+      checkArgument(args.length == 4, "Expected 4 args to main method");
+      Path inputDirectory = Path.of(args[0]);
+      Path outputDirectory = Path.of(args[1]);
+      Path archiveDirectory = Path.of(args[2]);
+      boolean shutdownComputer = Boolean.parseBoolean(args[2]);
+
+      Cli cli = new Cli();
+      HandBrake handBrake = new HandBrake(cli);
+      App app = new App(handBrake, cli);
+
+      app.run(inputDirectory, outputDirectory, archiveDirectory, shutdownComputer);
+    } catch (Exception e) {
+      log.fatal("Fatal error", e);
     }
   }
 }

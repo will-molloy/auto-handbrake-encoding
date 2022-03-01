@@ -120,6 +120,9 @@ class UnencodedVideoTest {
         .containsExactly(
             outputDirectory.resolve("Halo/Campaign/file - CFR.mp4"),
             archiveDirectory.resolve("Halo/Campaign/file - Archived.mp4"));
+    verify(mockHandBrake)
+        .encode(
+            unencodedMp4File, outputDirectory.resolve("Halo/Campaign/file - CFR (incomplete).mp4"));
   }
 
   @Test

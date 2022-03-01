@@ -77,6 +77,31 @@ final class UnencodedVideo {
    */
   static class Factory {
 
+    private static final String MP4_SUFFIX = ".mp4";
+    private static final String ENCODED_MP4_SUFFIX = " - CFR.mp4";
+    private static final String TEMP_ENCODED_MP4_SUFFIX = " - CFR (incomplete).mp4";
+    private static final String ARCHIVED_SUFFIX = " - Archived.mp4";
+
+    public static boolean isMp4(Path path) {
+      return fileName(path).endsWith(MP4_SUFFIX);
+    }
+
+    public static boolean isEncodedMp4(Path path) {
+      return fileName(path).endsWith(ENCODED_MP4_SUFFIX);
+    }
+
+    public static boolean isTempEncodedMp4(Path path) {
+      return fileName(path).endsWith(TEMP_ENCODED_MP4_SUFFIX);
+    }
+
+    public static boolean isArchivedMp4(Path path) {
+      return fileName(path).endsWith(ARCHIVED_SUFFIX);
+    }
+
+    private static String fileName(Path path) {
+      return checkNotNull(path.getFileName()).toString();
+    }
+
     private final Path inputDirectory;
     private final Path outputDirectory;
     private final Path archiveDirectory;
@@ -98,27 +123,6 @@ final class UnencodedVideo {
       this.inputDirectory = inputDirectory;
       this.outputDirectory = outputDirectory;
       this.archiveDirectory = archiveDirectory;
-    }
-
-    private static final String MP4_SUFFIX = ".mp4";
-    private static final String ENCODED_MP4_SUFFIX = " - CFR.mp4";
-    private static final String TEMP_ENCODED_MP4_SUFFIX = " - CFR (incomplete).mp4";
-    private static final String ARCHIVED_SUFFIX = " - Archived.mp4";
-
-    public static boolean isMp4(Path path) {
-      return path.toString().endsWith(MP4_SUFFIX);
-    }
-
-    public static boolean isEncodedMp4(Path path) {
-      return path.toString().endsWith(ENCODED_MP4_SUFFIX);
-    }
-
-    public static boolean isTempEncodedMp4(Path path) {
-      return path.toString().endsWith(TEMP_ENCODED_MP4_SUFFIX);
-    }
-
-    public static boolean isArchivedMp4(Path path) {
-      return path.toString().endsWith(ARCHIVED_SUFFIX);
     }
 
     public UnencodedVideo newUnencodedVideo(Path videoPath) {
@@ -161,10 +165,6 @@ final class UnencodedVideo {
       return archiveDirectory
           .resolve(inputDirectory.relativize(videoPath))
           .resolveSibling(archivedFileName);
-    }
-
-    private String fileName(Path path) {
-      return checkNotNull(path.getFileName()).toString();
     }
   }
 }
