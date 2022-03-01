@@ -33,6 +33,9 @@ import org.mockito.stubbing.Answer;
 @ExtendWith(MockitoExtension.class)
 class AppTest {
 
+  // TODO make this a true component/integration test
+  //  - need to figure out how to run HandBrake on GitHub Actions (docker?)
+
   private Path testDirectory;
   private Path inputDirectory;
   private Path outputDirectory;

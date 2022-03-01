@@ -28,9 +28,10 @@ Automating HandBrake encoding
       - It works with any framerate
       - It creates quite a large file afterwards, but it's ideal "as an intermediate format for video editing"
       - I recommend deleting the encoded file after using it, and retaining the original archived file
-3. Archives original videos, by renaming them with the suffix ` - Archived.mp4`
+3. Archives original videos
+    - Archived files are named with the suffix ` - Archived.mp4`
     - They won't be detected by the program again, if you want to encode again, remove this suffix first
-4. (optional) Shuts computer down after encoding
+4. (optional) Shuts computer down after running (useful if for example running overnight)
 
 #### Usage:
 
@@ -42,10 +43,11 @@ Automating HandBrake encoding
 2. Configure [Gradle task](nvidia-shadowplay/build.gradle)
     - Set `inputDirectory` to directory containing `.mp4` files to encode
     - Set `outputDirectory` where you want encoded files to be saved
-      - Note files are saved here in a flat structure (input directory structure is not retained), so if file names conflict the program will abort
+    - Set `archiveDirectory` where you want archived files to be saved
+    - (These can all be the same directory, personally I record and encode to an SSD, then archive to NAS)
 
 
-3. Run main [App class](nvidia-shadowplay/src/main/java/com/wilmol/handbrake/nvidia/shadowplay/App.java) via Gradle:
+3. Run via Gradle:
    ```bash
    ./gradlew :nvidia-shadowplay:run
    ```
