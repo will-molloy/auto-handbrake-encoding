@@ -47,6 +47,19 @@ class App {
         shutdownComputer);
 
     try {
+      checkArgument(
+          Files.isDirectory(inputDirectory),
+          "inputDirectory (%s) is not a directory",
+          inputDirectory);
+      checkArgument(
+          Files.isDirectory(outputDirectory),
+          "outputDirectory (%s) is not a directory",
+          outputDirectory);
+      checkArgument(
+          Files.isDirectory(archiveDirectory),
+          "archiveDirectory (%s) is not a directory",
+          archiveDirectory);
+
       deleteIncompleteEncodings(outputDirectory);
       List<UnencodedVideo> unencodedVideos =
           getUnencodedVideos(inputDirectory, outputDirectory, archiveDirectory);
@@ -146,7 +159,7 @@ class App {
       Path inputDirectory = Path.of(args[0]);
       Path outputDirectory = Path.of(args[1]);
       Path archiveDirectory = Path.of(args[2]);
-      boolean shutdownComputer = Boolean.parseBoolean(args[2]);
+      boolean shutdownComputer = Boolean.parseBoolean(args[3]);
 
       Cli cli = new Cli();
       HandBrake handBrake = new HandBrake(cli);
