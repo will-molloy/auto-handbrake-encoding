@@ -43,6 +43,8 @@ final class UnencodedVideo {
   public void encode(HandBrake handBrake) throws IOException {
     Stopwatch stopwatch = Stopwatch.createStarted();
 
+    Files.createDirectories(checkNotNull(encodedPath.getParent()));
+
     // to avoid leaving encoded files in an 'incomplete' state, encode to a temp file in case
     // something goes wrong
     boolean encodeSuccessful = handBrake.encode(originalPath, tempEncodedPath);

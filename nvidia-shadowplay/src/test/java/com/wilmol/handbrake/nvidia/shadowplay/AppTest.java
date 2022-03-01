@@ -1,6 +1,5 @@
 package com.wilmol.handbrake.nvidia.shadowplay;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.truth.Truth8.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -77,7 +76,6 @@ class AppTest {
                   // bit of an ugly hack...
                   // need to create the temp encoded file as its expected as output from HandBrake
                   Path handBrakeOutput = invocation.getArgument(1);
-                  Files.createDirectories(checkNotNull(handBrakeOutput.getParent()));
                   Files.createFile(handBrakeOutput);
                   return true;
                 });

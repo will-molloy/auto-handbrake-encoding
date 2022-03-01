@@ -47,19 +47,6 @@ class App {
         shutdownComputer);
 
     try {
-      checkArgument(
-          Files.isDirectory(inputDirectory),
-          "inputDirectory (%s) is not a directory",
-          inputDirectory);
-      checkArgument(
-          Files.isDirectory(outputDirectory),
-          "outputDirectory (%s) is not a directory",
-          outputDirectory);
-      checkArgument(
-          Files.isDirectory(archiveDirectory),
-          "archiveDirectory (%s) is not a directory",
-          archiveDirectory);
-
       deleteIncompleteEncodings(outputDirectory);
       List<UnencodedVideo> unencodedVideos =
           getUnencodedVideos(inputDirectory, outputDirectory, archiveDirectory);
@@ -144,7 +131,7 @@ class App {
     videos.parallelStream()
         .forEach(
             video -> {
-              log.info("Encoding ({}/{}): {}", atomicInt.getAndIncrement(), videos.size(), video);
+              log.info("Encoding ({}/{}): {}", atomicInt.incrementAndGet(), videos.size(), video);
               try {
                 video.encode(handBrake);
               } catch (IOException e) {

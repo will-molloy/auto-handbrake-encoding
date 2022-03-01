@@ -1,6 +1,5 @@
 package com.wilmol.handbrake.nvidia.shadowplay;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -61,6 +60,8 @@ class UnencodedVideoTest {
     FileUtils.deleteDirectory(testDirectory.toFile());
   }
 
+  // TODO all this stuff is tested in AppTest...
+
   @Test
   void encode_createsEncodedFileAndArchivesOriginal() throws IOException {
     // Given
@@ -71,7 +72,6 @@ class UnencodedVideoTest {
                   // bit of an ugly hack...
                   // need to create the temp encoded file as its expected as output from HandBrake
                   Path handBrakeOutput = invocation.getArgument(1);
-                  Files.createDirectories(checkNotNull(handBrakeOutput.getParent()));
                   Files.createFile(handBrakeOutput);
                   return true;
                 });
@@ -84,12 +84,12 @@ class UnencodedVideoTest {
     unencodedVideo.encode(mockHandBrake);
 
     // Then
+    verify(mockHandBrake)
+        .encode(unencodedMp4File, outputDirectory.resolve("file - CFR (incomplete).mp4"));
     assertThatTestDirectory()
         .containsExactly(
             outputDirectory.resolve("file - CFR.mp4"),
             archiveDirectory.resolve("file - Archived.mp4"));
-    verify(mockHandBrake)
-        .encode(unencodedMp4File, outputDirectory.resolve("file - CFR (incomplete).mp4"));
   }
 
   @Test
@@ -102,7 +102,6 @@ class UnencodedVideoTest {
                   // bit of an ugly hack...
                   // need to create the temp encoded file as its expected as output from HandBrake
                   Path handBrakeOutput = invocation.getArgument(1);
-                  Files.createDirectories(checkNotNull(handBrakeOutput.getParent()));
                   Files.createFile(handBrakeOutput);
                   return true;
                 });
@@ -116,13 +115,13 @@ class UnencodedVideoTest {
     unencodedVideo.encode(mockHandBrake);
 
     // Then
+    verify(mockHandBrake)
+        .encode(
+            unencodedMp4File, outputDirectory.resolve("Halo/Campaign/file - CFR (incomplete).mp4"));
     assertThatTestDirectory()
         .containsExactly(
             outputDirectory.resolve("Halo/Campaign/file - CFR.mp4"),
             archiveDirectory.resolve("Halo/Campaign/file - Archived.mp4"));
-    verify(mockHandBrake)
-        .encode(
-            unencodedMp4File, outputDirectory.resolve("Halo/Campaign/file - CFR (incomplete).mp4"));
   }
 
   @Test
