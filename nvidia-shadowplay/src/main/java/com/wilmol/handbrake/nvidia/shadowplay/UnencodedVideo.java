@@ -6,6 +6,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.base.Stopwatch;
 import com.wilmol.handbrake.core.HandBrake;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.apache.logging.log4j.LogManager;
@@ -35,12 +36,15 @@ final class UnencodedVideo {
   }
 
   public void archive() throws IOException {
+    log.info("Archiving: {} -> {}", originalPath, archivedPath);
     Files.createDirectories(checkNotNull(archivedPath.getParent()));
     Files.move(originalPath, archivedPath);
     log.info("Archived: {} -> {}", originalPath, archivedPath);
   }
 
   public void encode(HandBrake handBrake) throws IOException {
+    log.info("Encoding: {} -> {}", originalPath, encodedPath);
+
     Stopwatch stopwatch = Stopwatch.createStarted();
 
     Files.createDirectories(checkNotNull(encodedPath.getParent()));
@@ -55,7 +59,15 @@ final class UnencodedVideo {
       Files.move(tempEncodedPath, encodedPath);
       log.info("Encoded: {} -> {}", originalPath, encodedPath);
 
-      archive();
+      new Thread(
+              () -> {
+                try {
+                  archive();
+                } catch (IOException e) {
+                  throw new UncheckedIOException(e);
+                }
+              })
+          .start();
     } else {
       log.error("Failed to encode: {}", originalPath);
     }
