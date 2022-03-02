@@ -2,6 +2,7 @@ package com.wilmol.handbrake.core;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -48,13 +49,14 @@ class HandBrakeTest {
   }
 
   @Test
-  void outputAlreadyExistsReturnsTrue() throws IOException {
+  void outputAlreadyExistsReturnsEarly() throws IOException {
     Path input = Path.of("input.mp4");
     Path output = Path.of("output.mp4");
 
     try {
       Files.createFile(output);
       assertThat(handBrake.encode(input, output)).isTrue();
+      verify(mockCli, never()).execute(anyList());
     } finally {
       Files.delete(output);
     }

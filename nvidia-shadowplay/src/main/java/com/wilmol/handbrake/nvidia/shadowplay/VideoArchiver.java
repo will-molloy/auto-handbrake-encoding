@@ -23,10 +23,19 @@ public class VideoArchiver {
    * @param video video to archive
    */
   public CompletableFuture<Void> archiveAsync(UnencodedVideo video) {
+    // run archiving async as it can be expensive (e.g. moving to another disk or NAS)
+    // then while it archives it can encode the next video
     return CompletableFuture.runAsync(
         () -> {
           try {
             log.info("Archiving: {} -> {}", video.originalPath(), video.archivedPath());
+
+            if (Files.exists(video.archivedPath())) {
+              log.warn("Archive file ({}) already exists", video.archivedPath());
+              // delete the archived file and try again
+              // most likely it crashed and never fully moved the file
+              Files.delete(video.archivedPath());
+            }
 
             Files.createDirectories(checkNotNull(video.archivedPath().getParent()));
 
@@ -34,7 +43,7 @@ public class VideoArchiver {
 
             log.info("Archived: {} -> {}", video.originalPath(), video.archivedPath());
           } catch (IOException e) {
-            log.error("Error archiving: {}", video.originalPath());
+            log.error("Error archiving: %s".formatted(video), e);
           }
         });
   }

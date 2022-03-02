@@ -49,11 +49,17 @@ class App {
         shutdownComputer);
 
     try {
+      List<CompletableFuture<?>> futures = new ArrayList<>();
+
       deleteIncompleteEncodings(outputDirectory);
       List<UnencodedVideo> unencodedVideos =
           getUnencodedVideos(inputDirectory, outputDirectory, archiveDirectory);
-      unencodedVideos = archiveVideosThatHaveAlreadyBeenEncoded(unencodedVideos);
-      encodeVideos(unencodedVideos);
+      unencodedVideos = archiveVideosThatHaveAlreadyBeenEncoded(unencodedVideos, futures);
+      encodeVideos(unencodedVideos, futures);
+
+      for (CompletableFuture<?> future : futures) {
+        future.join();
+      }
     } finally {
       log.info("run finished - elapsed: {}", stopwatch.elapsed());
 
@@ -101,7 +107,7 @@ class App {
 
   // the corresponding encoded video(s) may already exist
   private List<UnencodedVideo> archiveVideosThatHaveAlreadyBeenEncoded(
-      List<UnencodedVideo> videos) {
+      List<UnencodedVideo> videos, List<CompletableFuture<?>> futures) {
     Map<Boolean, List<UnencodedVideo>> partition =
         videos.stream().collect(Collectors.partitioningBy(UnencodedVideo::hasBeenEncoded));
     List<UnencodedVideo> encodedVideos = partition.get(true);
@@ -111,13 +117,15 @@ class App {
       log.warn(
           "Detected {} unencoded video(s) that have already been encoded", encodedVideos.size());
 
-      encodedVideos.stream().map(videoArchiver::archiveAsync).forEach(CompletableFuture::join);
+      for (UnencodedVideo video : encodedVideos) {
+        futures.add(videoArchiver.archiveAsync(video));
+      }
     }
 
     return unencodedVideos;
   }
 
-  private void encodeVideos(List<UnencodedVideo> videos) {
+  private void encodeVideos(List<UnencodedVideo> videos, List<CompletableFuture<?>> futures) {
     log.info("Detected {} video(s) to encode", videos.size());
 
     int i = 0;
@@ -126,16 +134,11 @@ class App {
     }
 
     i = 0;
-    List<CompletableFuture<?>> futures = new ArrayList<>();
     for (UnencodedVideo video : videos) {
       log.info("Encoding ({}/{}): {}", ++i, videos.size(), video);
       if (videoEncoder.encode(video)) {
         futures.add(videoArchiver.archiveAsync(video));
       }
-    }
-
-    for (CompletableFuture<?> future : futures) {
-      future.join();
     }
   }
 

@@ -33,6 +33,11 @@ public class VideoEncoder {
     try {
       log.info("Encoding: {} -> {}", video.originalPath(), video.encodedPath());
 
+      if (Files.exists(video.encodedPath())) {
+        log.warn("Encoded file ({}) already exists", video.encodedPath());
+        return true;
+      }
+
       Files.createDirectories(checkNotNull(video.encodedPath().getParent()));
 
       // to avoid leaving encoded files in an 'incomplete' state, encode to a temp file in case
@@ -44,11 +49,11 @@ public class VideoEncoder {
         log.info("Encoded: {} -> {}", video.originalPath(), video.encodedPath());
         return true;
       } else {
-        log.error("Error encoding: {}", video.originalPath());
+        log.error("Error encoding: {}", video);
         return false;
       }
     } catch (IOException e) {
-      log.error("Error encoding: {}", video.originalPath());
+      log.error("Error encoding: %s".formatted(video), e);
       return false;
     }
   }

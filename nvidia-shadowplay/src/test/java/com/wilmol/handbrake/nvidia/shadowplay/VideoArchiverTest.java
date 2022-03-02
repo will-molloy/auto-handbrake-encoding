@@ -80,6 +80,22 @@ class VideoArchiverTest {
         .containsExactly(archiveDirectory.resolve("Halo/Campaign/file - Archived.mp4"));
   }
 
+  @Test
+  void archiveFileAlreadyExistsExecutesGracefully() throws IOException {
+    // Given
+    Files.copy(testVideo, archiveDirectory.resolve("file - Archived.mp4"));
+
+    Path unencodedMp4File = Files.copy(testVideo, inputDirectory.resolve("file.mp4"));
+
+    UnencodedVideo unencodedVideo = unencodedVideoFactory.newUnencodedVideo(unencodedMp4File);
+
+    // When
+    videoArchiver.archiveAsync(unencodedVideo).join();
+
+    // Then
+    assertThatTestDirectory().containsExactly(archiveDirectory.resolve("file - Archived.mp4"));
+  }
+
   private StreamSubject assertThatTestDirectory() throws IOException {
     return assertThat(Files.walk(testDirectory).filter(Files::isRegularFile));
   }

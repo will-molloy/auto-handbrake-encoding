@@ -2,6 +2,7 @@ package com.wilmol.handbrake.nvidia.shadowplay;
 
 import static com.google.common.truth.Truth8.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -136,6 +137,25 @@ class VideoEncoderTest {
 
     // Then
     assertThatTestDirectory().containsExactly(unencodedMp4File);
+  }
+
+  @Test
+  void encodedFileAlreadyExistsReturnsEarly() throws IOException {
+    // Given
+    Files.copy(testVideo, outputDirectory.resolve("file - CFR.mp4"));
+
+    Path unencodedMp4File = Files.copy(testVideo, inputDirectory.resolve("file.mp4"));
+
+    UnencodedVideo unencodedVideo = unencodedVideoFactory.newUnencodedVideo(unencodedMp4File);
+
+    // When
+    videoEncoder.encode(unencodedVideo);
+
+    // Then
+    verify(mockHandBrake, never()).encode(any(), any());
+    assertThatTestDirectory()
+        .containsExactly(
+            inputDirectory.resolve("file.mp4"), outputDirectory.resolve("file - CFR.mp4"));
   }
 
   private StreamSubject assertThatTestDirectory() throws IOException {
