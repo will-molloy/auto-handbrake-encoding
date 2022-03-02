@@ -2,13 +2,14 @@ package com.wilmol.handbrake.nvidia.shadowplay;
 
 import static com.google.common.truth.Truth8.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.io.Resources;
 import com.google.common.truth.StreamSubject;
 import com.wilmol.handbrake.core.Computer;
-import com.wilmol.handbrake.core.HandBrake;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -21,7 +22,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.stubbing.Answer;
 
 /**
  * AppTest.
@@ -41,10 +41,9 @@ class AppTest {
   private Path archiveDirectory;
   private Path testVideo;
 
-  @Mock private HandBrake mockHandBrake;
-
+  @Mock private VideoEncoder mockVideoEncoder;
+  @Mock private VideoArchiver mockVideoArchiver;
   @Mock private Computer mockComputer;
-
   @InjectMocks private App app;
 
   @BeforeEach
@@ -69,16 +68,7 @@ class AppTest {
   @Test
   void encodesVideoFilesAndArchivesOriginals() throws Exception {
     // Given
-    when(mockHandBrake.encode(any(), any()))
-        .then(
-            (Answer<Boolean>)
-                invocation -> {
-                  // bit of an ugly hack...
-                  // need to create the temp encoded file as its expected as output from HandBrake
-                  Path handBrakeOutput = invocation.getArgument(1);
-                  Files.createFile(handBrakeOutput);
-                  return true;
-                });
+    when(mockVideoEncoder.encode(any())).thenReturn(true);
 
     Files.createDirectories(inputDirectory.resolve("NestedFolder"));
     Files.copy(testVideo, inputDirectory.resolve("video1.mp4"));
@@ -89,14 +79,32 @@ class AppTest {
     app.run(inputDirectory, outputDirectory, archiveDirectory, false);
 
     // Then
-    assertThatTestDirectory()
-        .containsExactly(
-            archiveDirectory.resolve("video1 - Archived.mp4"),
-            archiveDirectory.resolve("video2 - Archived.mp4"),
-            archiveDirectory.resolve("NestedFolder/video3 - Archived.mp4"),
-            outputDirectory.resolve("video1 - CFR.mp4"),
-            outputDirectory.resolve("video2 - CFR.mp4"),
-            outputDirectory.resolve("NestedFolder/video3 - CFR.mp4"));
+    verify(mockVideoEncoder)
+        .encode(
+            argThat(video -> video.originalPath().equals(inputDirectory.resolve("video1.mp4"))));
+    verify(mockVideoEncoder)
+        .encode(
+            argThat(video -> video.originalPath().equals(inputDirectory.resolve("video2.mp4"))));
+    verify(mockVideoEncoder)
+        .encode(
+            argThat(
+                video ->
+                    video
+                        .originalPath()
+                        .equals(inputDirectory.resolve("NestedFolder/video3.mp4"))));
+    verify(mockVideoArchiver)
+        .archive(
+            argThat(video -> video.originalPath().equals(inputDirectory.resolve("video1.mp4"))));
+    verify(mockVideoArchiver)
+        .archive(
+            argThat(video -> video.originalPath().equals(inputDirectory.resolve("video2.mp4"))));
+    verify(mockVideoArchiver)
+        .archive(
+            argThat(
+                video ->
+                    video
+                        .originalPath()
+                        .equals(inputDirectory.resolve("NestedFolder/video3.mp4"))));
   }
 
   @Test
@@ -114,18 +122,32 @@ class AppTest {
     app.run(inputDirectory, outputDirectory, archiveDirectory, false);
 
     // Then
-    assertThatTestDirectory()
-        .containsExactly(
-            archiveDirectory.resolve("video1 - Archived.mp4"),
-            archiveDirectory.resolve("NestedFolder/video2 - Archived.mp4"),
-            outputDirectory.resolve("video1 - CFR.mp4"),
-            outputDirectory.resolve("NestedFolder/video2 - CFR.mp4"));
+    verify(mockVideoEncoder, never())
+        .encode(
+            argThat(video -> video.originalPath().equals(inputDirectory.resolve("video1.mp4"))));
+    verify(mockVideoEncoder, never())
+        .encode(
+            argThat(
+                video ->
+                    video
+                        .originalPath()
+                        .equals(inputDirectory.resolve("NestedFolder/video2.mp4"))));
+    verify(mockVideoArchiver)
+        .archive(
+            argThat(video -> video.originalPath().equals(inputDirectory.resolve("video1.mp4"))));
+    verify(mockVideoArchiver)
+        .archive(
+            argThat(
+                video ->
+                    video
+                        .originalPath()
+                        .equals(inputDirectory.resolve("NestedFolder/video2.mp4"))));
   }
 
   @Test
   void retainsOriginalIfEncodingFails() throws Exception {
     // Given
-    when(mockHandBrake.encode(any(), any())).thenReturn(false);
+    when(mockVideoEncoder.encode(any())).thenReturn(false);
 
     Files.copy(testVideo, inputDirectory.resolve("video1.mp4"));
 
@@ -133,7 +155,12 @@ class AppTest {
     app.run(inputDirectory, outputDirectory, archiveDirectory, false);
 
     // Then
-    assertThatTestDirectory().containsExactly(inputDirectory.resolve("video1.mp4"));
+    verify(mockVideoEncoder)
+        .encode(
+            argThat(video -> video.originalPath().equals(inputDirectory.resolve("video1.mp4"))));
+    verify(mockVideoArchiver, never())
+        .archive(
+            argThat(video -> video.originalPath().equals(inputDirectory.resolve("video1.mp4"))));
   }
 
   @Test

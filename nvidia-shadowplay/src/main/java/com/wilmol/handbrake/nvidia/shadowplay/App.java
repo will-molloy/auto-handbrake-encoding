@@ -10,6 +10,7 @@ import com.wilmol.handbrake.core.HandBrake;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -25,11 +26,13 @@ class App {
 
   private static final Logger log = LogManager.getLogger();
 
-  private final HandBrake handBrake;
+  private final VideoEncoder videoEncoder;
+  private final VideoArchiver videoArchiver;
   private final Computer computer;
 
-  App(HandBrake handBrake, Computer computer) {
-    this.handBrake = checkNotNull(handBrake);
+  App(VideoEncoder videoEncoder, VideoArchiver videoArchiver, Computer computer) {
+    this.videoEncoder = checkNotNull(videoEncoder);
+    this.videoArchiver = checkNotNull(videoArchiver);
     this.computer = checkNotNull(computer);
   }
 
@@ -96,8 +99,8 @@ class App {
   }
 
   // the corresponding encoded video(s) may already exist
-  private List<UnencodedVideo> archiveVideosThatHaveAlreadyBeenEncoded(List<UnencodedVideo> videos)
-      throws IOException {
+  private List<UnencodedVideo> archiveVideosThatHaveAlreadyBeenEncoded(
+      List<UnencodedVideo> videos) {
     Map<Boolean, List<UnencodedVideo>> partition =
         videos.stream().collect(Collectors.partitioningBy(UnencodedVideo::hasBeenEncoded));
     List<UnencodedVideo> encodedVideos = partition.get(true);
@@ -109,15 +112,15 @@ class App {
 
       int i = 0;
       for (UnencodedVideo video : encodedVideos) {
-        log.info("Archiving ({}/{}): {}", ++i, encodedVideos, video);
-        video.archive();
+        log.info("Archiving ({}/{}): {}", ++i, encodedVideos.size(), video);
+        videoArchiver.archive(video);
       }
     }
 
     return unencodedVideos;
   }
 
-  private void encodeVideos(List<UnencodedVideo> videos) throws IOException {
+  private void encodeVideos(List<UnencodedVideo> videos) throws InterruptedException {
     log.info("Detected {} video(s) to encode", videos.size());
 
     int i = 0;
@@ -126,9 +129,20 @@ class App {
     }
 
     i = 0;
+    ArrayList<Thread> threads = new ArrayList<>();
     for (UnencodedVideo video : videos) {
       log.info("Encoding ({}/{}): {}", ++i, videos.size(), video);
-      video.encode(handBrake);
+      if (videoEncoder.encode(video)) {
+        // archive on another thread so the encoding can begin on the next file
+        // adds considerable speed up when archiving to another disk or NAS
+        Thread thread = new Thread(() -> videoArchiver.archive(video));
+        thread.start();
+        threads.add(thread);
+      }
+    }
+
+    for (Thread thread : threads) {
+      thread.join();
     }
   }
 
@@ -142,8 +156,10 @@ class App {
 
       Cli cli = new Cli();
       HandBrake handBrake = new HandBrake(cli);
+      VideoEncoder videoEncoder = new VideoEncoder(handBrake);
+      VideoArchiver videoArchiver = new VideoArchiver();
       Computer computer = new Computer(cli);
-      App app = new App(handBrake, computer);
+      App app = new App(videoEncoder, videoArchiver, computer);
 
       app.run(inputDirectory, outputDirectory, archiveDirectory, shutdownComputer);
     } catch (Exception e) {

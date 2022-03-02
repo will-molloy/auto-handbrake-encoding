@@ -3,14 +3,8 @@ package com.wilmol.handbrake.nvidia.shadowplay;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Stopwatch;
-import com.wilmol.handbrake.core.HandBrake;
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * Represents an unencoded, unarchived video (.mp4 file).
@@ -19,8 +13,6 @@ import org.apache.logging.log4j.Logger;
  * @author <a href=https://wilmol.com>Will Molloy</a>
  */
 final class UnencodedVideo {
-
-  private static final Logger log = LogManager.getLogger();
 
   private final Path originalPath;
   private final Path encodedPath;
@@ -35,46 +27,6 @@ final class UnencodedVideo {
     this.archivedPath = archivedPath;
   }
 
-  public void archive() throws IOException {
-    log.info("Archiving: {} -> {}", originalPath, archivedPath);
-    Files.createDirectories(checkNotNull(archivedPath.getParent()));
-    Files.move(originalPath, archivedPath);
-    log.info("Archived: {} -> {}", originalPath, archivedPath);
-  }
-
-  public void encode(HandBrake handBrake) throws IOException {
-    log.info("Encoding: {} -> {}", originalPath, encodedPath);
-
-    Stopwatch stopwatch = Stopwatch.createStarted();
-
-    Files.createDirectories(checkNotNull(encodedPath.getParent()));
-
-    // to avoid leaving encoded files in an 'incomplete' state, encode to a temp file in case
-    // something goes wrong
-    boolean encodeSuccessful = handBrake.encode(originalPath, tempEncodedPath);
-
-    if (encodeSuccessful) {
-      // only archive the original after renaming the temp file, then it'll never reach a state
-      // where the encoding is incomplete and the original doesn't exist
-      Files.move(tempEncodedPath, encodedPath);
-      log.info("Encoded: {} -> {}", originalPath, encodedPath);
-
-      new Thread(
-              () -> {
-                try {
-                  archive();
-                } catch (IOException e) {
-                  throw new UncheckedIOException(e);
-                }
-              })
-          .start();
-    } else {
-      log.error("Failed to encode: {}", originalPath);
-    }
-
-    log.info("Elapsed: {}", stopwatch.elapsed());
-  }
-
   public boolean hasBeenEncoded() {
     return Files.exists(encodedPath);
   }
@@ -82,6 +34,22 @@ final class UnencodedVideo {
   @Override
   public String toString() {
     return originalPath.toString();
+  }
+
+  public Path originalPath() {
+    return originalPath;
+  }
+
+  public Path encodedPath() {
+    return encodedPath;
+  }
+
+  public Path tempEncodedPath() {
+    return tempEncodedPath;
+  }
+
+  public Path archivedPath() {
+    return archivedPath;
   }
 
   /**
