@@ -12,9 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -51,12 +49,7 @@ class App {
     try {
       deleteIncompleteEncodings(outputDirectory);
       deleteIncompleteArchives(archiveDirectory);
-
-      List<UnencodedVideo> videos =
-          getUnencodedVideos(inputDirectory, outputDirectory, archiveDirectory);
-      videos = archiveVideosThatHaveAlreadyBeenEncoded(videos);
-
-      encodeVideos(videos);
+      encodeVideos(getUnencodedVideos(inputDirectory, outputDirectory, archiveDirectory));
     } finally {
       log.info("run finished - elapsed: {}", stopwatch.elapsed());
 
@@ -72,7 +65,6 @@ class App {
             .filter(Files::isRegularFile)
             .filter(UnencodedVideo::isTempEncodedMp4)
             .toList();
-
     if (!tempEncodings.isEmpty()) {
       log.warn("Detected {} incomplete encoding(s)", tempEncodings.size());
       delete(tempEncodings);
@@ -85,7 +77,6 @@ class App {
             .filter(Files::isRegularFile)
             .filter(UnencodedVideo::isTempArchivedMp4)
             .toList();
-
     if (!tempArchives.isEmpty()) {
       log.warn("Detected {} incomplete archive(s)", tempArchives.size());
       delete(tempArchives);
@@ -104,7 +95,6 @@ class App {
       Path inputDirectory, Path outputDirectory, Path archiveDirectory) throws IOException {
     UnencodedVideo.Factory factory =
         new UnencodedVideo.Factory(inputDirectory, outputDirectory, archiveDirectory);
-
     return Files.walk(inputDirectory)
         .filter(Files::isRegularFile)
         .filter(UnencodedVideo::isMp4)
@@ -113,28 +103,6 @@ class App {
         .filter(path -> !UnencodedVideo.isEncodedMp4(path) && !UnencodedVideo.isArchivedMp4(path))
         .map(factory::newUnencodedVideo)
         .toList();
-  }
-
-  // the corresponding encoded video(s) may already exist
-  private List<UnencodedVideo> archiveVideosThatHaveAlreadyBeenEncoded(
-      List<UnencodedVideo> videos) {
-    Map<Boolean, List<UnencodedVideo>> partition =
-        videos.stream().collect(Collectors.partitioningBy(UnencodedVideo::hasBeenEncoded));
-    List<UnencodedVideo> encodedVideos = partition.get(true);
-    List<UnencodedVideo> unencodedVideos = partition.get(false);
-
-    if (!encodedVideos.isEmpty()) {
-      log.warn(
-          "Detected {} unencoded video(s) that have already been encoded", encodedVideos.size());
-
-      int i = 0;
-      for (UnencodedVideo video : encodedVideos) {
-        log.warn("Archiving ({}/{}): {}", ++i, encodedVideos.size(), video);
-        videoArchiver.archiveAsync(video).join();
-      }
-    }
-
-    return unencodedVideos;
   }
 
   private void encodeVideos(List<UnencodedVideo> videos) {

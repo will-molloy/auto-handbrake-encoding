@@ -49,7 +49,7 @@ class AppTest {
 
   @BeforeEach
   void setUp() throws Exception {
-    testDirectory = Path.of(AppTest.class.getSimpleName());
+    testDirectory = Path.of(this.getClass().getSimpleName());
     inputDirectory = testDirectory.resolve("input");
     outputDirectory = testDirectory.resolve("output");
     archiveDirectory = testDirectory.resolve("archive");
@@ -107,45 +107,6 @@ class AppTest {
                     video
                         .originalPath()
                         .equals(inputDirectory.resolve("NestedFolder/video3.mp4"))));
-  }
-
-  @Test
-  void archivesAlreadyEncodedVideos() throws Exception {
-    // Given
-    when(mockVideoArchiver.archiveAsync(any())).thenReturn(CompletableFuture.completedFuture(null));
-
-    Files.createDirectories(inputDirectory.resolve("NestedFolder"));
-    Files.copy(testVideo, inputDirectory.resolve("video1.mp4"));
-    Files.copy(testVideo, inputDirectory.resolve("NestedFolder/video2.mp4"));
-
-    Files.createDirectories(outputDirectory.resolve("NestedFolder"));
-    Files.copy(testVideo, outputDirectory.resolve("video1 - CFR.mp4"));
-    Files.copy(testVideo, outputDirectory.resolve("NestedFolder/video2 - CFR.mp4"));
-
-    // When
-    app.run(inputDirectory, outputDirectory, archiveDirectory, false);
-
-    // Then
-    verify(mockVideoEncoder, never())
-        .encode(
-            argThat(video -> video.originalPath().equals(inputDirectory.resolve("video1.mp4"))));
-    verify(mockVideoEncoder, never())
-        .encode(
-            argThat(
-                video ->
-                    video
-                        .originalPath()
-                        .equals(inputDirectory.resolve("NestedFolder/video2.mp4"))));
-    verify(mockVideoArchiver)
-        .archiveAsync(
-            argThat(video -> video.originalPath().equals(inputDirectory.resolve("video1.mp4"))));
-    verify(mockVideoArchiver)
-        .archiveAsync(
-            argThat(
-                video ->
-                    video
-                        .originalPath()
-                        .equals(inputDirectory.resolve("NestedFolder/video2.mp4"))));
   }
 
   @Test

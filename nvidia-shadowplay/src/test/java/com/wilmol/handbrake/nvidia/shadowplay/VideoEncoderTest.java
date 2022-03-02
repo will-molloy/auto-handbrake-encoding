@@ -42,7 +42,7 @@ class VideoEncoderTest {
 
   @BeforeEach
   void setUp() throws Exception {
-    testDirectory = Path.of(UnencodedVideoTest.class.getSimpleName());
+    testDirectory = Path.of(this.getClass().getSimpleName());
     inputDirectory = testDirectory.resolve("input/Videos/Gameplay");
     outputDirectory = testDirectory.resolve("output/Videos/Encoded Gameplay");
     Path archiveDirectory = testDirectory.resolve("archive/Videos/Gameplay");

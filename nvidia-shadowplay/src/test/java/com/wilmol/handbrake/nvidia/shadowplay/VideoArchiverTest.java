@@ -30,7 +30,7 @@ class VideoArchiverTest {
 
   @BeforeEach
   void setUp() throws Exception {
-    testDirectory = Path.of(VideoArchiverTest.class.getSimpleName());
+    testDirectory = Path.of(this.getClass().getSimpleName());
     inputDirectory = testDirectory.resolve("input/Videos/Gameplay");
     Path outputDirectory = testDirectory.resolve("output/Videos/Encoded Gameplay");
     archiveDirectory = testDirectory.resolve("archive/Videos/Gameplay");
@@ -81,7 +81,7 @@ class VideoArchiverTest {
   }
 
   @Test
-  void archiveFileAlreadyExistsExecutesGracefully() throws IOException {
+  void archiveFileAlreadyExistsReturnsGracefully() throws IOException {
     // Given
     Files.copy(testVideo, archiveDirectory.resolve("file - Archived.mp4"));
 

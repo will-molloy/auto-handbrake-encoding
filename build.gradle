@@ -76,8 +76,6 @@ subprojects {
 
   // Tests
   tasks.withType(Test) {
-    // run tests in parallel, assumes they're threadsafe
-    maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
     // use JUnit 5 engine
     useJUnitPlatform()
     testLogging {
