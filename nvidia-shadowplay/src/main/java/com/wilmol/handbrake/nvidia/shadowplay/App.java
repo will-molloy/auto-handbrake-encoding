@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -110,17 +111,13 @@ class App {
       log.warn(
           "Detected {} unencoded video(s) that have already been encoded", encodedVideos.size());
 
-      int i = 0;
-      for (UnencodedVideo video : encodedVideos) {
-        log.info("Archiving ({}/{}): {}", ++i, encodedVideos.size(), video);
-        videoArchiver.archive(video);
-      }
+      encodedVideos.stream().map(videoArchiver::archiveAsync).forEach(CompletableFuture::join);
     }
 
     return unencodedVideos;
   }
 
-  private void encodeVideos(List<UnencodedVideo> videos) throws InterruptedException {
+  private void encodeVideos(List<UnencodedVideo> videos) {
     log.info("Detected {} video(s) to encode", videos.size());
 
     int i = 0;
@@ -129,20 +126,16 @@ class App {
     }
 
     i = 0;
-    ArrayList<Thread> threads = new ArrayList<>();
+    List<CompletableFuture<?>> futures = new ArrayList<>();
     for (UnencodedVideo video : videos) {
       log.info("Encoding ({}/{}): {}", ++i, videos.size(), video);
       if (videoEncoder.encode(video)) {
-        // archive on another thread so the encoding can begin on the next file
-        // adds considerable speed up when archiving to another disk or NAS
-        Thread thread = new Thread(() -> videoArchiver.archive(video));
-        thread.start();
-        threads.add(thread);
+        futures.add(videoArchiver.archiveAsync(video));
       }
     }
 
-    for (Thread thread : threads) {
-      thread.join();
+    for (CompletableFuture<?> future : futures) {
+      future.join();
     }
   }
 

@@ -57,7 +57,7 @@ class VideoArchiverTest {
     UnencodedVideo unencodedVideo = unencodedVideoFactory.newUnencodedVideo(unencodedMp4File);
 
     // When
-    videoArchiver.archive(unencodedVideo);
+    videoArchiver.archiveAsync(unencodedVideo).join();
 
     // Then
     assertThatTestDirectory().containsExactly(archiveDirectory.resolve("file - Archived.mp4"));
@@ -73,7 +73,7 @@ class VideoArchiverTest {
     UnencodedVideo unencodedVideo = unencodedVideoFactory.newUnencodedVideo(unencodedMp4File);
 
     // When
-    videoArchiver.archive(unencodedVideo);
+    videoArchiver.archiveAsync(unencodedVideo).join();
 
     // Then
     assertThatTestDirectory()
