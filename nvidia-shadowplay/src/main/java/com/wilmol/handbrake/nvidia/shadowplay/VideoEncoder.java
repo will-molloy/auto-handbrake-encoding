@@ -32,7 +32,7 @@ public class VideoEncoder {
     try {
       log.info("Encoding: {} -> {}", video.originalPath(), video.encodedPath());
 
-      if (Files.exists(video.encodedPath())) {
+      if (video.hasBeenEncoded()) {
         log.warn("Encoded file ({}) already exists", video.encodedPath());
         return true;
       }

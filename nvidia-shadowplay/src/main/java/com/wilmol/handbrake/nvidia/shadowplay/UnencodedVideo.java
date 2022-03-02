@@ -33,10 +33,6 @@ final class UnencodedVideo {
     this.tempArchivedPath = tempArchivedPath;
   }
 
-  public boolean hasBeenEncoded() {
-    return Files.exists(encodedPath);
-  }
-
   @Override
   public String toString() {
     return originalPath.toString();
@@ -62,38 +58,46 @@ final class UnencodedVideo {
     return tempArchivedPath;
   }
 
+  public boolean hasBeenEncoded() {
+    return Files.exists(encodedPath);
+  }
+
+  public boolean hasBeenArchived() {
+    return Files.exists(archivedPath);
+  }
+
+  private static final String MP4_SUFFIX = ".mp4";
+  private static final String ENCODED_SUFFIX = " - CFR.mp4";
+  private static final String TEMP_ENCODED_SUFFIX = " - CFR (incomplete).mp4";
+  private static final String ARCHIVED_SUFFIX = " - Archived.mp4";
+  private static final String TEMP_ARCHIVED_SUFFIX = " - Archived (incomplete).mp4";
+
+  public static boolean isMp4(Path path) {
+    return fileName(path).endsWith(MP4_SUFFIX);
+  }
+
+  public static boolean isEncodedMp4(Path path) {
+    return fileName(path).endsWith(ENCODED_SUFFIX);
+  }
+
+  public static boolean isTempEncodedMp4(Path path) {
+    return fileName(path).endsWith(TEMP_ENCODED_SUFFIX);
+  }
+
+  public static boolean isArchivedMp4(Path path) {
+    return fileName(path).endsWith(ARCHIVED_SUFFIX);
+  }
+
+  public static boolean isTempArchivedMp4(Path path) {
+    return fileName(path).endsWith(TEMP_ARCHIVED_SUFFIX);
+  }
+
+  private static String fileName(Path path) {
+    return checkNotNull(path.getFileName()).toString();
+  }
+
   /** Factory for constructing {@link UnencodedVideo}. */
   static class Factory {
-
-    private static final String MP4_SUFFIX = ".mp4";
-    private static final String ENCODED_SUFFIX = " - CFR.mp4";
-    private static final String TEMP_ENCODED_SUFFIX = " - CFR (incomplete).mp4";
-    private static final String ARCHIVED_SUFFIX = " - Archived.mp4";
-    private static final String TEMP_ARCHIVED_SUFFIX = " - Archived (incomplete).mp4";
-
-    public static boolean isMp4(Path path) {
-      return fileName(path).endsWith(MP4_SUFFIX);
-    }
-
-    public static boolean isEncodedMp4(Path path) {
-      return fileName(path).endsWith(ENCODED_SUFFIX);
-    }
-
-    public static boolean isTempEncodedMp4(Path path) {
-      return fileName(path).endsWith(TEMP_ENCODED_SUFFIX);
-    }
-
-    public static boolean isArchivedMp4(Path path) {
-      return fileName(path).endsWith(ARCHIVED_SUFFIX);
-    }
-
-    public static boolean isTempArchivedMp4(Path path) {
-      return fileName(path).endsWith(TEMP_ARCHIVED_SUFFIX);
-    }
-
-    private static String fileName(Path path) {
-      return checkNotNull(path.getFileName()).toString();
-    }
 
     private final Path inputDirectory;
     private final Path outputDirectory;

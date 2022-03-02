@@ -52,11 +52,11 @@ class App {
       deleteIncompleteEncodings(outputDirectory);
       deleteIncompleteArchives(archiveDirectory);
 
-      List<UnencodedVideo> unencodedVideos =
+      List<UnencodedVideo> videos =
           getUnencodedVideos(inputDirectory, outputDirectory, archiveDirectory);
-      unencodedVideos = archiveVideosThatHaveAlreadyBeenEncoded(unencodedVideos);
+      videos = archiveVideosThatHaveAlreadyBeenEncoded(videos);
 
-      encodeVideos(unencodedVideos);
+      encodeVideos(videos);
     } finally {
       log.info("run finished - elapsed: {}", stopwatch.elapsed());
 
@@ -70,17 +70,12 @@ class App {
     List<Path> tempEncodings =
         Files.walk(outputDirectory)
             .filter(Files::isRegularFile)
-            .filter(UnencodedVideo.Factory::isTempEncodedMp4)
+            .filter(UnencodedVideo::isTempEncodedMp4)
             .toList();
 
     if (!tempEncodings.isEmpty()) {
       log.warn("Detected {} incomplete encoding(s)", tempEncodings.size());
-
-      int i = 0;
-      for (Path path : tempEncodings) {
-        log.warn("Deleting ({}/{}): {}", ++i, tempEncodings.size(), path);
-        Files.delete(path);
-      }
+      delete(tempEncodings);
     }
   }
 
@@ -88,17 +83,20 @@ class App {
     List<Path> tempArchives =
         Files.walk(archiveDirectory)
             .filter(Files::isRegularFile)
-            .filter(UnencodedVideo.Factory::isTempArchivedMp4)
+            .filter(UnencodedVideo::isTempArchivedMp4)
             .toList();
 
     if (!tempArchives.isEmpty()) {
       log.warn("Detected {} incomplete archive(s)", tempArchives.size());
+      delete(tempArchives);
+    }
+  }
 
-      int i = 0;
-      for (Path path : tempArchives) {
-        log.warn("Deleting ({}/{}): {}", ++i, tempArchives.size(), path);
-        Files.delete(path);
-      }
+  private void delete(List<Path> paths) throws IOException {
+    int i = 0;
+    for (Path path : paths) {
+      log.warn("Deleting ({}/{}): {}", ++i, paths.size(), path);
+      Files.delete(path);
     }
   }
 
@@ -109,13 +107,10 @@ class App {
 
     return Files.walk(inputDirectory)
         .filter(Files::isRegularFile)
-        .filter(UnencodedVideo.Factory::isMp4)
+        .filter(UnencodedVideo::isMp4)
         // don't include paths that represent encoded or archived videos
         // if somebody wants to encode again, they'll need to remove the 'Archived' suffix
-        .filter(
-            path ->
-                !UnencodedVideo.Factory.isEncodedMp4(path)
-                    && !UnencodedVideo.Factory.isArchivedMp4(path))
+        .filter(path -> !UnencodedVideo.isEncodedMp4(path) && !UnencodedVideo.isArchivedMp4(path))
         .map(factory::newUnencodedVideo)
         .toList();
   }
@@ -153,6 +148,8 @@ class App {
     for (UnencodedVideo video : videos) {
       log.info("Encoding ({}/{}): {}", ++i, videos.size(), video);
       if (videoEncoder.encode(video)) {
+        // run archiving async as it can be expensive (e.g. moving to another disk or NAS)
+        // then while it's archiving it can encode the next video
         futures.add(videoArchiver.archiveAsync(video));
       }
     }

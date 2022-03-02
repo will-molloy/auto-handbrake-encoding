@@ -22,14 +22,16 @@ public class VideoArchiver {
    * @param video video to archive
    */
   public CompletableFuture<Void> archiveAsync(UnencodedVideo video) {
-    // run archiving async as it can be expensive (e.g. moving to another disk or NAS)
     return CompletableFuture.runAsync(
         () -> {
           try {
             log.info("Archiving: {} -> {}", video.originalPath(), video.archivedPath());
 
-            if (Files.exists(video.archivedPath())) {
-              log.warn("Archive file ({}) already exists, deleting original", video.archivedPath());
+            if (video.hasBeenArchived()) {
+              log.warn(
+                  "Archive file ({}) already exists, deleting original ({})",
+                  video.archivedPath(),
+                  video.originalPath());
               Files.delete(video.originalPath());
               return;
             }
