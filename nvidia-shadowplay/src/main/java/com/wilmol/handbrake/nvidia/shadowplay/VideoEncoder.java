@@ -4,7 +4,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.wilmol.handbrake.core.HandBrake;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -45,11 +44,12 @@ public class VideoEncoder {
         log.info("Encoded: {} -> {}", video.originalPath(), video.encodedPath());
         return true;
       } else {
-        log.error("Failed to encode: {}", video.originalPath());
+        log.error("Error encoding: {}", video.originalPath());
         return false;
       }
     } catch (IOException e) {
-      throw new UncheckedIOException(e);
+      log.error("Error encoding: {}", video.originalPath());
+      return false;
     }
   }
 }
