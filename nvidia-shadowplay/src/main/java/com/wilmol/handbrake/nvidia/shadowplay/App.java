@@ -127,7 +127,9 @@ class App {
       log.warn(
           "Detected {} unencoded video(s) that have already been encoded", encodedVideos.size());
 
+      int i = 0;
       for (UnencodedVideo video : encodedVideos) {
+        log.warn("Archiving ({}/{}): {}", ++i, encodedVideos.size(), video);
         videoArchiver.archiveAsync(video).join();
       }
     }
