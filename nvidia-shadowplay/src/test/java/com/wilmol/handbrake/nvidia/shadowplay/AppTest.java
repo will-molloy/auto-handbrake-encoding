@@ -180,6 +180,18 @@ class AppTest {
   }
 
   @Test
+  void deletesIncompleteArchives() throws Exception {
+    // Given
+    Files.copy(testVideo, archiveDirectory.resolve("video1 - Archived (incomplete).mp4"));
+
+    // When
+    app.run(inputDirectory, outputDirectory, archiveDirectory, false);
+
+    // Then
+    assertThatTestDirectory().isEmpty();
+  }
+
+  @Test
   void shutsComputerDownIfRequested() throws Exception {
     // When
     app.run(inputDirectory, outputDirectory, archiveDirectory, true);

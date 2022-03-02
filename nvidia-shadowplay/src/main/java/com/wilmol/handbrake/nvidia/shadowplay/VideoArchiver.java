@@ -2,7 +2,6 @@ package com.wilmol.handbrake.nvidia.shadowplay;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.util.concurrent.CompletableFuture;
 import org.apache.logging.log4j.LogManager;
@@ -24,25 +23,26 @@ public class VideoArchiver {
    */
   public CompletableFuture<Void> archiveAsync(UnencodedVideo video) {
     // run archiving async as it can be expensive (e.g. moving to another disk or NAS)
-    // then while it archives it can encode the next video
     return CompletableFuture.runAsync(
         () -> {
           try {
             log.info("Archiving: {} -> {}", video.originalPath(), video.archivedPath());
 
             if (Files.exists(video.archivedPath())) {
-              log.warn("Archive file ({}) already exists", video.archivedPath());
-              // delete the archived file and try again
-              // most likely it crashed and never fully moved the file
-              Files.delete(video.archivedPath());
+              log.warn("Archive file ({}) already exists, deleting original", video.archivedPath());
+              Files.delete(video.originalPath());
+              return;
             }
 
             Files.createDirectories(checkNotNull(video.archivedPath().getParent()));
 
-            Files.move(video.originalPath(), video.archivedPath());
+            // archive to a temp file first in case something goes wrong
+            // (e.g. app crash while it's uploading to NAS)
+            Files.move(video.originalPath(), video.tempArchivedPath());
+            Files.move(video.tempArchivedPath(), video.archivedPath());
 
             log.info("Archived: {} -> {}", video.originalPath(), video.archivedPath());
-          } catch (IOException e) {
+          } catch (Exception e) {
             log.error("Error archiving: %s".formatted(video), e);
           }
         });

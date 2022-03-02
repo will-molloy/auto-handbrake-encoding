@@ -49,17 +49,14 @@ class App {
         shutdownComputer);
 
     try {
-      List<CompletableFuture<?>> futures = new ArrayList<>();
-
       deleteIncompleteEncodings(outputDirectory);
+      deleteIncompleteArchives(archiveDirectory);
+
       List<UnencodedVideo> unencodedVideos =
           getUnencodedVideos(inputDirectory, outputDirectory, archiveDirectory);
-      unencodedVideos = archiveVideosThatHaveAlreadyBeenEncoded(unencodedVideos, futures);
-      encodeVideos(unencodedVideos, futures);
+      unencodedVideos = archiveVideosThatHaveAlreadyBeenEncoded(unencodedVideos);
 
-      for (CompletableFuture<?> future : futures) {
-        future.join();
-      }
+      encodeVideos(unencodedVideos);
     } finally {
       log.info("run finished - elapsed: {}", stopwatch.elapsed());
 
@@ -87,6 +84,24 @@ class App {
     }
   }
 
+  private void deleteIncompleteArchives(Path archiveDirectory) throws IOException {
+    List<Path> tempArchives =
+        Files.walk(archiveDirectory)
+            .filter(Files::isRegularFile)
+            .filter(UnencodedVideo.Factory::isTempArchivedMp4)
+            .toList();
+
+    if (!tempArchives.isEmpty()) {
+      log.warn("Detected {} incomplete archive(s)", tempArchives.size());
+
+      int i = 0;
+      for (Path path : tempArchives) {
+        log.warn("Deleting ({}/{}): {}", ++i, tempArchives.size(), path);
+        Files.delete(path);
+      }
+    }
+  }
+
   private List<UnencodedVideo> getUnencodedVideos(
       Path inputDirectory, Path outputDirectory, Path archiveDirectory) throws IOException {
     UnencodedVideo.Factory factory =
@@ -107,7 +122,7 @@ class App {
 
   // the corresponding encoded video(s) may already exist
   private List<UnencodedVideo> archiveVideosThatHaveAlreadyBeenEncoded(
-      List<UnencodedVideo> videos, List<CompletableFuture<?>> futures) {
+      List<UnencodedVideo> videos) {
     Map<Boolean, List<UnencodedVideo>> partition =
         videos.stream().collect(Collectors.partitioningBy(UnencodedVideo::hasBeenEncoded));
     List<UnencodedVideo> encodedVideos = partition.get(true);
@@ -118,14 +133,14 @@ class App {
           "Detected {} unencoded video(s) that have already been encoded", encodedVideos.size());
 
       for (UnencodedVideo video : encodedVideos) {
-        futures.add(videoArchiver.archiveAsync(video));
+        videoArchiver.archiveAsync(video).join();
       }
     }
 
     return unencodedVideos;
   }
 
-  private void encodeVideos(List<UnencodedVideo> videos, List<CompletableFuture<?>> futures) {
+  private void encodeVideos(List<UnencodedVideo> videos) {
     log.info("Detected {} video(s) to encode", videos.size());
 
     int i = 0;
@@ -134,11 +149,16 @@ class App {
     }
 
     i = 0;
+    List<CompletableFuture<?>> futures = new ArrayList<>();
     for (UnencodedVideo video : videos) {
       log.info("Encoding ({}/{}): {}", ++i, videos.size(), video);
       if (videoEncoder.encode(video)) {
         futures.add(videoArchiver.archiveAsync(video));
       }
+    }
+
+    for (CompletableFuture<?> future : futures) {
+      future.join();
     }
   }
 

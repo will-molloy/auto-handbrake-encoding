@@ -55,11 +55,15 @@ class UnencodedVideoTest {
 
     // Then
     assertThat(unencodedVideo.originalPath()).isSameInstanceAs(mp4File);
+
+    assertThat(unencodedVideo.encodedPath()).isEqualTo(outputDirectory.resolve("file - CFR.mp4"));
     assertThat(unencodedVideo.tempEncodedPath())
         .isEqualTo(outputDirectory.resolve("file - CFR (incomplete).mp4"));
-    assertThat(unencodedVideo.encodedPath()).isEqualTo(outputDirectory.resolve("file - CFR.mp4"));
+
     assertThat(unencodedVideo.archivedPath())
         .isEqualTo(archiveDirectory.resolve("file - Archived.mp4"));
+    assertThat(unencodedVideo.tempArchivedPath())
+        .isEqualTo(archiveDirectory.resolve("file - Archived (incomplete).mp4"));
   }
 
   @Test
@@ -72,12 +76,16 @@ class UnencodedVideoTest {
 
     // Then
     assertThat(unencodedVideo.originalPath()).isSameInstanceAs(mp4File);
-    assertThat(unencodedVideo.tempEncodedPath())
-        .isEqualTo(outputDirectory.resolve("Nested/Nested2/file - CFR (incomplete).mp4"));
+
     assertThat(unencodedVideo.encodedPath())
         .isEqualTo(outputDirectory.resolve("Nested/Nested2/file - CFR.mp4"));
+    assertThat(unencodedVideo.tempEncodedPath())
+        .isEqualTo(outputDirectory.resolve("Nested/Nested2/file - CFR (incomplete).mp4"));
+
     assertThat(unencodedVideo.archivedPath())
         .isEqualTo(archiveDirectory.resolve("Nested/Nested2/file - Archived.mp4"));
+    assertThat(unencodedVideo.tempArchivedPath())
+        .isEqualTo(archiveDirectory.resolve("Nested/Nested2/file - Archived (incomplete).mp4"));
   }
 
   @Test
@@ -135,6 +143,22 @@ class UnencodedVideoTest {
     assertThat(thrown)
         .hasMessageThat()
         .isEqualTo("videoPath (%s) represents an archived .mp4 file".formatted(archivedMp4File));
+  }
+
+  @Test
+  void factory_newUnencodedVideo_rejectsTempArchivedMp4File() {
+    // Given
+    Path tempArchivedMp4File = inputDirectory.resolve("file - Archived (incomplete).mp4");
+
+    // When & Then
+    IllegalArgumentException thrown =
+        assertThrows(
+            IllegalArgumentException.class, () -> factory.newUnencodedVideo(tempArchivedMp4File));
+    assertThat(thrown)
+        .hasMessageThat()
+        .isEqualTo(
+            "videoPath (%s) represents an incomplete archived .mp4 file"
+                .formatted(tempArchivedMp4File));
   }
 
   @Test

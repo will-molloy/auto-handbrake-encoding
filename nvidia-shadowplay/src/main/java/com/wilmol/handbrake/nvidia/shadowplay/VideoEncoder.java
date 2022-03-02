@@ -3,7 +3,6 @@ package com.wilmol.handbrake.nvidia.shadowplay;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.wilmol.handbrake.core.HandBrake;
-import java.io.IOException;
 import java.nio.file.Files;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -52,7 +51,7 @@ public class VideoEncoder {
         log.error("Error encoding: {}", video);
         return false;
       }
-    } catch (IOException e) {
+    } catch (Exception e) {
       log.error("Error encoding: %s".formatted(video), e);
       return false;
     }
