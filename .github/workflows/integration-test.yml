@@ -30,9 +30,9 @@ jobs:
       - name: Setup HandBrake (Linux)
         if: matrix.os == 'ubuntu-latest'
         run: |
-          sudo add-apt-repository ppa:stebbins/handbrake-releases 
-          && sudo apt-get update 
-          && sudo apt-get install handbrake-cli
+          sudo add-apt-repository ppa:stebbins/handbrake-releases \
+          && sudo apt-get update \
+          && sudo apt-get install handbrake-cli \
           && sudo chmod a+x /usr/bin/HandBrakeCLI
 
       - name: Setup HandBrake (Mac)
