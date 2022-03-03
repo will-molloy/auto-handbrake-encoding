@@ -41,11 +41,11 @@ class HandBrakeTest {
             List.of(
                 "HandBrakeCLI",
                 "--preset",
-                "\"Production Standard\"",
+                "Production Standard",
                 "-i",
-                "\"input.mp4\"",
+                "input.mp4",
                 "-o",
-                "\"output.mp4\""));
+                "output.mp4"));
   }
 
   @Test

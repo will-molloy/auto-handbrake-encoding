@@ -46,16 +46,12 @@ public class HandBrake {
     try {
       return cli.execute(
           List.of(
-              "HandBrakeCLI", "--preset", quote(PRESET), "-i", quote(input), "-o", quote(output)));
+              "HandBrakeCLI", "--preset", PRESET, "-i", input.toString(), "-o", output.toString()));
     } catch (Exception e) {
       log.error("Error encoding: %s".formatted(input), e);
       return false;
     } finally {
       LOCK.unlock();
     }
-  }
-
-  private String quote(Object s) {
-    return "\"%s\"".formatted(s);
   }
 }
