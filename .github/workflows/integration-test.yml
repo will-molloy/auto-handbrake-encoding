@@ -10,7 +10,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ windows-latest ]
+        os: [ windows-latest, ubuntu-latest ]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2.4.0
@@ -21,28 +21,28 @@ jobs:
           distribution: adopt
           java-version: 17
 
-      - name: Setup HandBrake (Linux)
-        if: matrix.os == 'ubuntu-latest'
-        run: sudo add-apt-repository ppa:stebbins/handbrake-releases && sudo apt-get update && sudo apt-get install handbrake-cli
-
       - name: Setup HandBrake (Windows)
         if: matrix.os == 'windows-latest'
         run: choco install handbrake-cli
 
+      - name: Setup HandBrake (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: add-apt-repository ppa:stebbins/handbrake-releases && apt-get update && apt-get install handbrake-cli
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
-
-      - name: Integration Test (Linux)
-        if: matrix.os == 'ubuntu-latest'
-        # Linux needs sudo so Java process can access /usr/bin/HandBrakeCLI TODO why it runs with Java 11?
-        run: sudo ./gradlew projects clean integrationTest jacocoTestReport --no-daemon --refresh-dependencies
 
       - name: Integration Test (Windows)
         if: matrix.os == 'windows-latest'
         run: ./gradlew projects clean integrationTest jacocoTestReport --no-daemon --refresh-dependencies
 
-      - name: Upload coverage to Codecov (Linux only)
+      - name: Integration Test (Linux)
         if: matrix.os == 'ubuntu-latest'
+        # Linux needs sudo so Java process can access /usr/bin/HandBrakeCLI TODO why it runs with Java 11?
+        run: ./gradlew projects clean integrationTest jacocoTestReport --no-daemon --refresh-dependencies
+
+      - name: Upload coverage to Codecov (Windows only)
+        if: matrix.os == 'windows-latest'
         uses: codecov/codecov-action@v2.1.0
         with:
           flags: integrationtests
