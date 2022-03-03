@@ -10,30 +10,31 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        # TODO linux build not working, see below
-#        os: [ windows-latest, macos-latest ]
-        os: [ ubuntu-latest ]
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2.4.0
 
-      - name: Setup Java
+      - name: Setup Java 17
         uses: actions/setup-java@v2.5.0
         with:
           distribution: adopt
           java-version: 17
 
-      - name: Setup HandBrake (Windows)
-        if: matrix.os == 'windows-latest'
-        run: choco install handbrake-cli
-
       - name: Setup HandBrake (Linux)
         if: matrix.os == 'ubuntu-latest'
+        # Need to install as root, then chmod a+x so non-root Java/Gradle can access HandBrakeCLI
+        # Can't run gradle as root, some reason github actions defaults to Java 11
+        # TODO locally this doesn't work??? - still needing to run Java/Gradle with sudo
         run: |
           sudo add-apt-repository ppa:stebbins/handbrake-releases \
           && sudo apt-get update \
           && sudo apt-get install handbrake-cli \
           && sudo chmod a+x /usr/bin/HandBrakeCLI
+
+      - name: Setup HandBrake (Windows)
+        if: matrix.os == 'windows-latest'
+        run: choco install handbrake-cli
 
       - name: Setup HandBrake (Mac)
         if: matrix.os == 'macos-latest'
@@ -45,9 +46,9 @@ jobs:
       - name: Integration Test
         run: ./gradlew projects clean integrationTest jacocoTestReport --no-daemon --refresh-dependencies
 
-      # TODO this needs fixing too...
-#      - name: Upload coverage to Codecov (Windows only)
-#        if: matrix.os == 'windows-latest'
+      # TODO this needs fixing too... seems it never creates the report
+#      - name: Upload coverage to Codecov (Linux only)
+#        if: matrix.os == 'ubuntu-latest'
 #        uses: codecov/codecov-action@v2.1.0
 #        with:
 #          flags: integrationtests
