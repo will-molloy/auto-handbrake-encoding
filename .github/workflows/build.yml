@@ -39,7 +39,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ ubuntu-latest, windows-latest ]
+        os: [ windows-latest ]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2.4.0
@@ -63,7 +63,7 @@ jobs:
 
       - name: Integration Test
         if: matrix.os == 'ubuntu-latest'
-        # Linux needs sudo so Java process can access /usr/bin/HandBrakeCLI
+        # Linux needs sudo so Java process can access /usr/bin/HandBrakeCLI TODO why it runs with Java 11?
         run: sudo ./gradlew projects clean integrationTest jacocoTestReport --no-daemon --refresh-dependencies
 
       - name: Integration Test
