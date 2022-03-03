@@ -47,9 +47,16 @@ class App {
         shutdownComputer);
 
     try {
-      deleteIncompleteEncodings(outputDirectory);
-      deleteIncompleteArchives(archiveDirectory);
-      encodeVideos(getUnencodedVideos(inputDirectory, outputDirectory, archiveDirectory));
+      for (Path directory : List.of(inputDirectory, outputDirectory, archiveDirectory)) {
+        deleteIncompleteEncodings(directory);
+        deleteIncompleteArchives(directory);
+      }
+
+      UnencodedVideo.Factory factory =
+          new UnencodedVideo.Factory(inputDirectory, outputDirectory, archiveDirectory);
+      List<UnencodedVideo> unencodedVideos = getUnencodedVideos(inputDirectory, factory);
+
+      encodeAndArchiveVideos(unencodedVideos);
     } finally {
       log.info("run finished - elapsed: {}", stopwatch.elapsed());
 
@@ -59,72 +66,74 @@ class App {
     }
   }
 
-  private void deleteIncompleteEncodings(Path outputDirectory) throws IOException {
+  private void deleteIncompleteEncodings(Path directory) throws IOException {
     List<Path> tempEncodings =
-        Files.walk(outputDirectory)
+        Files.walk(directory)
             .filter(Files::isRegularFile)
             .filter(UnencodedVideo::isTempEncodedMp4)
             .toList();
     if (!tempEncodings.isEmpty()) {
-      log.warn("Detected {} incomplete encoding(s)", tempEncodings.size());
+      log.warn(
+          "Detected {} incomplete encoding(s) in directory: {}", tempEncodings.size(), directory);
       delete(tempEncodings);
     }
   }
 
-  private void deleteIncompleteArchives(Path archiveDirectory) throws IOException {
+  private void deleteIncompleteArchives(Path directory) throws IOException {
     List<Path> tempArchives =
-        Files.walk(archiveDirectory)
+        Files.walk(directory)
             .filter(Files::isRegularFile)
             .filter(UnencodedVideo::isTempArchivedMp4)
             .toList();
     if (!tempArchives.isEmpty()) {
-      log.warn("Detected {} incomplete archive(s)", tempArchives.size());
+      log.warn(
+          "Detected {} incomplete archive(s) in directory: {}", tempArchives.size(), directory);
       delete(tempArchives);
     }
   }
 
-  private void delete(List<Path> paths) throws IOException {
+  private void delete(List<Path> files) throws IOException {
     int i = 0;
-    for (Path path : paths) {
-      log.warn("Deleting ({}/{}): {}", ++i, paths.size(), path);
-      Files.delete(path);
+    for (Path file : files) {
+      log.warn("Deleting ({}/{}): {}", ++i, files.size(), file);
+      Files.delete(file);
     }
   }
 
   private List<UnencodedVideo> getUnencodedVideos(
-      Path inputDirectory, Path outputDirectory, Path archiveDirectory) throws IOException {
-    UnencodedVideo.Factory factory =
-        new UnencodedVideo.Factory(inputDirectory, outputDirectory, archiveDirectory);
-    return Files.walk(inputDirectory)
-        .filter(Files::isRegularFile)
-        .filter(UnencodedVideo::isMp4)
-        // don't include paths that represent encoded or archived videos
-        // if somebody wants to encode again, they'll need to remove the 'Archived' suffix
-        .filter(path -> !UnencodedVideo.isEncodedMp4(path) && !UnencodedVideo.isArchivedMp4(path))
-        .map(factory::newUnencodedVideo)
-        .toList();
+      Path inputDirectory, UnencodedVideo.Factory factory) throws IOException {
+    List<UnencodedVideo> videos =
+        Files.walk(inputDirectory)
+            .filter(Files::isRegularFile)
+            .filter(UnencodedVideo::isMp4)
+            // don't include paths that represent encoded or archived videos
+            // if somebody wants to encode again, they'll need to remove the 'Archived' suffix
+            .filter(
+                path -> !UnencodedVideo.isEncodedMp4(path) && !UnencodedVideo.isArchivedMp4(path))
+            .map(factory::newUnencodedVideo)
+            .toList();
+    log.info("Detected {} video(s) to encode in directory: {}", videos.size(), inputDirectory);
+    return videos;
   }
 
-  private void encodeVideos(List<UnencodedVideo> videos) {
-    log.info("Detected {} video(s) to encode", videos.size());
-
+  private void encodeAndArchiveVideos(List<UnencodedVideo> videos) {
     int i = 0;
     for (UnencodedVideo video : videos) {
       log.info("Detected ({}/{}): {}", ++i, videos.size(), video);
     }
 
     i = 0;
-    List<CompletableFuture<?>> futures = new ArrayList<>();
+    List<CompletableFuture<?>> archiverFutures = new ArrayList<>();
     for (UnencodedVideo video : videos) {
       log.info("Encoding ({}/{}): {}", ++i, videos.size(), video);
       if (videoEncoder.encode(video)) {
         // run archiving async as it can be expensive (e.g. moving to another disk or NAS)
         // then while it's archiving it can encode the next video
-        futures.add(videoArchiver.archiveAsync(video));
+        archiverFutures.add(videoArchiver.archiveAsync(video));
       }
     }
 
-    for (CompletableFuture<?> future : futures) {
+    for (CompletableFuture<?> future : archiverFutures) {
       future.join();
     }
   }

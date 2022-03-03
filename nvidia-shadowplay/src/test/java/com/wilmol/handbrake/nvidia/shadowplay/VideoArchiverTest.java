@@ -81,7 +81,7 @@ class VideoArchiverTest {
   }
 
   @Test
-  void archiveFileAlreadyExistsReturnsGracefully() throws IOException {
+  void archiveFileAlreadyExistsStillDeletesOriginal() throws IOException {
     // Given
     Files.copy(testVideo, archiveDirectory.resolve("file - Archived.mp4"));
 
