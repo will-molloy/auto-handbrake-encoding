@@ -17,16 +17,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2.4.0
 
-#      - name: Setup Java
-#        uses: actions/setup-java@v2.5.0
-#        with:
-#          distribution: adopt
-#          java-version: 17
-      - name: Setup Java (sudo)
-        run: |
-          wget -O- https://apt.corretto.aws/corretto.key | sudo apt-key add - \
-          && sudo add-apt-repository 'deb https://apt.corretto.aws stable main' \
-          && sudo apt-get update; sudo apt-get install -y java-17-amazon-corretto-jdk
+      - name: Setup Java
+        uses: actions/setup-java@v2.5.0
+        with:
+          distribution: adopt
+          java-version: 17
 
       - name: Setup HandBrake (Windows)
         if: matrix.os == 'windows-latest'
@@ -34,7 +29,11 @@ jobs:
 
       - name: Setup HandBrake (Linux)
         if: matrix.os == 'ubuntu-latest'
-        run: sudo add-apt-repository ppa:stebbins/handbrake-releases && sudo apt-get update && sudo apt-get install handbrake-cli
+        run: |
+          sudo add-apt-repository ppa:stebbins/handbrake-releases 
+          && sudo apt-get update 
+          && sudo apt-get install handbrake-cli
+          && sudo chmod a+x /usr/bin/HandBrakeCLI
 
       - name: Setup HandBrake (Mac)
         if: matrix.os == 'macos-latest'
@@ -44,7 +43,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Integration Test
-        run: sudo ./gradlew projects clean integrationTest jacocoTestReport --no-daemon --refresh-dependencies
+        run: ./gradlew projects clean integrationTest jacocoTestReport --no-daemon --refresh-dependencies
 
       # TODO this needs fixing too...
 #      - name: Upload coverage to Codecov (Windows only)
