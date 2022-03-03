@@ -50,9 +50,10 @@ jobs:
         if: matrix.os == 'macos-latest'
         run: ./gradlew projects clean integrationTest jacocoTestReport --no-daemon --refresh-dependencies
 
-      - name: Upload coverage to Codecov (Windows only)
-        if: matrix.os == 'windows-latest'
-        uses: codecov/codecov-action@v2.1.0
-        with:
-          flags: integrationtests
-          fail_ci_if_error: true
+      # TODO this needs fixing too...
+#      - name: Upload coverage to Codecov (Windows only)
+#        if: matrix.os == 'windows-latest'
+#        uses: codecov/codecov-action@v2.1.0
+#        with:
+#          flags: integrationtests
+#          fail_ci_if_error: true
