@@ -36,8 +36,10 @@ jobs:
 
 
   integration-test:
-    runs-on: ubuntu-latest
-
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, windows-latest ]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2.4.0
@@ -49,15 +51,27 @@ jobs:
           java-version: 17
 
       - name: Setup HandBrake
+        if: matrix.os == 'ubuntu-latest'
         run: sudo add-apt-repository ppa:stebbins/handbrake-releases && sudo apt-get update && sudo apt-get install handbrake-cli
+
+      - name: Setup HandBrake
+        if: matrix.os == 'windows-latest'
+        run: choco install handbrake-cli
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
       - name: Integration Test
+        if: matrix.os == 'ubuntu-latest'
+        # Linux needs sudo so Java process can access /usr/bin/HandBrakeCLI
         run: sudo ./gradlew projects clean integrationTest jacocoTestReport --no-daemon --refresh-dependencies
 
+      - name: Integration Test
+        if: matrix.os == 'windows-latest'
+        run: ./gradlew projects clean integrationTest jacocoTestReport --no-daemon --refresh-dependencies
+
       - name: Upload coverage to Codecov
+        if: matrix.os == 'ubuntu-latest'
         uses: codecov/codecov-action@v2.1.0
         with:
           flags: integrationtests
