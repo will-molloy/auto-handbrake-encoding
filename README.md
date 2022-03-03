@@ -35,9 +35,9 @@ Automating HandBrake encoding
 
 #### Usage:
 
-1. Build via Gradle:
+1. Build and test via Gradle:
    ```bash
-   ./gradlew build
+   ./gradlew build integrationTest
    ```
 
 2. Configure [Gradle task](nvidia-shadowplay/build.gradle)
