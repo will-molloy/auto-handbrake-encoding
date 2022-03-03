@@ -20,7 +20,7 @@ jobs:
           java-version: 17
 
       - name: Setup HandBrake
-        run: sudo add-apt-repository ppa:stebbins/handbrake-releases && sudo apt-get update && sudo apt-get install handbrake-cli
+        run: sudo add-apt-repository ppa:stebbins/handbrake-releases && sudo apt-get update && sudo apt-get install handbrake-cli handbrake-gtk
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
