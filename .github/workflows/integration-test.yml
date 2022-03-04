@@ -44,7 +44,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Integration Test
-        run: ./gradlew projects clean integrationTest jacocoIntegrationTestReport --no-daemon --refresh-dependencies
+        run: ./gradlew projects clean integrationTest --no-daemon --refresh-dependencies
 
       - name: Upload coverage to Codecov (Linux only)
         if: matrix.os == 'ubuntu-latest'

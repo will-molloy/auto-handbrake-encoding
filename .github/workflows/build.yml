@@ -25,7 +25,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build
-        run: ./gradlew projects clean build jacocoTestReport --no-daemon --refresh-dependencies
+        run: ./gradlew projects clean build --no-daemon --refresh-dependencies
 
       - name: Upload coverage to Codecov (Linux only)
         if: matrix.os == 'ubuntu-latest'

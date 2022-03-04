@@ -108,13 +108,14 @@ subprojects {
       csv.enabled = false
     }
   }
-  check.dependsOn jacocoTestReport
+  test.finalizedBy jacocoTestReport
 
   // Integration test support
   apply plugin: 'org.unbroken-dome.test-sets'
   testSets {
     integrationTest
   }
+  integrationTest.finalizedBy jacocoIntegrationTestReport
 
   // pin dependency versions
   ext {
