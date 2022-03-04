@@ -46,14 +46,9 @@ jobs:
       - name: Integration Test
         run: ./gradlew projects clean integrationTest --no-daemon --refresh-dependencies
 
-      - name: ls
-        if: matrix.os == 'ubuntu-latest'
-        run: ls -lARh
-
       - name: Upload coverage to Codecov (Linux only)
         if: matrix.os == 'ubuntu-latest'
         uses: codecov/codecov-action@v2.1.0
         with:
           flags: integration-tests
           fail_ci_if_error: true
-          directory: ./nvidia-shadowplay/build/reports/jacoco/jacocoIntegrationTestReport/
