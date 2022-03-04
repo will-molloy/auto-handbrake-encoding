@@ -60,11 +60,11 @@ public class Cli {
       return false;
     } finally {
       log.debug("Destroying: {}", command);
-      if (processLoggerFuture != null) {
-        processLoggerFuture.join();
-      }
       if (process != null) {
         process.destroy();
+      }
+      if (processLoggerFuture != null) {
+        processLoggerFuture.join();
       }
     }
   }

@@ -48,8 +48,7 @@ class App {
 
     try {
       for (Path directory : List.of(inputDirectory, outputDirectory, archiveDirectory)) {
-        deleteIncompleteEncodings(directory);
-        deleteIncompleteArchives(directory);
+        deleteIncompleteEncodingsAndArchives(directory);
       }
 
       UnencodedVideo.Factory factory =
@@ -66,37 +65,24 @@ class App {
     }
   }
 
-  private void deleteIncompleteEncodings(Path directory) throws IOException {
-    List<Path> tempEncodings =
+  private void deleteIncompleteEncodingsAndArchives(Path directory) throws IOException {
+    List<Path> tempFiles =
         Files.walk(directory)
             .filter(Files::isRegularFile)
-            .filter(UnencodedVideo::isTempEncodedMp4)
+            .filter(
+                file ->
+                    UnencodedVideo.isTempEncodedMp4(file) || UnencodedVideo.isTempArchivedMp4(file))
             .toList();
-    if (!tempEncodings.isEmpty()) {
+    if (!tempFiles.isEmpty()) {
       log.warn(
-          "Detected {} incomplete encoding(s) in directory: {}", tempEncodings.size(), directory);
-      delete(tempEncodings);
-    }
-  }
-
-  private void deleteIncompleteArchives(Path directory) throws IOException {
-    List<Path> tempArchives =
-        Files.walk(directory)
-            .filter(Files::isRegularFile)
-            .filter(UnencodedVideo::isTempArchivedMp4)
-            .toList();
-    if (!tempArchives.isEmpty()) {
-      log.warn(
-          "Detected {} incomplete archive(s) in directory: {}", tempArchives.size(), directory);
-      delete(tempArchives);
-    }
-  }
-
-  private void delete(List<Path> files) throws IOException {
-    int i = 0;
-    for (Path file : files) {
-      log.warn("Deleting ({}/{}): {}", ++i, files.size(), file);
-      Files.delete(file);
+          "Detected {} incomplete encoding(s)/archives(s) in directory: {}",
+          tempFiles.size(),
+          directory);
+      int i = 0;
+      for (Path file : tempFiles) {
+        log.warn("Deleting ({}/{}): {}", ++i, tempFiles.size(), file);
+        Files.delete(file);
+      }
     }
   }
 
