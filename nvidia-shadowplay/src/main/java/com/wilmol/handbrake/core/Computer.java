@@ -21,9 +21,7 @@ public class Computer {
     this.cli = checkNotNull(cli);
   }
 
-  /**
-   * Sends shutdown command.
-   */
+  /** Sends shutdown command. */
   public void shutdown() {
     log.info("Shutting down");
     // TODO right now its windows only?

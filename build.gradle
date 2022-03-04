@@ -115,8 +115,6 @@ subprojects {
   testSets {
     integrationTest
   }
-  // TODO disabled integrationTest from 'build' command, need to figure out how to run HandBrake on github actions (run with docker?)
-//  check.dependsOn integrationTest
 
   // pin dependency versions
   ext {
