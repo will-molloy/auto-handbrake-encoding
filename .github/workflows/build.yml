@@ -31,5 +31,5 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         uses: codecov/codecov-action@v2.1.0
         with:
-          flags: unittests
+          flags: unit-tests
           fail_ci_if_error: true

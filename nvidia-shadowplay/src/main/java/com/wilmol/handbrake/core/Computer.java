@@ -23,6 +23,7 @@ public class Computer {
 
   public void shutdown() {
     log.info("Shutting down");
+    // TODO right now its windows only?
     cli.execute(List.of("shutdown", "-s", "-t", "30"));
   }
 }

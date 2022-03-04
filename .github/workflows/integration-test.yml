@@ -44,12 +44,11 @@ jobs:
         run: chmod +x gradlew
 
       - name: Integration Test
-        run: ./gradlew projects clean integrationTest jacocoTestReport --no-daemon --refresh-dependencies
+        run: ./gradlew projects clean integrationTest jacocoIntegrationTestReport --no-daemon --refresh-dependencies
 
-      # TODO this needs fixing too... seems it never creates the report
-#      - name: Upload coverage to Codecov (Linux only)
-#        if: matrix.os == 'ubuntu-latest'
-#        uses: codecov/codecov-action@v2.1.0
-#        with:
-#          flags: integrationtests
-#          fail_ci_if_error: true
+      - name: Upload coverage to Codecov (Linux only)
+        if: matrix.os == 'ubuntu-latest'
+        uses: codecov/codecov-action@v2.1.0
+        with:
+          flags: integration-tests
+          fail_ci_if_error: true
