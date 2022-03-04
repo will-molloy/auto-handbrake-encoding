@@ -101,7 +101,7 @@ subprojects {
 
   // JaCoCo (code coverage reporting)
   apply plugin: 'jacoco'
-  jacocoTestReport {
+  tasks.withType(JacocoReport) {
     reports {
       xml.enabled = true
       html.enabled = true
