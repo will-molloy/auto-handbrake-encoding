@@ -52,4 +52,4 @@ jobs:
         with:
           flags: integration-tests
           fail_ci_if_error: true
-          directory: ./build/reports/jacoco/jacocoIntegrationTestReport/
+          directory: ./nvidia-shadowplay/build/reports/jacoco/jacocoIntegrationTestReport/
