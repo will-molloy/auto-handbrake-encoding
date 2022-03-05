@@ -51,7 +51,7 @@ public class Cli {
 
       int exitCode = process.waitFor();
       if (exitCode != 0) {
-        log.error("Command executed with non-zero exit code: {}", exitCode);
+        log.error("Command ({}) executed with non-zero exit code: {}", command, exitCode);
         return false;
       }
       return true;
@@ -59,10 +59,10 @@ public class Cli {
       log.error("Error executing: %s".formatted(command), e);
       return false;
     } finally {
-      log.debug("Destroying: {}", command);
       if (process != null) {
         process.destroy();
-        if (process.isAlive()){
+        if (process.isAlive()) {
+          log.warn("Destroying forcibly: {}", command);
           process.destroyForcibly();
         }
       }

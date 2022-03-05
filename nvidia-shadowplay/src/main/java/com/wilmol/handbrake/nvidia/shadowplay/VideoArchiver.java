@@ -2,6 +2,7 @@ package com.wilmol.handbrake.nvidia.shadowplay;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.Stopwatch;
 import java.nio.file.Files;
 import java.util.concurrent.CompletableFuture;
 import org.apache.logging.log4j.LogManager;
@@ -24,6 +25,7 @@ public class VideoArchiver {
   public CompletableFuture<Void> archiveAsync(UnencodedVideo video) {
     return CompletableFuture.runAsync(
         () -> {
+          Stopwatch stopwatch = Stopwatch.createStarted();
           try {
             log.info("Archiving: {} -> {}", video.originalPath(), video.archivedPath());
 
@@ -40,7 +42,7 @@ public class VideoArchiver {
             Files.move(video.originalPath(), video.tempArchivedPath());
             Files.move(video.tempArchivedPath(), video.archivedPath());
 
-            log.info("Archived: {} -> {}", video.originalPath(), video.archivedPath());
+            log.info("Archived: {} - elapsed: {}", video.archivedPath(), stopwatch.elapsed());
           } catch (Exception e) {
             log.error("Error archiving: %s".formatted(video), e);
           }

@@ -8,11 +8,13 @@ import com.wilmol.handbrake.core.Cli;
 import com.wilmol.handbrake.core.Computer;
 import com.wilmol.handbrake.core.HandBrake;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -47,9 +49,7 @@ class App {
         shutdownComputer);
 
     try {
-      for (Path directory : List.of(inputDirectory, outputDirectory, archiveDirectory)) {
-        deleteIncompleteEncodingsAndArchives(directory);
-      }
+      deleteIncompleteEncodingsAndArchives(inputDirectory, outputDirectory, archiveDirectory);
 
       UnencodedVideo.Factory factory =
           new UnencodedVideo.Factory(inputDirectory, outputDirectory, archiveDirectory);
@@ -65,19 +65,28 @@ class App {
     }
   }
 
-  private void deleteIncompleteEncodingsAndArchives(Path directory) throws IOException {
+  private void deleteIncompleteEncodingsAndArchives(
+      Path inputDirectory, Path outputDirectory, Path archiveDirectory) throws IOException {
     List<Path> tempFiles =
-        Files.walk(directory)
-            .filter(Files::isRegularFile)
-            .filter(
-                file ->
-                    UnencodedVideo.isTempEncodedMp4(file) || UnencodedVideo.isTempArchivedMp4(file))
+        Stream.of(inputDirectory, outputDirectory, archiveDirectory)
+            .distinct()
+            .flatMap(
+                directory -> {
+                  try {
+                    return Files.walk(directory)
+                        .filter(Files::isRegularFile)
+                        .filter(
+                            file ->
+                                UnencodedVideo.isTempEncodedMp4(file)
+                                    || UnencodedVideo.isTempArchivedMp4(file));
+                  } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                  }
+                })
             .toList();
+
     if (!tempFiles.isEmpty()) {
-      log.warn(
-          "Detected {} incomplete encoding(s)/archives(s) in directory: {}",
-          tempFiles.size(),
-          directory);
+      log.warn("Detected {} incomplete encoding(s)/archives(s)", tempFiles.size());
       int i = 0;
       for (Path file : tempFiles) {
         log.warn("Deleting ({}/{}): {}", ++i, tempFiles.size(), file);
@@ -88,21 +97,18 @@ class App {
 
   private List<UnencodedVideo> getUnencodedVideos(
       Path inputDirectory, UnencodedVideo.Factory factory) throws IOException {
-    List<UnencodedVideo> videos =
-        Files.walk(inputDirectory)
-            .filter(Files::isRegularFile)
-            .filter(UnencodedVideo::isMp4)
-            // don't include paths that represent encoded or archived videos
-            // if somebody wants to encode again, they'll need to remove the 'Archived' suffix
-            .filter(
-                path -> !UnencodedVideo.isEncodedMp4(path) && !UnencodedVideo.isArchivedMp4(path))
-            .map(factory::newUnencodedVideo)
-            .toList();
-    log.info("Detected {} video(s) to encode in directory: {}", videos.size(), inputDirectory);
-    return videos;
+    return Files.walk(inputDirectory)
+        .filter(Files::isRegularFile)
+        .filter(UnencodedVideo::isMp4)
+        // don't include paths that represent encoded or archived videos
+        // if somebody wants to encode again, they'll need to remove the 'Archived' suffix
+        .filter(path -> !UnencodedVideo.isEncodedMp4(path) && !UnencodedVideo.isArchivedMp4(path))
+        .map(factory::newUnencodedVideo)
+        .toList();
   }
 
   private void encodeAndArchiveVideos(List<UnencodedVideo> videos) {
+    log.info("Detected {} video(s) to encode", videos.size());
     int i = 0;
     for (UnencodedVideo video : videos) {
       log.info("Detected ({}/{}): {}", ++i, videos.size(), video);

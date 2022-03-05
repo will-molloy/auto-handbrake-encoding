@@ -2,6 +2,7 @@ package com.wilmol.handbrake.nvidia.shadowplay;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.Stopwatch;
 import com.wilmol.handbrake.core.HandBrake;
 import java.nio.file.Files;
 import org.apache.logging.log4j.LogManager;
@@ -29,6 +30,7 @@ public class VideoEncoder {
    * @return {@code true} if encoding was successful
    */
   public boolean encode(UnencodedVideo video) {
+    Stopwatch stopwatch = Stopwatch.createStarted();
     try {
       log.info("Encoding: {} -> {}", video.originalPath(), video.encodedPath());
 
@@ -45,7 +47,7 @@ public class VideoEncoder {
 
       if (encodeSuccessful) {
         Files.move(video.tempEncodedPath(), video.encodedPath());
-        log.info("Encoded: {} -> {}", video.originalPath(), video.encodedPath());
+        log.info("Encoded: {} - elapsed: {}", video.encodedPath(), stopwatch.elapsed());
         return true;
       } else {
         log.error("Error encoding: {}", video);
