@@ -62,6 +62,9 @@ public class Cli {
       log.debug("Destroying: {}", command);
       if (process != null) {
         process.destroy();
+        if (process.isAlive()){
+          process.destroyForcibly();
+        }
       }
       if (processLoggerFuture != null) {
         processLoggerFuture.join();
