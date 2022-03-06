@@ -2,17 +2,19 @@ package com.wilmol.handbrake.nvidia.shadowplay;
 
 import static com.google.common.truth.Truth8.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.io.Resources;
-import com.wilmol.handbrake.core.Cli;
-import com.wilmol.handbrake.core.HandBrake;
+import com.google.common.truth.StreamSubject;
+import com.wilmol.handbrake.core.Computer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,7 +23,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.stubbing.Answer;
 
 /**
  * AppTest.
@@ -33,18 +34,28 @@ import org.mockito.stubbing.Answer;
 class AppTest {
 
   private Path testDirectory;
+  private Path inputDirectory;
+  private Path outputDirectory;
+  private Path archiveDirectory;
   private Path testVideo;
 
-  @Mock private HandBrake mockHandBrake;
-
-  @Mock private Cli mockCli;
-
+  @Mock private VideoEncoder mockVideoEncoder;
+  @Mock private VideoArchiver mockVideoArchiver;
+  @Mock private Computer mockComputer;
   @InjectMocks private App app;
 
   @BeforeEach
   void setUp() throws Exception {
-    testDirectory = Path.of("AppTest");
+    testDirectory = Path.of(this.getClass().getSimpleName());
+    inputDirectory = testDirectory.resolve("input");
+    outputDirectory = testDirectory.resolve("output");
+    archiveDirectory = testDirectory.resolve("archive");
+
     testVideo = Path.of(Resources.getResource("test-video.mp4").toURI());
+
+    Files.createDirectories(inputDirectory);
+    Files.createDirectories(outputDirectory);
+    Files.createDirectories(archiveDirectory);
   }
 
   @AfterEach
@@ -55,89 +66,99 @@ class AppTest {
   @Test
   void encodesVideoFilesAndArchivesOriginals() throws Exception {
     // Given
-    when(mockHandBrake.encode(any(), any()))
-        .then(
-            (Answer<Boolean>)
-                invocation -> {
-                  // bit of an ugly hack...
-                  // need to create the temp encoded file as its expected as output from HandBrake
-                  Path handBrakeOutput = invocation.getArgument(1);
-                  Files.createFile(handBrakeOutput);
-                  return true;
-                });
+    when(mockVideoEncoder.encode(any())).thenReturn(true);
+    when(mockVideoArchiver.archiveAsync(any())).thenReturn(CompletableFuture.completedFuture(null));
 
-    Files.createDirectories(testDirectory.resolve("NestedFolder"));
-    Files.copy(testVideo, testDirectory.resolve("video1.mp4"));
-    Files.copy(testVideo, testDirectory.resolve("video2.mp4"));
-    Files.copy(testVideo, testDirectory.resolve("NestedFolder/video3.mp4"));
+    Files.createDirectories(inputDirectory.resolve("NestedFolder"));
+    Files.copy(testVideo, inputDirectory.resolve("video1.mp4"));
+    Files.copy(testVideo, inputDirectory.resolve("video2.mp4"));
+    Files.copy(testVideo, inputDirectory.resolve("NestedFolder/video3.mp4"));
 
     // When
-    app.run(testDirectory, false);
+    app.run(inputDirectory, outputDirectory, archiveDirectory, false);
 
     // Then
-    assertThat(Files.walk(testDirectory).filter(Files::isRegularFile))
-        .containsExactly(
-            testDirectory.resolve("video1 - Archived.mp4"),
-            testDirectory.resolve("video2 - Archived.mp4"),
-            testDirectory.resolve("NestedFolder/video3 - Archived.mp4"),
-            testDirectory.resolve("video1 - CFR.mp4"),
-            testDirectory.resolve("video2 - CFR.mp4"),
-            testDirectory.resolve("NestedFolder/video3 - CFR.mp4"));
+    verify(mockVideoEncoder)
+        .encode(
+            argThat(video -> video.originalPath().equals(inputDirectory.resolve("video1.mp4"))));
+    verify(mockVideoEncoder)
+        .encode(
+            argThat(video -> video.originalPath().equals(inputDirectory.resolve("video2.mp4"))));
+    verify(mockVideoEncoder)
+        .encode(
+            argThat(
+                video ->
+                    video
+                        .originalPath()
+                        .equals(inputDirectory.resolve("NestedFolder/video3.mp4"))));
+    verify(mockVideoArchiver)
+        .archiveAsync(
+            argThat(video -> video.originalPath().equals(inputDirectory.resolve("video1.mp4"))));
+    verify(mockVideoArchiver)
+        .archiveAsync(
+            argThat(video -> video.originalPath().equals(inputDirectory.resolve("video2.mp4"))));
+    verify(mockVideoArchiver)
+        .archiveAsync(
+            argThat(
+                video ->
+                    video
+                        .originalPath()
+                        .equals(inputDirectory.resolve("NestedFolder/video3.mp4"))));
   }
 
   @Test
-  void archivesAlreadyEncodedVideos() throws Exception {
+  void skipsArchivingOriginalIfEncodingFails() throws Exception {
     // Given
-    Files.createDirectories(testDirectory);
-    Files.copy(testVideo, testDirectory.resolve("video1.mp4"));
-    Files.copy(testVideo, testDirectory.resolve("video1 - CFR.mp4"));
+    when(mockVideoEncoder.encode(any())).thenReturn(false);
+
+    Files.copy(testVideo, inputDirectory.resolve("video1.mp4"));
 
     // When
-    app.run(testDirectory, false);
+    app.run(inputDirectory, outputDirectory, archiveDirectory, false);
 
     // Then
-    assertThat(Files.walk(testDirectory).filter(Files::isRegularFile))
-        .containsExactly(
-            testDirectory.resolve("video1 - Archived.mp4"),
-            testDirectory.resolve("video1 - CFR.mp4"));
-  }
-
-  @Test
-  void retainsOriginalIfEncodingFails() throws Exception {
-    // Given
-    when(mockHandBrake.encode(any(), any())).thenReturn(false);
-
-    Files.createDirectories(testDirectory);
-    Files.copy(testVideo, testDirectory.resolve("video1.mp4"));
-
-    // When
-    app.run(testDirectory, false);
-
-    // Then
-    assertThat(Files.walk(testDirectory).filter(Files::isRegularFile))
-        .containsExactly(testDirectory.resolve("video1.mp4"));
+    verify(mockVideoEncoder)
+        .encode(
+            argThat(video -> video.originalPath().equals(inputDirectory.resolve("video1.mp4"))));
+    verify(mockVideoArchiver, never())
+        .archiveAsync(
+            argThat(video -> video.originalPath().equals(inputDirectory.resolve("video1.mp4"))));
   }
 
   @Test
   void deletesIncompleteEncodings() throws Exception {
     // Given
-    Files.createDirectories(testDirectory);
-    Files.copy(testVideo, testDirectory.resolve("video1 - CFR (incomplete).mp4"));
+    Files.copy(testVideo, outputDirectory.resolve("video1 - CFR (incomplete).mp4"));
 
     // When
-    app.run(testDirectory, false);
+    app.run(inputDirectory, outputDirectory, archiveDirectory, false);
 
     // Then
-    assertThat(Files.walk(testDirectory).filter(Files::isRegularFile)).isEmpty();
+    assertThatTestDirectory().isEmpty();
+  }
+
+  @Test
+  void deletesIncompleteArchives() throws Exception {
+    // Given
+    Files.copy(testVideo, archiveDirectory.resolve("video1 - Archived (incomplete).mp4"));
+
+    // When
+    app.run(inputDirectory, outputDirectory, archiveDirectory, false);
+
+    // Then
+    assertThatTestDirectory().isEmpty();
   }
 
   @Test
   void shutsComputerDownIfRequested() throws Exception {
     // When
-    Files.createDirectories(testDirectory);
-    app.run(testDirectory, true);
+    app.run(inputDirectory, outputDirectory, archiveDirectory, true);
 
     // Then
-    verify(mockCli).execute(List.of("shutdown", "-s", "-t", "30"));
+    verify(mockComputer).shutdown();
+  }
+
+  private StreamSubject assertThatTestDirectory() throws IOException {
+    return assertThat(Files.walk(testDirectory).filter(Files::isRegularFile));
   }
 }

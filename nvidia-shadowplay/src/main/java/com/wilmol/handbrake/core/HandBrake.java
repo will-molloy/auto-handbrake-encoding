@@ -5,6 +5,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -18,6 +20,8 @@ public class HandBrake {
   private static final Logger log = LogManager.getLogger();
 
   private static final String PRESET = "Production Standard";
+
+  private static final Lock LOCK = new ReentrantLock();
 
   private final Cli cli;
 
@@ -38,17 +42,16 @@ public class HandBrake {
       return true;
     }
 
+    LOCK.lock();
     try {
       return cli.execute(
           List.of(
-              "HandBrakeCLI", "--preset", quote(PRESET), "-i", quote(input), "-o", quote(output)));
+              "HandBrakeCLI", "--preset", PRESET, "-i", input.toString(), "-o", output.toString()));
     } catch (Exception e) {
       log.error("Error encoding: %s".formatted(input), e);
       return false;
+    } finally {
+      LOCK.unlock();
     }
-  }
-
-  private String quote(Object s) {
-    return "\"%s\"".formatted(s);
   }
 }

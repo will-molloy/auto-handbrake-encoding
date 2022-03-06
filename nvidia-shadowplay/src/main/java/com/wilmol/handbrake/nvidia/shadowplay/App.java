@@ -5,11 +5,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Stopwatch;
 import com.wilmol.handbrake.core.Cli;
+import com.wilmol.handbrake.core.Computer;
 import com.wilmol.handbrake.core.HandBrake;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -20,143 +25,129 @@ import org.apache.logging.log4j.Logger;
  */
 class App {
 
-  public static void main(String[] args) {
-    try {
-      checkArgument(args.length == 2, "Expected 2 args to main method");
-      Path videosPath = Path.of(args[0]);
-      boolean shutdownComputer = Boolean.parseBoolean(args[1]);
-
-      Cli cli = new Cli();
-      HandBrake handBrake = new HandBrake(cli);
-      App app = new App(handBrake, cli);
-
-      app.run(videosPath, shutdownComputer);
-    } catch (Exception e) {
-      log.fatal("Fatal error", e);
-    }
-  }
-
   private static final Logger log = LogManager.getLogger();
 
-  private final HandBrake handBrake;
-  private final Cli cli;
+  private final VideoEncoder videoEncoder;
+  private final VideoArchiver videoArchiver;
+  private final Computer computer;
 
-  App(HandBrake handBrake, Cli cli) {
-    this.handBrake = checkNotNull(handBrake);
-    this.cli = checkNotNull(cli);
+  App(VideoEncoder videoEncoder, VideoArchiver videoArchiver, Computer computer) {
+    this.videoEncoder = checkNotNull(videoEncoder);
+    this.videoArchiver = checkNotNull(videoArchiver);
+    this.computer = checkNotNull(computer);
   }
 
-  void run(Path videosPath, boolean shutdownComputer) throws Exception {
+  void run(
+      Path inputDirectory, Path outputDirectory, Path archiveDirectory, boolean shutdownComputer)
+      throws Exception {
     Stopwatch stopwatch = Stopwatch.createStarted();
-    log.info("run(videosPath={}, shutdownComputer={}) started", videosPath, shutdownComputer);
+    log.info(
+        "run(inputDirectory={}, outputDirectory={}, archiveDirectory={}, shutdownComputer={}) started",
+        inputDirectory,
+        outputDirectory,
+        archiveDirectory,
+        shutdownComputer);
 
     try {
-      deleteIncompleteEncodings(videosPath);
-      List<UnencodedVideo> unencodedVideos = getUnencodedVideos(videosPath);
-      archiveVideosThatHaveAlreadyBeenEncoded(unencodedVideos);
-      encodeVideos(unencodedVideos);
+      deleteIncompleteEncodingsAndArchives(inputDirectory, outputDirectory, archiveDirectory);
+
+      UnencodedVideo.Factory factory =
+          new UnencodedVideo.Factory(inputDirectory, outputDirectory, archiveDirectory);
+      List<UnencodedVideo> unencodedVideos = getUnencodedVideos(inputDirectory, factory);
+
+      encodeAndArchiveVideos(unencodedVideos);
     } finally {
       log.info("run finished - elapsed: {}", stopwatch.elapsed());
 
       if (shutdownComputer) {
-        log.info("Shutting computer down");
-        cli.execute(List.of("shutdown", "-s", "-t", "30"));
+        computer.shutdown();
       }
     }
   }
 
-  private void deleteIncompleteEncodings(Path videosPath) throws IOException {
-    List<Path> tempEncodings =
-        Files.walk(videosPath)
-            .filter(Files::isRegularFile)
-            .filter(UnencodedVideo::isTempEncodedMp4)
+  private void deleteIncompleteEncodingsAndArchives(
+      Path inputDirectory, Path outputDirectory, Path archiveDirectory) throws IOException {
+    List<Path> tempFiles =
+        Stream.of(inputDirectory, outputDirectory, archiveDirectory)
+            .distinct()
+            .flatMap(
+                directory -> {
+                  try {
+                    return Files.walk(directory)
+                        .filter(Files::isRegularFile)
+                        .filter(
+                            file ->
+                                UnencodedVideo.isTempEncodedMp4(file)
+                                    || UnencodedVideo.isTempArchivedMp4(file));
+                  } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                  }
+                })
             .toList();
-    if (tempEncodings.isEmpty()) {
-      return;
-    }
 
-    log.warn("Detected {} incomplete encoding(s)", tempEncodings.size());
-
-    for (int i = 0; i < tempEncodings.size(); i++) {
-      Path path = tempEncodings.get(i);
-      log.warn("Deleting ({}/{}): {}", i + 1, tempEncodings.size(), path);
-      Files.delete(path);
+    if (!tempFiles.isEmpty()) {
+      log.warn("Detected {} incomplete encoding(s)/archives(s)", tempFiles.size());
+      int i = 0;
+      for (Path file : tempFiles) {
+        log.warn("Deleting ({}/{}): {}", ++i, tempFiles.size(), file);
+        Files.delete(file);
+      }
     }
   }
 
-  private List<UnencodedVideo> getUnencodedVideos(Path videosPath) throws IOException {
-    List<UnencodedVideo> unencodedVideos =
-        Files.walk(videosPath)
-            .filter(Files::isRegularFile)
-            .filter(UnencodedVideo::isMp4)
-            // don't include paths that represent encoded or archived videos
-            // if somebody wants to encode again, they'll need to remove the 'Archived' suffix
-            .filter(
-                path -> !UnencodedVideo.isEncodedMp4(path) && !UnencodedVideo.isArchivedMp4(path))
-            .map(UnencodedVideo::new)
-            .toList();
-    log.info("Detected {} unencoded videos(s)", unencodedVideos.size());
-    return unencodedVideos;
+  private List<UnencodedVideo> getUnencodedVideos(
+      Path inputDirectory, UnencodedVideo.Factory factory) throws IOException {
+    return Files.walk(inputDirectory)
+        .filter(Files::isRegularFile)
+        .filter(UnencodedVideo::isMp4)
+        // don't include paths that represent encoded or archived videos
+        // if somebody wants to encode again, they'll need to remove the 'Archived' suffix
+        .filter(path -> !UnencodedVideo.isEncodedMp4(path) && !UnencodedVideo.isArchivedMp4(path))
+        .map(factory::newUnencodedVideo)
+        .toList();
   }
 
-  // While 'List<UnencodedVideo> videos' represents unencoded videos (NOT encoded videos) the
-  // corresponding encoded video may already exist
-  private void archiveVideosThatHaveAlreadyBeenEncoded(List<UnencodedVideo> videos)
-      throws IOException {
-    List<UnencodedVideo> alreadyEncodedVideos =
-        videos.stream().filter(UnencodedVideo::hasBeenEncoded).toList();
-    if (alreadyEncodedVideos.isEmpty()) {
-      return;
+  private void encodeAndArchiveVideos(List<UnencodedVideo> videos) {
+    log.info("Detected {} video(s) to encode", videos.size());
+    int i = 0;
+    for (UnencodedVideo video : videos) {
+      log.info("Detected ({}/{}): {}", ++i, videos.size(), video);
     }
 
-    log.warn(
-        "Detected {} unencoded video(s) that have already been encoded",
-        alreadyEncodedVideos.size());
-
-    for (int i = 0; i < alreadyEncodedVideos.size(); i++) {
-      UnencodedVideo video = alreadyEncodedVideos.get(i);
-      log.info("Archiving ({}/{}): {}", i + 1, alreadyEncodedVideos.size(), video.originalPath());
-      Files.move(video.originalPath(), video.archivedPath());
-    }
-  }
-
-  private void encodeVideos(List<UnencodedVideo> videos) throws IOException {
-    List<UnencodedVideo> videosToEncode =
-        videos.stream().filter(video -> !video.hasBeenEncoded()).toList();
-
-    log.info("Detected {} video(s) to encode", videosToEncode.size());
-
-    for (int i = 0; i < videosToEncode.size(); i++) {
-      UnencodedVideo video = videosToEncode.get(i);
-      log.info("Detected ({}/{}): {}", i + 1, videosToEncode.size(), video.originalPath());
+    i = 0;
+    List<CompletableFuture<?>> archiverFutures = new ArrayList<>();
+    for (UnencodedVideo video : videos) {
+      log.info("Encoding ({}/{}): {}", ++i, videos.size(), video);
+      if (videoEncoder.encode(video)) {
+        // run archiving async as it can be expensive (e.g. moving to another disk or NAS)
+        // then while it's archiving it can encode the next video
+        archiverFutures.add(videoArchiver.archiveAsync(video));
+      }
     }
 
-    for (int i = 0; i < videosToEncode.size(); i++) {
-      UnencodedVideo video = videosToEncode.get(i);
-      log.info("Encoding ({}/{}): {}", i + 1, videosToEncode.size(), video.originalPath());
-      encodeVideo(video);
+    for (CompletableFuture<?> future : archiverFutures) {
+      future.join();
     }
   }
 
-  private void encodeVideo(UnencodedVideo video) throws IOException {
-    Stopwatch stopwatch = Stopwatch.createStarted();
+  public static void main(String... args) {
+    try {
+      checkArgument(args.length == 4, "Expected 4 args to main method");
+      Path inputDirectory = Path.of(args[0]);
+      Path outputDirectory = Path.of(args[1]);
+      Path archiveDirectory = Path.of(args[2]);
+      boolean shutdownComputer = Boolean.parseBoolean(args[3]);
 
-    // to avoid leaving encoded files in an 'incomplete' state, encode to a temp file in case
-    // something goes wrong
-    boolean encodeSuccessful = handBrake.encode(video.originalPath(), video.tempEncodedPath());
+      Cli cli = new Cli();
+      HandBrake handBrake = new HandBrake(cli);
+      VideoEncoder videoEncoder = new VideoEncoder(handBrake);
+      VideoArchiver videoArchiver = new VideoArchiver();
+      Computer computer = new Computer(cli);
+      App app = new App(videoEncoder, videoArchiver, computer);
 
-    if (encodeSuccessful) {
-      // only archive the original after renaming the temp file, then it'll never reach a state
-      // where the encoding is incomplete and the original doesn't exist
-      Files.move(video.tempEncodedPath(), video.encodedPath());
-      log.info("Encoded: {}", video.encodedPath());
-
-      Files.move(video.originalPath(), video.archivedPath());
-      log.info("Archived: {}", video.archivedPath());
-    } else {
-      log.error("Encode failed: {}", video.originalPath());
+      app.run(inputDirectory, outputDirectory, archiveDirectory, shutdownComputer);
+    } catch (Exception e) {
+      log.fatal("Fatal error", e);
     }
-
-    log.info("Elapsed: {}", stopwatch.elapsed());
   }
 }

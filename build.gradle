@@ -11,6 +11,7 @@ buildscript {
     classpath group: 'com.diffplug.spotless', name: 'spotless-plugin-gradle', version: '6.0.5'
     classpath group: 'gradle.plugin.com.github.spotbugs.snom', name: 'spotbugs-gradle-plugin', version: '4.7.5'
     classpath group: 'net.rdrei.android.buildtimetracker', name: 'gradle-plugin', version: '0.11.1'
+    classpath group: 'org.unbroken-dome.gradle-plugins', name: 'gradle-testsets-plugin', version: '4.0.0'
   }
 }
 
@@ -76,8 +77,6 @@ subprojects {
 
   // Tests
   tasks.withType(Test) {
-    // run tests in parallel, assumes they're threadsafe
-    maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
     // use JUnit 5 engine
     useJUnitPlatform()
     testLogging {
@@ -102,14 +101,21 @@ subprojects {
 
   // JaCoCo (code coverage reporting)
   apply plugin: 'jacoco'
-  jacocoTestReport {
+  tasks.withType(JacocoReport) {
     reports {
       xml.enabled = true
       html.enabled = true
       csv.enabled = false
     }
   }
-  check.dependsOn jacocoTestReport
+  test.finalizedBy jacocoTestReport
+
+  // Integration test support
+  apply plugin: 'org.unbroken-dome.test-sets'
+  testSets {
+    integrationTest
+  }
+  integrationTest.finalizedBy jacocoIntegrationTestReport
 
   // pin dependency versions
   ext {

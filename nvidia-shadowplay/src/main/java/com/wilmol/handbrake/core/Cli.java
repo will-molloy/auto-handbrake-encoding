@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import org.apache.logging.log4j.LogManager;
@@ -42,34 +43,42 @@ public class Cli {
   public boolean execute(List<String> command) {
     log.info("Executing: {}", command);
 
+    Process process = null;
+    CompletableFuture<?> processLoggerFuture = null;
     try {
-      ProcessBuilder processBuilder = processBuilderSupplier.get();
-      Process process = processBuilder.command(command).redirectErrorStream(true).start();
-      try {
-        consumeStream(process.getInputStream(), log::debug);
+      process = processBuilderSupplier.get().command(command).redirectErrorStream(true).start();
+      processLoggerFuture = consumeStreamAsync(process.getInputStream(), log::debug);
 
-        int exitCode = process.waitFor();
-        if (exitCode != 0) {
-          log.error("Command executed with non-zero exit code: {}", exitCode);
-          return false;
-        }
-        return true;
-      } finally {
-        process.destroy();
+      int exitCode = process.waitFor();
+      if (exitCode != 0) {
+        log.error("Command ({}) executed with non-zero exit code: {}", command, exitCode);
+        return false;
       }
+      return true;
     } catch (Exception e) {
       log.error("Error executing: %s".formatted(command), e);
       return false;
+    } finally {
+      if (process != null) {
+        process.destroy();
+        if (process.isAlive()) {
+          log.warn("Destroying forcibly: {}", command);
+          process.destroyForcibly();
+        }
+      }
+      if (processLoggerFuture != null) {
+        processLoggerFuture.join();
+      }
     }
   }
 
-  private void consumeStream(InputStream inputStream, Consumer<String> consumer) {
-    new Thread(
-            () -> {
-              BufferedReader bufferedReader =
-                  new BufferedReader(new InputStreamReader(inputStream, Charset.defaultCharset()));
-              bufferedReader.lines().forEach(consumer);
-            })
-        .start();
+  private CompletableFuture<Void> consumeStreamAsync(
+      InputStream inputStream, Consumer<String> consumer) {
+    return CompletableFuture.runAsync(
+        () -> {
+          BufferedReader bufferedReader =
+              new BufferedReader(new InputStreamReader(inputStream, Charset.defaultCharset()));
+          bufferedReader.lines().forEach(consumer);
+        });
   }
 }

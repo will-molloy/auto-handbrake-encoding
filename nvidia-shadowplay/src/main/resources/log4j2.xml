@@ -7,7 +7,7 @@
     <Appenders>
         <Console name="console" target="SYSTEM_OUT">
             <ThresholdFilter level="info"/>
-            <PatternLayout pattern="[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] [%c] [%M] - %msg%n"/>
+            <PatternLayout pattern="[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%c{1.}] - %msg%n"/>
         </Console>
 
         <File name="file" fileName="logs/${fileNameDate}.log">
