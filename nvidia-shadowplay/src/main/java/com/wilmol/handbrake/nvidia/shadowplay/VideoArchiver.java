@@ -29,9 +29,16 @@ public class VideoArchiver {
           try {
             log.info("Archiving: {} -> {}", video.originalPath(), video.archivedPath());
 
-            if (video.hasBeenArchived()) {
-              log.warn("Archive file ({}) already exists, deleting original", video.archivedPath());
-              Files.delete(video.originalPath());
+            if (Files.exists(video.archivedPath())) {
+              if (Files.mismatch(video.originalPath(), video.archivedPath()) == -1) {
+                log.warn(
+                    "Archive file ({}) already exists, deleting original", video.archivedPath());
+                Files.delete(video.originalPath());
+              } else {
+                log.warn(
+                    "Archive file ({}) already exists but contents differ, keeping original",
+                    video.archivedPath());
+              }
               return;
             }
 

@@ -58,14 +58,6 @@ final class UnencodedVideo {
     return tempArchivedPath;
   }
 
-  public boolean hasBeenEncoded() {
-    return Files.exists(encodedPath);
-  }
-
-  public boolean hasBeenArchived() {
-    return Files.exists(archivedPath);
-  }
-
   private static final String MP4_SUFFIX = ".mp4";
   private static final String ENCODED_SUFFIX = " - CFR.mp4";
   private static final String TEMP_ENCODED_SUFFIX = " - CFR (incomplete).mp4";

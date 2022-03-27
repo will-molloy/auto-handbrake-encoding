@@ -29,11 +29,13 @@ class AppIntegrationTest {
 
   private Path testDirectory;
   private Path testVideo;
+  private Path testVideo2;
 
   @BeforeEach
   void setUp() throws Exception {
     testDirectory = Path.of(this.getClass().getSimpleName());
-    testVideo = Path.of(Resources.getResource("test-video.mp4").toURI());
+    testVideo = Path.of(Resources.getResource("Big_Buck_Bunny_360_10s_1MB.mp4").toURI());
+    testVideo2 = Path.of(Resources.getResource("Big_Buck_Bunny_360_10s_2MB.mp4").toURI());
   }
 
   @AfterEach
@@ -559,6 +561,60 @@ class AppIntegrationTest {
   }
 
   @Test
+  @Order(60)
+  void singleVideo_archiveExistsButContentsDifferSoRetainsOriginal() throws IOException {
+    // Given
+    // video to encode
+    Path inputDirectory = createDirectoryAt(testDirectory.resolve("Gameplay"));
+    createVideoAt(inputDirectory.resolve("my video.mp4"));
+
+    // already archived but different contents
+    createVideo2At(inputDirectory.resolve("my video - Archived.mp4"));
+
+    // When
+    runApp(inputDirectory, inputDirectory, inputDirectory);
+
+    // Then
+    assertThatTestDirectory()
+        .containsExactly(
+            // original
+            inputDirectory.resolve("my video.mp4"),
+            // encoding
+            inputDirectory.resolve("my video - CFR.mp4"),
+            // archive
+            inputDirectory.resolve("my video - Archived.mp4"));
+  }
+
+  @Test
+  @Order(61)
+  void singleVideo_encodingAlreadyExists_and_archiveExistsButContentsDifferSoRetainsOriginal()
+      throws IOException {
+    // Given
+    // video to encode
+    Path inputDirectory = createDirectoryAt(testDirectory.resolve("Gameplay"));
+    createVideoAt(inputDirectory.resolve("my video.mp4"));
+
+    // already encoded
+    createVideoAt(inputDirectory.resolve("my video - CFR.mp4"));
+
+    // already archived but different contents
+    createVideo2At(inputDirectory.resolve("my video - Archived.mp4"));
+
+    // When
+    runApp(inputDirectory, inputDirectory, inputDirectory);
+
+    // Then
+    assertThatTestDirectory()
+        .containsExactly(
+            // original
+            inputDirectory.resolve("my video.mp4"),
+            // encoding
+            inputDirectory.resolve("my video - CFR.mp4"),
+            // archive
+            inputDirectory.resolve("my video - Archived.mp4"));
+  }
+
+  @Test
   @Order(100)
   void
       severalVideos_nestedDirectoryStructure_and_someEncodingsAndArchivesAlreadyExists_and_deletesIncompleteEncodingsAndArchives_and_retainsCompleteEncodingsAndArchives()
@@ -704,6 +760,13 @@ class AppIntegrationTest {
   private Path createVideoAt(Path path) throws IOException {
     Files.createDirectories(checkNotNull(path.getParent()));
     Files.copy(testVideo, path);
+    return path;
+  }
+
+  @CanIgnoreReturnValue
+  private Path createVideo2At(Path path) throws IOException {
+    Files.createDirectories(checkNotNull(path.getParent()));
+    Files.copy(testVideo2, path);
     return path;
   }
 
