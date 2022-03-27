@@ -1,5 +1,5 @@
-String inputDirectory = "S:\\Videos\\Gameplay"
-String outputDirectory = "S:\\Videos\\Gameplay Encoded"
+String inputDirectory = "S:\\Gameplay"
+String outputDirectory = "S:\\Gameplay Encoded"
 String archiveDirectory = "D:\\Videos\\Gameplay Archive"
 
 task run(type: JavaExec) {
