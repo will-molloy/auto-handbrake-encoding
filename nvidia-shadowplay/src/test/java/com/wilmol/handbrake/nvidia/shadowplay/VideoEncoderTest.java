@@ -46,7 +46,7 @@ class VideoEncoderTest {
     inputDirectory = testDirectory.resolve("input/Videos/Gameplay");
     outputDirectory = testDirectory.resolve("output/Videos/Encoded Gameplay");
     Path archiveDirectory = testDirectory.resolve("archive/Videos/Gameplay");
-    testVideo = Path.of(Resources.getResource("test-video.mp4").toURI());
+    testVideo = Path.of(Resources.getResource("Big_Buck_Bunny_360_10s_1MB.mp4").toURI());
 
     Files.createDirectories(inputDirectory);
     Files.createDirectories(outputDirectory);

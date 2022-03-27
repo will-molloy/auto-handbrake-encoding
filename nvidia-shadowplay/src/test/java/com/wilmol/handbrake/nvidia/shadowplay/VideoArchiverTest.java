@@ -23,6 +23,7 @@ class VideoArchiverTest {
   private Path inputDirectory;
   private Path archiveDirectory;
   private Path testVideo;
+  private Path testVideo2;
 
   private UnencodedVideo.Factory unencodedVideoFactory;
 
@@ -34,7 +35,8 @@ class VideoArchiverTest {
     inputDirectory = testDirectory.resolve("input/Videos/Gameplay");
     Path outputDirectory = testDirectory.resolve("output/Videos/Encoded Gameplay");
     archiveDirectory = testDirectory.resolve("archive/Videos/Gameplay");
-    testVideo = Path.of(Resources.getResource("test-video.mp4").toURI());
+    testVideo = Path.of(Resources.getResource("Big_Buck_Bunny_360_10s_1MB.mp4").toURI());
+    testVideo2 = Path.of(Resources.getResource("Big_Buck_Bunny_360_10s_2MB.mp4").toURI());
 
     Files.createDirectories(inputDirectory);
     Files.createDirectories(outputDirectory);
@@ -94,6 +96,24 @@ class VideoArchiverTest {
 
     // Then
     assertThatTestDirectory().containsExactly(archiveDirectory.resolve("file - Archived.mp4"));
+  }
+
+  @Test
+  void archiveFileExistsButContentsDifferKeepsOriginal() throws IOException {
+    // Given
+    Files.copy(testVideo2, archiveDirectory.resolve("file - Archived.mp4"));
+
+    Path unencodedMp4File = Files.copy(testVideo, inputDirectory.resolve("file.mp4"));
+
+    UnencodedVideo unencodedVideo = unencodedVideoFactory.newUnencodedVideo(unencodedMp4File);
+
+    // When
+    videoArchiver.archiveAsync(unencodedVideo).join();
+
+    // Then
+    assertThatTestDirectory()
+        .containsExactly(
+            inputDirectory.resolve("file.mp4"), archiveDirectory.resolve("file - Archived.mp4"));
   }
 
   private StreamSubject assertThatTestDirectory() throws IOException {

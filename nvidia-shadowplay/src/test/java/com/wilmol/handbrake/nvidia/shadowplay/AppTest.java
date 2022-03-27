@@ -51,7 +51,7 @@ class AppTest {
     outputDirectory = testDirectory.resolve("output");
     archiveDirectory = testDirectory.resolve("archive");
 
-    testVideo = Path.of(Resources.getResource("test-video.mp4").toURI());
+    testVideo = Path.of(Resources.getResource("Big_Buck_Bunny_360_10s_1MB.mp4").toURI());
 
     Files.createDirectories(inputDirectory);
     Files.createDirectories(outputDirectory);
