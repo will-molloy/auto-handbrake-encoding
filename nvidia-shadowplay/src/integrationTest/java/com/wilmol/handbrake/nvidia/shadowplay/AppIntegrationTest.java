@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.stream.IntStream;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
@@ -66,7 +67,7 @@ class AppIntegrationTest {
     assertThatTestDirectory()
         .containsExactly(
             // encoding
-            new PathAndContents(inputDirectory.resolve("my video - CFR.mp4"), testVideoEncoded),
+            new PathAndContents(inputDirectory.resolve("my video - CFR.mp4"), testVideo),
             // archive
             new PathAndContents(inputDirectory.resolve("my video - Archived.mp4"), testVideo));
   }
@@ -835,7 +836,6 @@ class AppIntegrationTest {
   }
 
   private record PathAndContents(Path path, Path contents) {
-
     static Correspondence<Path, PathAndContents> correspondence() {
       return Correspondence.from(PathAndContents::recordsEquivalent, "is equivalent to")
           .formattingDiffsUsing(PathAndContents::formatRecordDiff);
@@ -849,7 +849,7 @@ class AppIntegrationTest {
       if (!actual.equals(expected.path)) {
         return "paths not equal";
       }
-      if (!contentsSimilar(actual, expected.path)) {
+      if (!contentsSimilar(actual, expected.contents)) {
         return "contents not similar";
       }
       throw new AssertionError("Unreachable");
@@ -858,19 +858,20 @@ class AppIntegrationTest {
     // HandBrake is not deterministic (encoding doesn't always produce the exact same output)
     // so need a method to test file contents are similar.
     // This method returns true if <1% bytes mismatch, which is good enough for these tests.
-    static boolean contentsSimilar(Path a, Path b) {
+    static boolean contentsSimilar(Path path1, Path path2) {
       try {
-        byte[] aBytes = Files.readAllBytes(a);
-        byte[] bBytes = Files.readAllBytes(b);
+        byte[] bytes1 = Files.readAllBytes(path1);
+        byte[] bytes2 = Files.readAllBytes(path2);
+        // pad arrays to same length
+        byte[] paddedBytes1 = Arrays.copyOf(bytes1, Math.max(bytes1.length, bytes2.length));
+        byte[] paddedBytes2 = Arrays.copyOf(bytes2, Math.max(bytes1.length, bytes2.length));
 
         long mismatchCount =
-            IntStream.iterate(0, i -> i < aBytes.length && i < bBytes.length, i -> i + 1)
-                .filter(i -> aBytes[i] != bBytes[i])
+            IntStream.range(0, paddedBytes1.length)
+                .filter(i -> paddedBytes1[i] != paddedBytes2[i])
                 .count();
 
-        double meanLength = (aBytes.length + bBytes.length) / 2d;
-
-        double percentMismatch = mismatchCount / meanLength;
+        double percentMismatch = (double) mismatchCount / paddedBytes1.length;
         return percentMismatch < 0.01;
       } catch (IOException e) {
         throw new UncheckedIOException(e);
