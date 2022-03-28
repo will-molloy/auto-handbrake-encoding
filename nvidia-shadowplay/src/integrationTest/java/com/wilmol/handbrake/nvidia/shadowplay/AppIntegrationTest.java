@@ -842,23 +842,23 @@ class AppIntegrationTest {
     }
 
     static boolean recordsEquivalent(Path actual, PathAndContents expected) {
-      return actual.equals(expected.path) && contentsSimilar(actual, expected.contents);
+      return actual.equals(expected.path) && percentMismatch(actual, expected.contents) < 0.01;
     }
 
     static String formatRecordDiff(Path actual, PathAndContents expected) {
       if (!actual.equals(expected.path)) {
         return "paths not equal";
       }
-      if (!contentsSimilar(actual, expected.contents)) {
-        return "contents not similar";
+      double percentMismatch = percentMismatch(actual, expected.contents);
+      if (percentMismatch > 0.01) {
+        return "contents not similar, percentMismatch=%s%%".formatted(percentMismatch * 100);
       }
       throw new AssertionError("Unreachable");
     }
 
-    // HandBrake is not deterministic (encoding doesn't always produce the exact same output)
-    // so need a method to test file contents are similar.
-    // This method returns true if <1% bytes mismatch, which is good enough for these tests.
-    static boolean contentsSimilar(Path path1, Path path2) {
+    // HandBrake is not deterministic (encoding doesn't always produce the exact same output) so
+    // need a method to test file contents are similar.
+    static double percentMismatch(Path path1, Path path2) {
       try {
         byte[] bytes1 = Files.readAllBytes(path1);
         byte[] bytes2 = Files.readAllBytes(path2);
@@ -871,8 +871,7 @@ class AppIntegrationTest {
                 .filter(i -> paddedBytes1[i] != paddedBytes2[i])
                 .count();
 
-        double percentMismatch = (double) mismatchCount / paddedBytes1.length;
-        return percentMismatch < 0.01;
+        return (double) mismatchCount / paddedBytes1.length;
       } catch (IOException e) {
         throw new UncheckedIOException(e);
       }
