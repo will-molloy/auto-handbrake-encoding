@@ -832,17 +832,19 @@ class AppIntegrationTest {
   private IterableSubject.UsingCorrespondence<Path, PathAndContents> assertThatTestDirectory()
       throws IOException {
     return assertThat(Files.walk(testDirectory).filter(Files::isRegularFile).toList())
-        .comparingElementsUsing(PathAndContents.correspondence());
+        .comparingElementsUsing(PathAndContents.EQUIVALENCE);
   }
 
   private record PathAndContents(Path path, Path contents) {
-    static Correspondence<Path, PathAndContents> correspondence() {
-      return Correspondence.from(PathAndContents::recordsEquivalent, "is equivalent to")
-          .formattingDiffsUsing(PathAndContents::formatRecordDiff);
-    }
+    static final Correspondence<Path, PathAndContents> EQUIVALENCE =
+        Correspondence.from(PathAndContents::recordsEquivalent, "is equivalent to")
+            .formattingDiffsUsing(PathAndContents::formatRecordDiff);
+
+    static final double PERCENT_MISMATCH_TOLERANCE = 0.01;
 
     static boolean recordsEquivalent(Path actual, PathAndContents expected) {
-      return actual.equals(expected.path) && percentMismatch(actual, expected.contents) < 0.01;
+      return actual.equals(expected.path)
+          && percentMismatch(actual, expected.contents) < PERCENT_MISMATCH_TOLERANCE;
     }
 
     static String formatRecordDiff(Path actual, PathAndContents expected) {
@@ -850,7 +852,7 @@ class AppIntegrationTest {
         return "paths not equal";
       }
       double percentMismatch = percentMismatch(actual, expected.contents);
-      if (percentMismatch > 0.01) {
+      if (percentMismatch >= PERCENT_MISMATCH_TOLERANCE) {
         return "contents not similar, percentMismatch=%s%%".formatted(percentMismatch * 100);
       }
       throw new AssertionError("Unreachable");
