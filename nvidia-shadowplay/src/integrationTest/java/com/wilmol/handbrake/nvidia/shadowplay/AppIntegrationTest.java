@@ -3,7 +3,6 @@ package com.wilmol.handbrake.nvidia.shadowplay;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.truth.Truth.assertThat;
 
-import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import com.google.common.truth.Correspondence;
 import com.google.common.truth.IterableSubject;
@@ -12,8 +11,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-
+import java.util.stream.IntStream;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,7 +39,10 @@ class AppIntegrationTest {
   void setUp() throws Exception {
     testDirectory = Path.of(this.getClass().getSimpleName());
     testVideo = Path.of(Resources.getResource("Big_Buck_Bunny_360_10s_1MB.mp4").toURI());
-    testVideoEncoded = Path.of(Resources.getResource("Big_Buck_Bunny_360_10s_1MB_encoded_Production_Standard.mp4").toURI());
+    testVideoEncoded =
+        Path.of(
+            Resources.getResource("Big_Buck_Bunny_360_10s_1MB_encoded_Production_Standard.mp4")
+                .toURI());
     testVideo2 = Path.of(Resources.getResource("Big_Buck_Bunny_360_10s_2MB.mp4").toURI());
   }
 
@@ -154,7 +155,8 @@ class AppIntegrationTest {
         .containsExactly(
             // encoding
             new PathAndContents(
-                inputDirectory.resolve("League of Legends/ranked_game1 - CFR.mp4"), testVideoEncoded),
+                inputDirectory.resolve("League of Legends/ranked_game1 - CFR.mp4"),
+                testVideoEncoded),
             // archive
             new PathAndContents(
                 inputDirectory.resolve("League of Legends/ranked_game1 - Archived.mp4"),
@@ -203,7 +205,8 @@ class AppIntegrationTest {
         .containsExactly(
             // encoding
             new PathAndContents(
-                inputDirectory.resolve("Path of Exile/vaal spark templar - CFR.mp4"), testVideoEncoded),
+                inputDirectory.resolve("Path of Exile/vaal spark templar - CFR.mp4"),
+                testVideoEncoded),
             // archive
             new PathAndContents(
                 archiveDirectory.resolve("Path of Exile/vaal spark templar - Archived.mp4"),
@@ -261,7 +264,8 @@ class AppIntegrationTest {
             // encodings
             new PathAndContents(inputDirectory.resolve("recording1 - CFR.mp4"), testVideoEncoded),
             new PathAndContents(inputDirectory.resolve("recording2 - CFR.mp4"), testVideoEncoded),
-            new PathAndContents(inputDirectory.resolve("Nested/recording3 - CFR.mp4"), testVideoEncoded),
+            new PathAndContents(
+                inputDirectory.resolve("Nested/recording3 - CFR.mp4"), testVideoEncoded),
             new PathAndContents(
                 inputDirectory.resolve("Nested1/Nested2/recording4 - CFR.mp4"), testVideoEncoded),
             // archives
@@ -295,7 +299,8 @@ class AppIntegrationTest {
             // encodings
             new PathAndContents(outputDirectory.resolve("recording1 - CFR.mp4"), testVideoEncoded),
             new PathAndContents(outputDirectory.resolve("recording2 - CFR.mp4"), testVideoEncoded),
-            new PathAndContents(outputDirectory.resolve("Nested/recording3 - CFR.mp4"), testVideoEncoded),
+            new PathAndContents(
+                outputDirectory.resolve("Nested/recording3 - CFR.mp4"), testVideoEncoded),
             new PathAndContents(
                 outputDirectory.resolve("Nested1/Nested2/recording4 - CFR.mp4"), testVideoEncoded),
             // archives
@@ -329,7 +334,8 @@ class AppIntegrationTest {
             // encodings
             new PathAndContents(inputDirectory.resolve("recording1 - CFR.mp4"), testVideoEncoded),
             new PathAndContents(inputDirectory.resolve("recording2 - CFR.mp4"), testVideoEncoded),
-            new PathAndContents(inputDirectory.resolve("Nested/recording3 - CFR.mp4"), testVideoEncoded),
+            new PathAndContents(
+                inputDirectory.resolve("Nested/recording3 - CFR.mp4"), testVideoEncoded),
             new PathAndContents(
                 inputDirectory.resolve("Nested1/Nested2/recording4 - CFR.mp4"), testVideoEncoded),
             // archives
@@ -366,7 +372,8 @@ class AppIntegrationTest {
             // encodings
             new PathAndContents(outputDirectory.resolve("recording1 - CFR.mp4"), testVideoEncoded),
             new PathAndContents(outputDirectory.resolve("recording2 - CFR.mp4"), testVideoEncoded),
-            new PathAndContents(outputDirectory.resolve("Nested/recording3 - CFR.mp4"), testVideoEncoded),
+            new PathAndContents(
+                outputDirectory.resolve("Nested/recording3 - CFR.mp4"), testVideoEncoded),
             new PathAndContents(
                 outputDirectory.resolve("Nested1/Nested2/recording4 - CFR.mp4"), testVideoEncoded),
             // archives
@@ -451,8 +458,8 @@ class AppIntegrationTest {
     createVideoAt(inputDirectory.resolve("my video.mp4"), testVideo);
 
     // unrelated encodings
-    createVideoAt(inputDirectory.resolve("recording - CFR.mp4"), testVideo);
-    createVideoAt(inputDirectory.resolve("recording2 - CFR.mp4"), testVideo);
+    createVideoAt(inputDirectory.resolve("recording - CFR.mp4"), testVideoEncoded);
+    createVideoAt(inputDirectory.resolve("recording2 - CFR.mp4"), testVideoEncoded);
 
     // unrelated archives
     createVideoAt(inputDirectory.resolve("recording - Archived.mp4"), testVideo);
@@ -529,7 +536,7 @@ class AppIntegrationTest {
     createVideoAt(inputDirectory.resolve("my video.mp4"), testVideo);
 
     // already encoded
-    createVideoAt(inputDirectory.resolve("my video - CFR.mp4"), testVideo);
+    createVideoAt(inputDirectory.resolve("my video - CFR.mp4"), testVideoEncoded);
 
     // When
     runApp(inputDirectory, inputDirectory, inputDirectory);
@@ -575,7 +582,7 @@ class AppIntegrationTest {
     createVideoAt(inputDirectory.resolve("my video.mp4"), testVideo);
 
     // already encoded
-    createVideoAt(inputDirectory.resolve("my video - CFR.mp4"), testVideo);
+    createVideoAt(inputDirectory.resolve("my video - CFR.mp4"), testVideoEncoded);
 
     // already archived
     createVideoAt(inputDirectory.resolve("my video - Archived.mp4"), testVideo);
@@ -614,7 +621,7 @@ class AppIntegrationTest {
             // encoding
             new PathAndContents(inputDirectory.resolve("my video - CFR.mp4"), testVideoEncoded),
             // archive
-            new PathAndContents(inputDirectory.resolve("my video - Archived.mp4"), testVideo));
+            new PathAndContents(inputDirectory.resolve("my video - Archived.mp4"), testVideo2));
   }
 
   @Test
@@ -627,7 +634,7 @@ class AppIntegrationTest {
     createVideoAt(inputDirectory.resolve("my video.mp4"), testVideo);
 
     // already encoded
-    createVideoAt(inputDirectory.resolve("my video - CFR.mp4"), testVideo);
+    createVideoAt(inputDirectory.resolve("my video - CFR.mp4"), testVideoEncoded);
 
     // already archived but different contents
     createVideoAt(inputDirectory.resolve("my video - Archived.mp4"), testVideo2);
@@ -643,7 +650,7 @@ class AppIntegrationTest {
             // encoding
             new PathAndContents(inputDirectory.resolve("my video - CFR.mp4"), testVideoEncoded),
             // archive
-            new PathAndContents(inputDirectory.resolve("my video - Archived.mp4"), testVideo));
+            new PathAndContents(inputDirectory.resolve("my video - Archived.mp4"), testVideo2));
   }
 
   @Test
@@ -660,8 +667,8 @@ class AppIntegrationTest {
     createVideoAt(inputDirectory.resolve("Nested1/Nested2/recording4.mp4"), testVideo);
 
     // already encoded
-    createVideoAt(inputDirectory.resolve("recording2 - CFR.mp4"), testVideo);
-    createVideoAt(inputDirectory.resolve("Nested/recording3 - CFR.mp4"), testVideo);
+    createVideoAt(inputDirectory.resolve("recording2 - CFR.mp4"), testVideoEncoded);
+    createVideoAt(inputDirectory.resolve("Nested/recording3 - CFR.mp4"), testVideoEncoded);
 
     // already archived
     createVideoAt(inputDirectory.resolve("recording1 - Archived.mp4"), testVideo);
@@ -680,8 +687,9 @@ class AppIntegrationTest {
         testVideo);
 
     // unrelated encodings
-    createVideoAt(inputDirectory.resolve("Starcraft II/protoss - CFR.mp4"), testVideo);
-    createVideoAt(inputDirectory.resolve("Starcraft II/Campaign/terran1 - CFR.mp4"), testVideo);
+    createVideoAt(inputDirectory.resolve("Starcraft II/protoss - CFR.mp4"), testVideoEncoded);
+    createVideoAt(
+        inputDirectory.resolve("Starcraft II/Campaign/terran1 - CFR.mp4"), testVideoEncoded);
 
     // unrelated archives
     createVideoAt(inputDirectory.resolve("League of Legends/ryze - Archived.mp4"), testVideo);
@@ -697,7 +705,8 @@ class AppIntegrationTest {
             // encodings
             new PathAndContents(inputDirectory.resolve("recording1 - CFR.mp4"), testVideoEncoded),
             new PathAndContents(inputDirectory.resolve("recording2 - CFR.mp4"), testVideoEncoded),
-            new PathAndContents(inputDirectory.resolve("Nested/recording3 - CFR.mp4"), testVideoEncoded),
+            new PathAndContents(
+                inputDirectory.resolve("Nested/recording3 - CFR.mp4"), testVideoEncoded),
             new PathAndContents(
                 inputDirectory.resolve("Nested1/Nested2/recording4 - CFR.mp4"), testVideoEncoded),
             // archives
@@ -711,7 +720,8 @@ class AppIntegrationTest {
             new PathAndContents(
                 inputDirectory.resolve("Starcraft II/protoss - CFR.mp4"), testVideoEncoded),
             new PathAndContents(
-                inputDirectory.resolve("Starcraft II/Campaign/terran1 - CFR.mp4"), testVideoEncoded),
+                inputDirectory.resolve("Starcraft II/Campaign/terran1 - CFR.mp4"),
+                testVideoEncoded),
             // unrelated archives
             new PathAndContents(
                 inputDirectory.resolve("League of Legends/ryze - Archived.mp4"), testVideo),
@@ -738,8 +748,8 @@ class AppIntegrationTest {
     Path archiveDirectory = createDirectoryAt(testDirectory.resolve("Gameplay Archive"));
 
     // already encoded
-    createVideoAt(outputDirectory.resolve("recording2 - CFR.mp4"), testVideo);
-    createVideoAt(outputDirectory.resolve("Nested/recording3 - CFR.mp4"), testVideo);
+    createVideoAt(outputDirectory.resolve("recording2 - CFR.mp4"), testVideoEncoded);
+    createVideoAt(outputDirectory.resolve("Nested/recording3 - CFR.mp4"), testVideoEncoded);
 
     // already archived
     createVideoAt(archiveDirectory.resolve("recording1 - Archived.mp4"), testVideo);
@@ -756,9 +766,9 @@ class AppIntegrationTest {
     createVideoAt(archiveDirectory.resolve("recording2 - Archived (incomplete).mp4"), testVideo);
 
     // unrelated encodings
-    createVideoAt(inputDirectory.resolve("recording - CFR.mp4"), testVideo);
-    createVideoAt(outputDirectory.resolve("recording - CFR.mp4"), testVideo);
-    createVideoAt(archiveDirectory.resolve("recording - CFR.mp4"), testVideo);
+    createVideoAt(inputDirectory.resolve("recording - CFR.mp4"), testVideoEncoded);
+    createVideoAt(outputDirectory.resolve("recording - CFR.mp4"), testVideoEncoded);
+    createVideoAt(archiveDirectory.resolve("recording - CFR.mp4"), testVideoEncoded);
 
     // unrelated archives
     createVideoAt(inputDirectory.resolve("recording - Archived.mp4"), testVideo);
@@ -774,7 +784,8 @@ class AppIntegrationTest {
             // encodings
             new PathAndContents(outputDirectory.resolve("recording1 - CFR.mp4"), testVideoEncoded),
             new PathAndContents(outputDirectory.resolve("recording2 - CFR.mp4"), testVideoEncoded),
-            new PathAndContents(outputDirectory.resolve("Nested/recording3 - CFR.mp4"), testVideoEncoded),
+            new PathAndContents(
+                outputDirectory.resolve("Nested/recording3 - CFR.mp4"), testVideoEncoded),
             new PathAndContents(
                 outputDirectory.resolve("Nested1/Nested2/recording4 - CFR.mp4"), testVideoEncoded),
             // archives
@@ -829,37 +840,43 @@ class AppIntegrationTest {
 
   private record PathAndContents(Path path, Path contents) {
 
-    // HandBrake is not deterministic (repeating an encoding doesn't always result in the same output)
-    // workaround when asserting expected file contents:
-    // Just check the first ~1MB is equal. Good enough for these test, if it were an entirely different file it would fail on the first byte.
-    // TODO better workaround? - Call mismatch several times? Check 95% equal?
-    static int FIRST_MISMATCHED_BYTE_TOLERANCE = 1_000_000;
-
     static Correspondence<PathAndContents, PathAndContents> correspondence() {
       return Correspondence.from(PathAndContents::recordsEquivalent, "is equivalent to")
           .formattingDiffsUsing(PathAndContents::formatRecordDiff);
     }
 
     static boolean recordsEquivalent(PathAndContents actual, PathAndContents expected) {
-      try {
-        return actual.path.equals(expected.path)
-            && Files.mismatch(actual.contents, expected.contents) <= FIRST_MISMATCHED_BYTE_TOLERANCE;
-      } catch (IOException e) {
-        throw new UncheckedIOException(e);
-      }
+      return actual.path.equals(expected.path)
+          && contentsSimilar(actual.contents, expected.contents);
     }
 
     static String formatRecordDiff(PathAndContents actual, PathAndContents expected) {
       if (!actual.path.equals(expected.path)) {
         return "paths not equal";
       }
+      if (!contentsSimilar(actual.path, expected.path)) {
+        return "contents not similar";
+      }
+      throw new AssertionError("Unreachable");
+    }
+
+    // HandBrake is not deterministic (encoding doesn't always produce the exact same output)
+    // so need a method to test file contents are similar.
+    // This method returns true if <1% bytes mismatch, which is good enough for these tests.
+    static boolean contentsSimilar(Path a, Path b) {
       try {
-        long mismatch = Files.mismatch(actual.contents, expected.contents);
-        if (mismatch > FIRST_MISMATCHED_BYTE_TOLERANCE) {
-          return "contents differ, first mismatched byte: %s"
-              .formatted(mismatch);
-        }
-        throw new AssertionError("Unreachable");
+        byte[] aBytes = Files.readAllBytes(a);
+        byte[] bBytes = Files.readAllBytes(b);
+
+        long mismatchCount =
+            IntStream.iterate(0, i -> i < aBytes.length && i < bBytes.length, i -> i + 1)
+                .filter(i -> aBytes[i] != bBytes[i])
+                .count();
+
+        double meanLength = (aBytes.length + bBytes.length) / 2d;
+
+        double percentMismatch = mismatchCount / meanLength;
+        return percentMismatch < 0.01;
       } catch (IOException e) {
         throw new UncheckedIOException(e);
       }
