@@ -828,33 +828,28 @@ class AppIntegrationTest {
         Boolean.FALSE.toString());
   }
 
-  private IterableSubject.UsingCorrespondence<PathAndContents, PathAndContents>
-      assertThatTestDirectory() throws IOException {
-    return assertThat(
-            Files.walk(testDirectory)
-                .filter(Files::isRegularFile)
-                .map(path -> new PathAndContents(path, path))
-                .toList())
+  private IterableSubject.UsingCorrespondence<Path, PathAndContents> assertThatTestDirectory()
+      throws IOException {
+    return assertThat(Files.walk(testDirectory).filter(Files::isRegularFile).toList())
         .comparingElementsUsing(PathAndContents.correspondence());
   }
 
   private record PathAndContents(Path path, Path contents) {
 
-    static Correspondence<PathAndContents, PathAndContents> correspondence() {
+    static Correspondence<Path, PathAndContents> correspondence() {
       return Correspondence.from(PathAndContents::recordsEquivalent, "is equivalent to")
           .formattingDiffsUsing(PathAndContents::formatRecordDiff);
     }
 
-    static boolean recordsEquivalent(PathAndContents actual, PathAndContents expected) {
-      return actual.path.equals(expected.path)
-          && contentsSimilar(actual.contents, expected.contents);
+    static boolean recordsEquivalent(Path actual, PathAndContents expected) {
+      return actual.equals(expected.path) && contentsSimilar(actual, expected.contents);
     }
 
-    static String formatRecordDiff(PathAndContents actual, PathAndContents expected) {
-      if (!actual.path.equals(expected.path)) {
+    static String formatRecordDiff(Path actual, PathAndContents expected) {
+      if (!actual.equals(expected.path)) {
         return "paths not equal";
       }
-      if (!contentsSimilar(actual.path, expected.path)) {
+      if (!contentsSimilar(actual, expected.path)) {
         return "contents not similar";
       }
       throw new AssertionError("Unreachable");
