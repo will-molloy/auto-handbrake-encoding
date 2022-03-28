@@ -67,7 +67,7 @@ class AppIntegrationTest {
     assertThatTestDirectory()
         .containsExactly(
             // encoding
-            new PathAndContents(inputDirectory.resolve("my video - CFR.mp4"), testVideo),
+            new PathAndContents(inputDirectory.resolve("my video - CFR.mp4"), testVideoEncoded),
             // archive
             new PathAndContents(inputDirectory.resolve("my video - Archived.mp4"), testVideo));
   }
