@@ -32,7 +32,6 @@ Automating HandBrake encoding
 3. Archives original videos
     - Archived files are named with the suffix ` - Archived.mp4`
     - They won't be detected by the program again, if you want to encode again, remove this suffix first
-4. (optional) Shuts computer down after running (useful if for example running overnight)
 
 #### Usage:
 
@@ -51,8 +50,4 @@ Automating HandBrake encoding
 3. Run via Gradle:
    ```bash
    ./gradlew :nvidia-shadowplay:run
-   ```
-   or to shutdown afterwards (e.g. running overnight):
-   ```bash
-   ./gradlew :nvidia-shadowplay:runAndThenShutdownComputer
    ```

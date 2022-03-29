@@ -5,7 +5,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Stopwatch;
 import com.wilmol.handbrake.core.Cli;
-import com.wilmol.handbrake.core.Computer;
 import com.wilmol.handbrake.core.HandBrake;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -29,24 +28,19 @@ class App {
 
   private final VideoEncoder videoEncoder;
   private final VideoArchiver videoArchiver;
-  private final Computer computer;
 
-  App(VideoEncoder videoEncoder, VideoArchiver videoArchiver, Computer computer) {
+  App(VideoEncoder videoEncoder, VideoArchiver videoArchiver) {
     this.videoEncoder = checkNotNull(videoEncoder);
     this.videoArchiver = checkNotNull(videoArchiver);
-    this.computer = checkNotNull(computer);
   }
 
-  void run(
-      Path inputDirectory, Path outputDirectory, Path archiveDirectory, boolean shutdownComputer)
-      throws Exception {
+  void run(Path inputDirectory, Path outputDirectory, Path archiveDirectory) throws Exception {
     Stopwatch stopwatch = Stopwatch.createStarted();
     log.info(
-        "run(inputDirectory={}, outputDirectory={}, archiveDirectory={}, shutdownComputer={}) started",
+        "run(inputDirectory={}, outputDirectory={}, archiveDirectory={}) started",
         inputDirectory,
         outputDirectory,
-        archiveDirectory,
-        shutdownComputer);
+        archiveDirectory);
 
     try {
       deleteIncompleteEncodingsAndArchives(inputDirectory, outputDirectory, archiveDirectory);
@@ -58,10 +52,6 @@ class App {
       encodeAndArchiveVideos(unencodedVideos);
     } finally {
       log.info("run finished - elapsed: {}", stopwatch.elapsed());
-
-      if (shutdownComputer) {
-        computer.shutdown();
-      }
     }
   }
 
@@ -132,20 +122,16 @@ class App {
 
   public static void main(String... args) {
     try {
-      checkArgument(args.length == 4, "Expected 4 args to main method");
+      checkArgument(args.length == 3, "Expected 3 args to main method");
       Path inputDirectory = Path.of(args[0]);
       Path outputDirectory = Path.of(args[1]);
       Path archiveDirectory = Path.of(args[2]);
-      boolean shutdownComputer = Boolean.parseBoolean(args[3]);
 
-      Cli cli = new Cli();
-      HandBrake handBrake = new HandBrake(cli);
-      VideoEncoder videoEncoder = new VideoEncoder(handBrake);
+      VideoEncoder videoEncoder = new VideoEncoder(new HandBrake(new Cli()));
       VideoArchiver videoArchiver = new VideoArchiver();
-      Computer computer = new Computer(cli);
-      App app = new App(videoEncoder, videoArchiver, computer);
+      App app = new App(videoEncoder, videoArchiver);
 
-      app.run(inputDirectory, outputDirectory, archiveDirectory, shutdownComputer);
+      app.run(inputDirectory, outputDirectory, archiveDirectory);
     } catch (Exception e) {
       log.fatal("Fatal error", e);
     }

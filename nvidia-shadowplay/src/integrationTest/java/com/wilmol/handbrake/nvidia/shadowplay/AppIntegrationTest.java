@@ -822,11 +822,7 @@ class AppIntegrationTest {
   }
 
   private void runApp(Path inputDirectory, Path outputDirectory, Path archiveDirectory) {
-    App.main(
-        inputDirectory.toString(),
-        outputDirectory.toString(),
-        archiveDirectory.toString(),
-        Boolean.FALSE.toString());
+    App.main(inputDirectory.toString(), outputDirectory.toString(), archiveDirectory.toString());
   }
 
   private IterableSubject.UsingCorrespondence<Path, PathAndContents> assertThatTestDirectory()

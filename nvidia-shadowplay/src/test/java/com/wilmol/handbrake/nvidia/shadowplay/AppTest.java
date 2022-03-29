@@ -9,7 +9,6 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.io.Resources;
 import com.google.common.truth.StreamSubject;
-import com.wilmol.handbrake.core.Computer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -41,7 +40,6 @@ class AppTest {
 
   @Mock private VideoEncoder mockVideoEncoder;
   @Mock private VideoArchiver mockVideoArchiver;
-  @Mock private Computer mockComputer;
   @InjectMocks private App app;
 
   @BeforeEach
@@ -75,7 +73,7 @@ class AppTest {
     Files.copy(testVideo, inputDirectory.resolve("NestedFolder/video3.mp4"));
 
     // When
-    app.run(inputDirectory, outputDirectory, archiveDirectory, false);
+    app.run(inputDirectory, outputDirectory, archiveDirectory);
 
     // Then
     verify(mockVideoEncoder)
@@ -114,7 +112,7 @@ class AppTest {
     Files.copy(testVideo, inputDirectory.resolve("video1.mp4"));
 
     // When
-    app.run(inputDirectory, outputDirectory, archiveDirectory, false);
+    app.run(inputDirectory, outputDirectory, archiveDirectory);
 
     // Then
     verify(mockVideoEncoder)
@@ -131,7 +129,7 @@ class AppTest {
     Files.copy(testVideo, outputDirectory.resolve("video1 - CFR (incomplete).mp4"));
 
     // When
-    app.run(inputDirectory, outputDirectory, archiveDirectory, false);
+    app.run(inputDirectory, outputDirectory, archiveDirectory);
 
     // Then
     assertThatTestDirectory().isEmpty();
@@ -143,19 +141,10 @@ class AppTest {
     Files.copy(testVideo, archiveDirectory.resolve("video1 - Archived (incomplete).mp4"));
 
     // When
-    app.run(inputDirectory, outputDirectory, archiveDirectory, false);
+    app.run(inputDirectory, outputDirectory, archiveDirectory);
 
     // Then
     assertThatTestDirectory().isEmpty();
-  }
-
-  @Test
-  void shutsComputerDownIfRequested() throws Exception {
-    // When
-    app.run(inputDirectory, outputDirectory, archiveDirectory, true);
-
-    // Then
-    verify(mockComputer).shutdown();
   }
 
   private StreamSubject assertThatTestDirectory() throws IOException {
