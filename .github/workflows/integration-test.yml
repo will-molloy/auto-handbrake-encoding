@@ -51,7 +51,12 @@ jobs:
         run: chmod +x gradlew
 
       - name: Integration Test
-        run: ./gradlew projects clean integrationTest --no-daemon --refresh-dependencies
+        # use retry cause the integration tests can be flaky. E.g. HandBrake crashing on the agent.
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 10
+          max_attempts: 10
+          command: ./gradlew projects clean integrationTest --no-daemon --refresh-dependencies
 
       - name: Upload coverage to Codecov (Linux only)
         if: matrix.os == 'ubuntu-latest'
