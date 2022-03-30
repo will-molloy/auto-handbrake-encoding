@@ -55,7 +55,7 @@ class CliTest {
   void successfulExecutionOfCommandReturnsTrue() throws Exception {
     when(mockProcess.waitFor()).thenReturn(0);
 
-    assertThat(cli.execute(List.of("ls"))).isTrue();
+    assertThat(cli.execute(List.of("ls"), s -> {})).isTrue();
     verify(mockProcessBuilder).command(List.of("ls"));
   }
 
@@ -63,7 +63,7 @@ class CliTest {
   void nonZeroExitCodeReturnsFalse() throws Exception {
     when(mockProcess.waitFor()).thenReturn(1);
 
-    assertThat(cli.execute(List.of("abc"))).isFalse();
+    assertThat(cli.execute(List.of("abc"), s -> {})).isFalse();
     verify(mockProcessBuilder).command(List.of("abc"));
   }
 
@@ -71,7 +71,7 @@ class CliTest {
   void exceptionThrownReturnsFalse() throws Exception {
     when(mockProcess.waitFor()).thenThrow(new RuntimeException("error"));
 
-    assertThat(cli.execute(List.of("xyz"))).isFalse();
+    assertThat(cli.execute(List.of("xyz"), s -> {})).isFalse();
     verify(mockProcessBuilder).command(List.of("xyz"));
   }
 

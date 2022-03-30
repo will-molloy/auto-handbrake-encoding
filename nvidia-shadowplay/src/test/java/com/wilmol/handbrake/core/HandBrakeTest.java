@@ -1,7 +1,9 @@
 package com.wilmol.handbrake.core;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -33,19 +35,21 @@ class HandBrakeTest {
     Path input = Path.of("input.mp4");
     Path output = Path.of("output.mp4");
 
-    when(mockCli.execute(anyList())).thenReturn(true);
+    when(mockCli.execute(anyList(), any())).thenReturn(true);
 
     assertThat(handBrake.encode(input, output)).isTrue();
     verify(mockCli)
         .execute(
-            List.of(
-                "HandBrakeCLI",
-                "--preset",
-                "Production Standard",
-                "-i",
-                "input.mp4",
-                "-o",
-                "output.mp4"));
+            eq(
+                List.of(
+                    "HandBrakeCLI",
+                    "--preset",
+                    "Production Standard",
+                    "-i",
+                    "input.mp4",
+                    "-o",
+                    "output.mp4")),
+            any());
   }
 
   @Test
@@ -56,7 +60,7 @@ class HandBrakeTest {
     try {
       Files.createFile(output);
       assertThat(handBrake.encode(input, output)).isTrue();
-      verify(mockCli, never()).execute(anyList());
+      verify(mockCli, never()).execute(anyList(), any());
     } finally {
       Files.delete(output);
     }
@@ -67,7 +71,7 @@ class HandBrakeTest {
     Path input = Path.of("input.mp4");
     Path output = Path.of("output.mp4");
 
-    when(mockCli.execute(anyList())).thenReturn(false);
+    when(mockCli.execute(anyList(), any())).thenReturn(false);
 
     assertThat(handBrake.encode(input, output)).isFalse();
   }
@@ -77,7 +81,7 @@ class HandBrakeTest {
     Path input = Path.of("input.mp4");
     Path output = Path.of("output.mp4");
 
-    when(mockCli.execute(anyList())).thenThrow(new RuntimeException("error"));
+    when(mockCli.execute(anyList(), any())).thenThrow(new RuntimeException("error"));
 
     assertThat(handBrake.encode(input, output)).isFalse();
   }

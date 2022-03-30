@@ -46,7 +46,8 @@ public class HandBrake {
     try {
       return cli.execute(
           List.of(
-              "HandBrakeCLI", "--preset", PRESET, "-i", input.toString(), "-o", output.toString()));
+              "HandBrakeCLI", "--preset", PRESET, "-i", input.toString(), "-o", output.toString()),
+          log::debug);
     } catch (Exception e) {
       log.error("Error encoding: %s".formatted(input), e);
       return false;
