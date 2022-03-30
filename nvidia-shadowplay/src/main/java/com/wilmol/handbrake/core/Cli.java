@@ -37,18 +37,19 @@ public class Cli {
    * Executes the given command.
    *
    * @param command command to execute
-   * @param inputStreamConsumer consumer of the command's process input stream
+   * @param processLogConsumer consumer of the command's process logs (i.e. {@link
+   *     Process#getInputStream})
    * @return {@code true} if execution was successful
    */
   @SuppressFBWarnings("REC_CATCH_EXCEPTION")
-  public boolean execute(List<String> command, Consumer<String> inputStreamConsumer) {
+  public boolean execute(List<String> command, Consumer<String> processLogConsumer) {
     log.info("Executing: {}", command);
 
     Process process = null;
     CompletableFuture<?> processLoggerFuture = null;
     try {
       process = processBuilderSupplier.get().command(command).redirectErrorStream(true).start();
-      processLoggerFuture = consumeStreamAsync(process.getInputStream(), inputStreamConsumer);
+      processLoggerFuture = consumeStreamAsync(process.getInputStream(), processLogConsumer);
 
       int exitCode = process.waitFor();
       if (exitCode != 0) {
