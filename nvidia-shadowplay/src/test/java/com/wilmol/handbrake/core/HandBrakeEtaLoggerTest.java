@@ -1,10 +1,10 @@
 package com.wilmol.handbrake.core;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.util.List;
 import org.apache.logging.log4j.Logger;
@@ -39,6 +39,7 @@ class HandBrakeEtaLoggerTest {
             "",
             "Starting Task: Encoding Pass",
             "Encoding: task 1 of 1, 0.63 % (61.80 fps, avg 62.30 fps, ETA 00h10m00s)",
+            "Encoding: task 1 of 1, 0.75 % (61.80 fps, avg 62.30 fps, ETA 00h09m59s)",
             "Encoding: task 1 of 1, 5.15 % (61.80 fps, avg 62.30 fps, ETA 00h09m30s)",
             "Encoding: task 1 of 1, 10.44 % (61.80 fps, avg 62.30 fps, ETA 00h09m00s)",
             "Encoding: task 1 of 1, 15.15 % (61.80 fps, avg 62.30 fps, ETA 00h08m30s)",
@@ -72,17 +73,19 @@ class HandBrakeEtaLoggerTest {
     }
 
     inOrder = inOrder(mockLogger);
-    inOrder.verify(mockLogger).info("{}% {}", 0, "ETA 00h10m00s");
-    inOrder.verify(mockLogger).info("{}% {}", 10, "ETA 00h09m00s");
-    inOrder.verify(mockLogger).info("{}% {}", 20, "ETA 00h08m00s");
-    inOrder.verify(mockLogger).info("{}% {}", 30, "ETA 00h07m00s");
-    inOrder.verify(mockLogger).info("{}% {}", 40, "ETA 00h06m00s");
-    inOrder.verify(mockLogger).info("{}% {}", 50, "ETA 00h05m00s");
-    inOrder.verify(mockLogger).info("{}% {}", 60, "ETA 00h04m00s");
-    inOrder.verify(mockLogger).info("{}% {}", 70, "ETA 00h03m00s");
-    inOrder.verify(mockLogger).info("{}% {}", 80, "ETA 00h02m00s");
-    inOrder.verify(mockLogger).info("{}% {}", 90, "ETA 00h01m00s");
-    inOrder.verify(mockLogger).info("{}% {}", 100, "ETA 00h00m00s");
-    verify(mockLogger, times(11)).info(anyString(), any(), any());
+    inOrder.verify(mockLogger).info("0.63 % (61.80 fps, avg 62.30 fps, ETA 00h10m00s)");
+    inOrder.verify(mockLogger).info("10.44 % (61.80 fps, avg 62.30 fps, ETA 00h09m00s)");
+    inOrder.verify(mockLogger).info("20.63 % (61.80 fps, avg 62.30 fps, ETA 00h08m00s)");
+    inOrder.verify(mockLogger).info("30.63 % (61.80 fps, avg 62.30 fps, ETA 00h07m00s)");
+    inOrder.verify(mockLogger).info("40.36 % (61.80 fps, avg 62.30 fps, ETA 00h06m00s)");
+    inOrder.verify(mockLogger).info("50.72 % (61.80 fps, avg 62.30 fps, ETA 00h05m00s)");
+    inOrder.verify(mockLogger).info("60.45 % (61.80 fps, avg 62.30 fps, ETA 00h04m00s)");
+    inOrder.verify(mockLogger).info("70.06 % (61.80 fps, avg 62.30 fps, ETA 00h03m00s)");
+    inOrder.verify(mockLogger).info("80.77 % (61.80 fps, avg 62.30 fps, ETA 00h02m00s)");
+    inOrder.verify(mockLogger).info("90.32 % (61.80 fps, avg 62.30 fps, ETA 00h01m00s)");
+    inOrder.verify(mockLogger).info("100.00 % (61.80 fps, avg 62.30 fps, ETA 00h00m00s)");
+    verify(mockLogger, times(11)).info(anyString());
+
+    verifyNoMoreInteractions(mockLogger);
   }
 }
