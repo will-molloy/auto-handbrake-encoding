@@ -1,8 +1,8 @@
 # auto-handbrake-encoding
 
-[![build](https://github.com/wilmol/auto-handbrake-encoding/workflows/build/badge.svg?branch=main)](https://github.com/wilmol/auto-handbrake-encoding/actions?query=workflow%3Abuild)
-[![integration-test](https://github.com/wilmol/auto-handbrake-encoding/workflows/integration-test/badge.svg?branch=main)](https://github.com/wilmol/auto-handbrake-encoding/actions?query=workflow%3Aintegration-test)
-[![codecov](https://codecov.io/gh/wilmol/auto-handbrake-encoding/branch/main/graph/badge.svg)](https://codecov.io/gh/wilmol/auto-handbrake-encoding)
+[![build](https://github.com/will-molloy/auto-handbrake-encoding/workflows/build/badge.svg?branch=main)](https://github.com/will-molloy/auto-handbrake-encoding/actions?query=workflow%3Abuild)
+[![integration-test](https://github.com/will-molloy/auto-handbrake-encoding/workflows/integration-test/badge.svg?branch=main)](https://github.com/will-molloy/auto-handbrake-encoding/actions?query=workflow%3Aintegration-test)
+[![codecov](https://codecov.io/gh/will-molloy/auto-handbrake-encoding/branch/main/graph/badge.svg)](https://codecov.io/gh/will-molloy/auto-handbrake-encoding)
 
 Automating HandBrake encoding
 
