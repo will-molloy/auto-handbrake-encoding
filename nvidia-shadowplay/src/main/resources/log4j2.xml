@@ -21,6 +21,6 @@
             <AppenderRef ref="file"/>
         </Root>
 
-        <Logger name="com.wilmol" level="debug"/>
+        <Logger name="com.willmolloy" level="debug"/>
     </Loggers>
 </Configuration>
