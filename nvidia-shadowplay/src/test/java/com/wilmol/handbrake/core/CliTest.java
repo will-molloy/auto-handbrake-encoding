@@ -10,6 +10,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.function.Consumer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -55,7 +56,7 @@ class CliTest {
   void successfulExecutionOfCommandReturnsTrue() throws Exception {
     when(mockProcess.waitFor()).thenReturn(0);
 
-    assertThat(cli.execute(List.of("ls"))).isTrue();
+    assertThat(cli.execute(List.of("ls"), new EmptyConsumer())).isTrue();
     verify(mockProcessBuilder).command(List.of("ls"));
   }
 
@@ -63,7 +64,7 @@ class CliTest {
   void nonZeroExitCodeReturnsFalse() throws Exception {
     when(mockProcess.waitFor()).thenReturn(1);
 
-    assertThat(cli.execute(List.of("abc"))).isFalse();
+    assertThat(cli.execute(List.of("abc"), new EmptyConsumer())).isFalse();
     verify(mockProcessBuilder).command(List.of("abc"));
   }
 
@@ -71,7 +72,7 @@ class CliTest {
   void exceptionThrownReturnsFalse() throws Exception {
     when(mockProcess.waitFor()).thenThrow(new RuntimeException("error"));
 
-    assertThat(cli.execute(List.of("xyz"))).isFalse();
+    assertThat(cli.execute(List.of("xyz"), new EmptyConsumer())).isFalse();
     verify(mockProcessBuilder).command(List.of("xyz"));
   }
 
@@ -80,5 +81,11 @@ class CliTest {
     public int read() {
       return -1;
     }
+  }
+
+  private static final class EmptyConsumer implements Consumer<String> {
+
+    @Override
+    public void accept(String s) {}
   }
 }
