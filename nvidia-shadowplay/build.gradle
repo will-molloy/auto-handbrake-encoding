@@ -1,6 +1,6 @@
-String inputDirectory = "S:\\Gameplay"
-String outputDirectory = "S:\\Gameplay"
-String archiveDirectory = "D:\\Videos\\Gameplay Archive"
+String inputDirectory = project.getProperties().getOrDefault("inputDirectory", "")
+String outputDirectory = project.getProperties().getOrDefault("outputDirectory", "")
+String archiveDirectory = project.getProperties().getOrDefault("archiveDirectory", "")
 
 task run(type: JavaExec) {
   classpath = sourceSets.main.runtimeClasspath

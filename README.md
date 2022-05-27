@@ -40,14 +40,11 @@ Automating HandBrake encoding
    ./gradlew build integrationTest
    ```
 
-2. Configure [Gradle task](nvidia-shadowplay/build.gradle)
+2. Run via [Gradle task](nvidia-shadowplay/build.gradle):
+   ```bash
+   ./gradlew :nvidia-shadowplay:run -PinputDirectory="" -PoutputDirectory="" -ParchiveDirectory=""
+   ```
     - Set `inputDirectory` to directory containing `.mp4` files to encode
     - Set `outputDirectory` where you want encoded files to be saved
     - Set `archiveDirectory` where you want archived files to be saved
     - (These can all be the same directory, personally I record and encode to an SSD, then archive to NAS)
-
-
-3. Run via Gradle:
-   ```bash
-   ./gradlew :nvidia-shadowplay:run
-   ```
