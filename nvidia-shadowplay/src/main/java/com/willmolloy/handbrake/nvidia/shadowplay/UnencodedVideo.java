@@ -59,10 +59,10 @@ final class UnencodedVideo {
   }
 
   private static final String MP4_SUFFIX = ".mp4";
-  private static final String ENCODED_SUFFIX = " - CFR.mp4";
-  private static final String TEMP_ENCODED_SUFFIX = " - CFR (incomplete).mp4";
-  private static final String ARCHIVED_SUFFIX = " - Archived.mp4";
-  private static final String TEMP_ARCHIVED_SUFFIX = " - Archived (incomplete).mp4";
+  private static final String ENCODED_SUFFIX = ".cfr.mp4";
+  private static final String TEMP_ENCODED_SUFFIX = ".cfr.mp4.part";
+  private static final String ARCHIVED_SUFFIX = ".archived.mp4";
+  private static final String TEMP_ARCHIVED_SUFFIX = ".archived.mp4.part";
 
   public static boolean isMp4(Path path) {
     return fileName(path).endsWith(MP4_SUFFIX);
@@ -115,21 +115,23 @@ final class UnencodedVideo {
     }
 
     public UnencodedVideo newUnencodedVideo(Path videoPath) {
-      checkArgument(isMp4(videoPath), "videoPath (%s) does not represent an .mp4 file", videoPath);
-
-      checkArgument(
-          !isEncodedMp4(videoPath), "videoPath (%s) represents an encoded .mp4 file", videoPath);
       checkArgument(
           !isTempEncodedMp4(videoPath),
           "videoPath (%s) represents an incomplete encoded .mp4 file",
           videoPath);
 
       checkArgument(
-          !isArchivedMp4(videoPath), "videoPath (%s) represents an archived .mp4 file", videoPath);
-      checkArgument(
           !isTempArchivedMp4(videoPath),
           "videoPath (%s) represents an incomplete archived .mp4 file",
           videoPath);
+
+      checkArgument(isMp4(videoPath), "videoPath (%s) does not represent an .mp4 file", videoPath);
+
+      checkArgument(
+          !isEncodedMp4(videoPath), "videoPath (%s) represents an encoded .mp4 file", videoPath);
+
+      checkArgument(
+          !isArchivedMp4(videoPath), "videoPath (%s) represents an archived .mp4 file", videoPath);
 
       checkArgument(
           videoPath.startsWith(inputDirectory),

@@ -56,12 +56,12 @@ class FileRenamerTest {
   void ignoresFilesNotMatchingSuffix() throws IOException {
     // Given
     Files.createDirectories(testDirectory.resolve("Nested"));
-    Files.createFile(testDirectory.resolve("video1 - Archived.mp4"));
+    Files.createFile(testDirectory.resolve("video1.archived.mp4"));
     Files.createFile(testDirectory.resolve("My Vid2 - New.mp4"));
     Files.createFile(testDirectory.resolve("Nested/Video3.mp4"));
 
     // When
-    fileRenamer.changeSuffixes(testDirectory, " - Archived.mp4", ".mp4");
+    fileRenamer.changeSuffixes(testDirectory, ".archived.mp4", ".mp4");
 
     // Then
     assertThat(Files.walk(testDirectory).filter(Files::isRegularFile))

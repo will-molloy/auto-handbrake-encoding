@@ -83,11 +83,10 @@ class VideoEncoderTest {
     videoEncoder.encode(unencodedVideo);
 
     // Then
-    verify(mockHandBrake)
-        .encode(unencodedMp4File, outputDirectory.resolve("file - CFR (incomplete).mp4"));
+    verify(mockHandBrake).encode(unencodedMp4File, outputDirectory.resolve("file.cfr.mp4.part"));
     assertThatTestDirectory()
         .containsExactly(
-            inputDirectory.resolve("file.mp4"), outputDirectory.resolve("file - CFR.mp4"));
+            inputDirectory.resolve("file.mp4"), outputDirectory.resolve("file.cfr.mp4"));
   }
 
   @Test
@@ -115,12 +114,11 @@ class VideoEncoderTest {
 
     // Then
     verify(mockHandBrake)
-        .encode(
-            unencodedMp4File, outputDirectory.resolve("Halo/Campaign/file - CFR (incomplete).mp4"));
+        .encode(unencodedMp4File, outputDirectory.resolve("Halo/Campaign/file.cfr.mp4.part"));
     assertThatTestDirectory()
         .containsExactly(
             inputDirectory.resolve("Halo/Campaign/file.mp4"),
-            outputDirectory.resolve("Halo/Campaign/file - CFR.mp4"));
+            outputDirectory.resolve("Halo/Campaign/file.cfr.mp4"));
   }
 
   @Test
@@ -142,7 +140,7 @@ class VideoEncoderTest {
   @Test
   void encodedFileAlreadyExistsReturnsEarly() throws IOException {
     // Given
-    Files.copy(testVideo, outputDirectory.resolve("file - CFR.mp4"));
+    Files.copy(testVideo, outputDirectory.resolve("file.cfr.mp4"));
 
     Path unencodedMp4File = Files.copy(testVideo, inputDirectory.resolve("file.mp4"));
 
@@ -155,7 +153,7 @@ class VideoEncoderTest {
     verify(mockHandBrake, never()).encode(any(), any());
     assertThatTestDirectory()
         .containsExactly(
-            inputDirectory.resolve("file.mp4"), outputDirectory.resolve("file - CFR.mp4"));
+            inputDirectory.resolve("file.mp4"), outputDirectory.resolve("file.cfr.mp4"));
   }
 
   private StreamSubject assertThatTestDirectory() throws IOException {

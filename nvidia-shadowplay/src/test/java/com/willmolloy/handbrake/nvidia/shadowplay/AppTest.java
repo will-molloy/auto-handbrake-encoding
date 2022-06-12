@@ -126,7 +126,7 @@ class AppTest {
   @Test
   void deletesIncompleteEncodings() throws Exception {
     // Given
-    Files.copy(testVideo, outputDirectory.resolve("video1 - CFR (incomplete).mp4"));
+    Files.copy(testVideo, outputDirectory.resolve("video1.cfr.mp4.part"));
 
     // When
     app.run(inputDirectory, outputDirectory, archiveDirectory);
@@ -138,7 +138,7 @@ class AppTest {
   @Test
   void deletesIncompleteArchives() throws Exception {
     // Given
-    Files.copy(testVideo, archiveDirectory.resolve("video1 - Archived (incomplete).mp4"));
+    Files.copy(testVideo, archiveDirectory.resolve("video1.archived.mp4.part"));
 
     // When
     app.run(inputDirectory, outputDirectory, archiveDirectory);
