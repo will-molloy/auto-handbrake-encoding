@@ -62,7 +62,7 @@ public class FileRenamer {
   //      //      fileRenamer.changeSuffixes(directory, " - Archived.mp4", ".mp4");
   //
   //      // other
-  //      //      fileRenamer.changeSuffixes(directory, " - CFR 60 FPS.mp4", " - CFR.mp4");
+  //      //      fileRenamer.changeSuffixes(directory, " - CFR 60 FPS.mp4", ".cfr.mp4");
   //    } catch (Exception e) {
   //      log.fatal("Fatal error", e);
   //    }
