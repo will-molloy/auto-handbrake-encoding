@@ -399,8 +399,8 @@ class AppIntegrationTest {
     createVideoAt(inputDirectory.resolve("recording2.cfr.mp4.part"), testVideo);
 
     // incomplete archives
-    createVideoAt(inputDirectory.resolve("vid - Archived (incomplete).mp4"), testVideo);
-    createVideoAt(inputDirectory.resolve("vid2 - Archived (incomplete).mp4"), testVideo);
+    createVideoAt(inputDirectory.resolve("vid.archived.mp4.part"), testVideo);
+    createVideoAt(inputDirectory.resolve("vid2.archived.mp4.part"), testVideo);
 
     // When
     runApp(inputDirectory, inputDirectory, inputDirectory);
@@ -434,9 +434,9 @@ class AppIntegrationTest {
     createVideoAt(archiveDirectory.resolve("recording.cfr.mp4.part"), testVideo);
 
     // incomplete archives
-    createVideoAt(inputDirectory.resolve("vid - Archived (incomplete).mp4"), testVideo);
-    createVideoAt(outputDirectory.resolve("vid - Archived (incomplete).mp4"), testVideo);
-    createVideoAt(archiveDirectory.resolve("vid - Archived (incomplete).mp4"), testVideo);
+    createVideoAt(inputDirectory.resolve("vid.archived.mp4.part"), testVideo);
+    createVideoAt(outputDirectory.resolve("vid.archived.mp4.part"), testVideo);
+    createVideoAt(archiveDirectory.resolve("vid.archived.mp4.part"), testVideo);
 
     // When
     runApp(inputDirectory, outputDirectory, archiveDirectory);
@@ -682,9 +682,9 @@ class AppIntegrationTest {
         testVideo);
 
     // incomplete archives
-    createVideoAt(inputDirectory.resolve("recording2 - Archived (incomplete).mp4"), testVideo);
+    createVideoAt(inputDirectory.resolve("recording2.archived.mp4.part"), testVideo);
     createVideoAt(
-        inputDirectory.resolve("Nested1/Nested2/Nested3/random video - Archived (incomplete).mp4"),
+        inputDirectory.resolve("Nested1/Nested2/Nested3/random video.archived.mp4.part"),
         testVideo);
 
     // unrelated encodings
@@ -762,9 +762,9 @@ class AppIntegrationTest {
     createVideoAt(archiveDirectory.resolve("recording1.cfr.mp4.part"), testVideo);
 
     // incomplete archives
-    createVideoAt(inputDirectory.resolve("recording2 - Archived (incomplete).mp4"), testVideo);
-    createVideoAt(outputDirectory.resolve("recording2 - Archived (incomplete).mp4"), testVideo);
-    createVideoAt(archiveDirectory.resolve("recording2 - Archived (incomplete).mp4"), testVideo);
+    createVideoAt(inputDirectory.resolve("recording2.archived.mp4.part"), testVideo);
+    createVideoAt(outputDirectory.resolve("recording2.archived.mp4.part"), testVideo);
+    createVideoAt(archiveDirectory.resolve("recording2.archived.mp4.part"), testVideo);
 
     // unrelated encodings
     createVideoAt(inputDirectory.resolve("recording.cfr.mp4"), testVideoEncoded);
