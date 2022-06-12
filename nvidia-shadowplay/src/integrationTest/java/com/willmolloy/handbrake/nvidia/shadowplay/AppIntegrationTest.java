@@ -395,8 +395,8 @@ class AppIntegrationTest {
     createVideoAt(inputDirectory.resolve("my video.mp4"), testVideo);
 
     // incomplete encodings
-    createVideoAt(inputDirectory.resolve("recording - CFR (incomplete).mp4"), testVideo);
-    createVideoAt(inputDirectory.resolve("recording2 - CFR (incomplete).mp4"), testVideo);
+    createVideoAt(inputDirectory.resolve("recording.cfr.mp4.part"), testVideo);
+    createVideoAt(inputDirectory.resolve("recording2.cfr.mp4.part"), testVideo);
 
     // incomplete archives
     createVideoAt(inputDirectory.resolve("vid - Archived (incomplete).mp4"), testVideo);
@@ -429,9 +429,9 @@ class AppIntegrationTest {
     Path archiveDirectory = createDirectoryAt(testDirectory.resolve("Gameplay Archive"));
 
     // incomplete encodings
-    createVideoAt(inputDirectory.resolve("recording - CFR (incomplete).mp4"), testVideo);
-    createVideoAt(outputDirectory.resolve("recording - CFR (incomplete).mp4"), testVideo);
-    createVideoAt(archiveDirectory.resolve("recording - CFR (incomplete).mp4"), testVideo);
+    createVideoAt(inputDirectory.resolve("recording.cfr.mp4.part"), testVideo);
+    createVideoAt(outputDirectory.resolve("recording.cfr.mp4.part"), testVideo);
+    createVideoAt(archiveDirectory.resolve("recording.cfr.mp4.part"), testVideo);
 
     // incomplete archives
     createVideoAt(inputDirectory.resolve("vid - Archived (incomplete).mp4"), testVideo);
@@ -676,9 +676,9 @@ class AppIntegrationTest {
     createVideoAt(inputDirectory.resolve("Nested/recording3.archived.mp4"), testVideo);
 
     // incomplete encodings
-    createVideoAt(inputDirectory.resolve("recording1 - CFR (incomplete).mp4"), testVideo);
+    createVideoAt(inputDirectory.resolve("recording1.cfr.mp4.part"), testVideo);
     createVideoAt(
-        inputDirectory.resolve("Nested1/Nested2/Nested3/other video - CFR (incomplete).mp4"),
+        inputDirectory.resolve("Nested1/Nested2/Nested3/other video.cfr.mp4.part"),
         testVideo);
 
     // incomplete archives
@@ -757,9 +757,9 @@ class AppIntegrationTest {
     createVideoAt(archiveDirectory.resolve("Nested/recording3.archived.mp4"), testVideo);
 
     // incomplete encodings
-    createVideoAt(inputDirectory.resolve("recording1 - CFR (incomplete).mp4"), testVideo);
-    createVideoAt(outputDirectory.resolve("recording1 - CFR (incomplete).mp4"), testVideo);
-    createVideoAt(archiveDirectory.resolve("recording1 - CFR (incomplete).mp4"), testVideo);
+    createVideoAt(inputDirectory.resolve("recording1.cfr.mp4.part"), testVideo);
+    createVideoAt(outputDirectory.resolve("recording1.cfr.mp4.part"), testVideo);
+    createVideoAt(archiveDirectory.resolve("recording1.cfr.mp4.part"), testVideo);
 
     // incomplete archives
     createVideoAt(inputDirectory.resolve("recording2 - Archived (incomplete).mp4"), testVideo);

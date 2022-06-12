@@ -58,7 +58,7 @@ class UnencodedVideoTest {
 
     assertThat(unencodedVideo.encodedPath()).isEqualTo(outputDirectory.resolve("file.cfr.mp4"));
     assertThat(unencodedVideo.tempEncodedPath())
-        .isEqualTo(outputDirectory.resolve("file - CFR (incomplete).mp4"));
+        .isEqualTo(outputDirectory.resolve("file.cfr.mp4.part"));
 
     assertThat(unencodedVideo.archivedPath())
         .isEqualTo(archiveDirectory.resolve("file.archived.mp4"));
@@ -80,7 +80,7 @@ class UnencodedVideoTest {
     assertThat(unencodedVideo.encodedPath())
         .isEqualTo(outputDirectory.resolve("Nested/Nested2/file.cfr.mp4"));
     assertThat(unencodedVideo.tempEncodedPath())
-        .isEqualTo(outputDirectory.resolve("Nested/Nested2/file - CFR (incomplete).mp4"));
+        .isEqualTo(outputDirectory.resolve("Nested/Nested2/file.cfr.mp4.part"));
 
     assertThat(unencodedVideo.archivedPath())
         .isEqualTo(archiveDirectory.resolve("Nested/Nested2/file.archived.mp4"));
@@ -118,7 +118,7 @@ class UnencodedVideoTest {
   @Test
   void factory_newUnencodedVideo_rejectsTempEncodedMp4File() {
     // Given
-    Path tempEncodedMp4File = inputDirectory.resolve("file - CFR (incomplete).mp4");
+    Path tempEncodedMp4File = inputDirectory.resolve("file.cfr.mp4.part");
 
     // When & Then
     IllegalArgumentException thrown =
