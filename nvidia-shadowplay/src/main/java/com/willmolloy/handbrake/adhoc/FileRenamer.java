@@ -59,7 +59,7 @@ public class FileRenamer {
   //      FileRenamer fileRenamer = new FileRenamer();
   //
   //      // unarchive
-  //      //      fileRenamer.changeSuffixes(directory, " - Archived.mp4", ".mp4");
+  //      //      fileRenamer.changeSuffixes(directory, ".archived.mp4", ".mp4");
   //
   //      // other
   //      //      fileRenamer.changeSuffixes(directory, " - CFR 60 FPS.mp4", ".cfr.mp4");

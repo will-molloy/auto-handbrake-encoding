@@ -30,7 +30,7 @@ Automating HandBrake encoding
       - It creates quite a large file afterwards, but it's ideal "as an intermediate format for video editing"
       - I recommend deleting the encoded file after using it, and retaining the original archived file
 3. Archives original videos
-    - Archived files are named with the suffix ` - Archived.mp4`
+    - Archived files are named with the suffix `.archived.mp4`
     - They won't be detected by the program again, if you want to encode again, remove this suffix first
 
 #### Usage:

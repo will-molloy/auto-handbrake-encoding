@@ -62,7 +62,7 @@ class VideoArchiverTest {
     videoArchiver.archiveAsync(unencodedVideo).join();
 
     // Then
-    assertThatTestDirectory().containsExactly(archiveDirectory.resolve("file - Archived.mp4"));
+    assertThatTestDirectory().containsExactly(archiveDirectory.resolve("file.archived.mp4"));
   }
 
   @Test
@@ -79,13 +79,13 @@ class VideoArchiverTest {
 
     // Then
     assertThatTestDirectory()
-        .containsExactly(archiveDirectory.resolve("Halo/Campaign/file - Archived.mp4"));
+        .containsExactly(archiveDirectory.resolve("Halo/Campaign/file.archived.mp4"));
   }
 
   @Test
   void archiveFileAlreadyExistsStillDeletesOriginal() throws IOException {
     // Given
-    Files.copy(testVideo, archiveDirectory.resolve("file - Archived.mp4"));
+    Files.copy(testVideo, archiveDirectory.resolve("file.archived.mp4"));
 
     Path unencodedMp4File = Files.copy(testVideo, inputDirectory.resolve("file.mp4"));
 
@@ -95,13 +95,13 @@ class VideoArchiverTest {
     videoArchiver.archiveAsync(unencodedVideo).join();
 
     // Then
-    assertThatTestDirectory().containsExactly(archiveDirectory.resolve("file - Archived.mp4"));
+    assertThatTestDirectory().containsExactly(archiveDirectory.resolve("file.archived.mp4"));
   }
 
   @Test
   void archiveFileExistsButContentsDifferKeepsOriginal() throws IOException {
     // Given
-    Files.copy(testVideo2, archiveDirectory.resolve("file - Archived.mp4"));
+    Files.copy(testVideo2, archiveDirectory.resolve("file.archived.mp4"));
 
     Path unencodedMp4File = Files.copy(testVideo, inputDirectory.resolve("file.mp4"));
 
@@ -113,7 +113,7 @@ class VideoArchiverTest {
     // Then
     assertThatTestDirectory()
         .containsExactly(
-            inputDirectory.resolve("file.mp4"), archiveDirectory.resolve("file - Archived.mp4"));
+            inputDirectory.resolve("file.mp4"), archiveDirectory.resolve("file.archived.mp4"));
   }
 
   private StreamSubject assertThatTestDirectory() throws IOException {
