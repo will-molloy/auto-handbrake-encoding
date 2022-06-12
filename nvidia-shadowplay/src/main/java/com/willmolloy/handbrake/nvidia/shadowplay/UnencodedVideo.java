@@ -115,21 +115,23 @@ final class UnencodedVideo {
     }
 
     public UnencodedVideo newUnencodedVideo(Path videoPath) {
-      checkArgument(isMp4(videoPath), "videoPath (%s) does not represent an .mp4 file", videoPath);
-
-      checkArgument(
-          !isEncodedMp4(videoPath), "videoPath (%s) represents an encoded .mp4 file", videoPath);
       checkArgument(
           !isTempEncodedMp4(videoPath),
           "videoPath (%s) represents an incomplete encoded .mp4 file",
           videoPath);
 
       checkArgument(
-          !isArchivedMp4(videoPath), "videoPath (%s) represents an archived .mp4 file", videoPath);
-      checkArgument(
           !isTempArchivedMp4(videoPath),
           "videoPath (%s) represents an incomplete archived .mp4 file",
           videoPath);
+
+      checkArgument(isMp4(videoPath), "videoPath (%s) does not represent an .mp4 file", videoPath);
+
+      checkArgument(
+          !isEncodedMp4(videoPath), "videoPath (%s) represents an encoded .mp4 file", videoPath);
+
+      checkArgument(
+          !isArchivedMp4(videoPath), "videoPath (%s) represents an archived .mp4 file", videoPath);
 
       checkArgument(
           videoPath.startsWith(inputDirectory),

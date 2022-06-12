@@ -83,8 +83,7 @@ class VideoEncoderTest {
     videoEncoder.encode(unencodedVideo);
 
     // Then
-    verify(mockHandBrake)
-        .encode(unencodedMp4File, outputDirectory.resolve("file.cfr.mp4.part"));
+    verify(mockHandBrake).encode(unencodedMp4File, outputDirectory.resolve("file.cfr.mp4.part"));
     assertThatTestDirectory()
         .containsExactly(
             inputDirectory.resolve("file.mp4"), outputDirectory.resolve("file.cfr.mp4"));
@@ -115,8 +114,7 @@ class VideoEncoderTest {
 
     // Then
     verify(mockHandBrake)
-        .encode(
-            unencodedMp4File, outputDirectory.resolve("Halo/Campaign/file.cfr.mp4.part"));
+        .encode(unencodedMp4File, outputDirectory.resolve("Halo/Campaign/file.cfr.mp4.part"));
     assertThatTestDirectory()
         .containsExactly(
             inputDirectory.resolve("Halo/Campaign/file.mp4"),

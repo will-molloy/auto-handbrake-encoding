@@ -156,12 +156,10 @@ class AppIntegrationTest {
         .containsExactly(
             // encoding
             new PathAndContents(
-                inputDirectory.resolve("League of Legends/ranked_game1.cfr.mp4"),
-                testVideoEncoded),
+                inputDirectory.resolve("League of Legends/ranked_game1.cfr.mp4"), testVideoEncoded),
             // archive
             new PathAndContents(
-                inputDirectory.resolve("League of Legends/ranked_game1.archived.mp4"),
-                testVideo));
+                inputDirectory.resolve("League of Legends/ranked_game1.archived.mp4"), testVideo));
   }
 
   @Test
@@ -678,8 +676,7 @@ class AppIntegrationTest {
     // incomplete encodings
     createVideoAt(inputDirectory.resolve("recording1.cfr.mp4.part"), testVideo);
     createVideoAt(
-        inputDirectory.resolve("Nested1/Nested2/Nested3/other video.cfr.mp4.part"),
-        testVideo);
+        inputDirectory.resolve("Nested1/Nested2/Nested3/other video.cfr.mp4.part"), testVideo);
 
     // incomplete archives
     createVideoAt(inputDirectory.resolve("recording2.archived.mp4.part"), testVideo);
@@ -721,8 +718,7 @@ class AppIntegrationTest {
             new PathAndContents(
                 inputDirectory.resolve("Starcraft II/protoss.cfr.mp4"), testVideoEncoded),
             new PathAndContents(
-                inputDirectory.resolve("Starcraft II/Campaign/terran1.cfr.mp4"),
-                testVideoEncoded),
+                inputDirectory.resolve("Starcraft II/Campaign/terran1.cfr.mp4"), testVideoEncoded),
             // unrelated archives
             new PathAndContents(
                 inputDirectory.resolve("League of Legends/ryze.archived.mp4"), testVideo),
