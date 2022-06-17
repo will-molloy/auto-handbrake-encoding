@@ -16,12 +16,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
- * HandBrakeEtaLoggerTest.
+ * HandBrakeLoggerTest.
  *
  * @author <a href=https://willmolloy.com>Will Molloy</a>
  */
 @ExtendWith(MockitoExtension.class)
-class HandBrakeEtaLoggerTest {
+class HandBrakeLoggerTest {
 
   @Mock private Logger mockLogger;
 
@@ -68,6 +68,7 @@ class HandBrakeEtaLoggerTest {
 
     // Then
     InOrder inOrder = inOrder(mockLogger);
+
     for (String log : fakeHandBrakeLogs) {
       inOrder.verify(mockLogger).debug(log);
     }

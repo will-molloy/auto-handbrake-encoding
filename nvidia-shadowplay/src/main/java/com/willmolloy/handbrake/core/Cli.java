@@ -43,7 +43,7 @@ public class Cli {
    */
   @SuppressFBWarnings("REC_CATCH_EXCEPTION")
   public boolean execute(List<String> command, Consumer<String> processLogConsumer) {
-    log.info("Executing: {}", command);
+    log.debug("Executing: {}", command);
 
     Process process = null;
     CompletableFuture<?> processLoggerFuture = null;

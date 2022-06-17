@@ -32,7 +32,7 @@ public class VideoEncoder {
   public boolean encode(UnencodedVideo video) {
     Stopwatch stopwatch = Stopwatch.createStarted();
     try {
-      log.info("Encoding: {} -> {}", video.originalPath(), video.encodedPath());
+      log.debug("Encoding: {} -> {}", video.originalPath(), video.encodedPath());
 
       if (Files.exists(video.encodedPath())) {
         log.warn("Encoded file ({}) already exists", video.encodedPath());
