@@ -20,5 +20,4 @@ VOLUME /input
 VOLUME /output
 VOLUME /archive
 
-# TODO remove sleep
-ENTRYPOINT ./gradlew :nvidia-shadowplay:run -PinputDirectory="/input" -PoutputDirectory="/output" -ParchiveDirectory="/archive" && sleep 99999
+ENTRYPOINT ./gradlew :nvidia-shadowplay:run -PinputDirectory="/input" -PoutputDirectory="/output" -ParchiveDirectory="/archive"
