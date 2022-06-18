@@ -6,18 +6,13 @@
 
 Automating HandBrake encoding
 
-## Requirements
-
-- Java 17
-- HandBrakeCLI
-
 ## Use cases
 
 ### Encoding Nvidia ShadowPlay videos with a CFR preset
 
 #### Why?
 
-- Nvidia ShadowPlay records video with a variable/peak frame rate (PFR), leading to audio sync issues in video editing software
+- Nvidia ShadowPlay records video with a variable/peak frame rate (VFR/PFR), leading to audio sync issues in video editing software
 
 #### How?
 
@@ -35,16 +30,35 @@ Automating HandBrake encoding
 
 #### Usage:
 
-1. Build and test via Gradle:
+You can run with either Gradle directly or with Docker.
+
+The app requires the following arguments:
+- `inputDirectory` directory containing `.mp4` files to encode
+- `outputDirectory` where you want encoded files to be saved
+- `archiveDirectory` where you want archived files to be saved
+- (These can all be the same directory, personally I record and encode to an SSD, then archive to NAS)
+
+##### Run with Gradle (requires Java 17 and HandBrakeCLI installed)
+
+1. Build:
    ```bash
-   ./gradlew build integrationTest
+   ./gradlew build
    ```
 
-2. Run via [Gradle task](nvidia-shadowplay/build.gradle):
+2. Run:
    ```bash
    ./gradlew :nvidia-shadowplay:run -PinputDirectory="" -PoutputDirectory="" -ParchiveDirectory=""
    ```
-    - Set `inputDirectory` to directory containing `.mp4` files to encode
-    - Set `outputDirectory` where you want encoded files to be saved
-    - Set `archiveDirectory` where you want archived files to be saved
-    - (These can all be the same directory, personally I record and encode to an SSD, then archive to NAS)
+
+##### Run with Docker
+
+1. Build:
+   ```bash
+   docker build -t handbrake .
+   ```
+
+2. Run:
+   ```bash
+   docker run --rm -v <INPUT_DIR>:/input -v <OUTPUT_DIR>:/output -v <ARCHIVE_DIR>:/archive handbrake
+   ```
+   - (If you need to mount a network drive, [this stackoverflow answer](https://stackoverflow.com/a/57510166/6122976) worked for me)

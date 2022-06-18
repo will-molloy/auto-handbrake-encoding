@@ -23,14 +23,7 @@ jobs:
 
       - name: Setup HandBrake (Linux)
         if: matrix.os == 'ubuntu-latest'
-        # Need to install as root, then chmod a+x so non-root Java/Gradle can access HandBrakeCLI
-        # Can't run gradle as root, some reason github actions defaults to Java 11
-        # TODO locally this doesn't work??? - still needing to run Java/Gradle with sudo
-        run: |
-          sudo add-apt-repository ppa:stebbins/handbrake-releases \
-          && sudo apt-get update \
-          && sudo apt-get install handbrake-cli \
-          && sudo chmod a+x /usr/bin/HandBrakeCLI
+        run: sudo apt install handbrake-cli
 
       - name: Setup HandBrake (Windows)
         if: matrix.os == 'windows-latest'

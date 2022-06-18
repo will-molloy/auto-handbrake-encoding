@@ -1,0 +1,23 @@
+# this workflow verifies the Dockerfile can be built and run
+name: docker
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  docker:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2.4.0
+
+      - name: Build Dockerfile
+        run: docker build -t handbrake .
+
+      - name: Run container
+        run: docker run --rm handbrake
