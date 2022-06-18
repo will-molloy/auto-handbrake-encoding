@@ -3,10 +3,10 @@
 FROM jlesage/handbrake:latest
 
 # Update packages
-RUN apk update && \
-    apk add --upgrade apk-tools && \
-    apk upgrade --available && \
-    sync
+RUN apk update \
+    && apk add --upgrade apk-tools \
+    && apk upgrade --available \
+    && sync
 
 # Install OpenJDK 17
 RUN apk --no-cache add openjdk17 --repository=https://dl-cdn.alpinelinux.org/alpine/latest-stable/community
