@@ -28,7 +28,7 @@ jobs:
         # TODO locally this doesn't work??? - still needing to run Java/Gradle with sudo
         run: |
           sudo apt update \
-          && sudo apt install handbrake
+          && sudo apt install handbrake-cli
 
       - name: Setup HandBrake (Windows)
         if: matrix.os == 'windows-latest'
