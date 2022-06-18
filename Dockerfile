@@ -14,7 +14,7 @@ RUN apk --no-cache add openjdk17 --repository=https://dl-cdn.alpinelinux.org/alp
 COPY . /app
 WORKDIR /app
 
-RUN ./gradlew build
+RUN ./gradlew clean build
 
 VOLUME /input
 VOLUME /output
