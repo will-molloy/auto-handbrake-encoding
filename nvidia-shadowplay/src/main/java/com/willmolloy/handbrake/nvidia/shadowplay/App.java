@@ -80,7 +80,7 @@ class App {
       int i = 0;
       for (Path file : tempFiles) {
         log.warn("Deleting ({}/{}): {}", ++i, tempFiles.size(), file);
-        Files.delete(file);
+        Files.deleteIfExists(file);
       }
     }
   }
