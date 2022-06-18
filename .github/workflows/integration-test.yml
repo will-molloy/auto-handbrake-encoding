@@ -27,7 +27,7 @@ jobs:
         # Can't run gradle as root, some reason github actions defaults to Java 11
         # TODO locally this doesn't work??? - still needing to run Java/Gradle with sudo
         run: |
-          sudo sudo apt update \
+          sudo apt update \
           && sudo apt install handbrake
 
       - name: Setup HandBrake (Windows)
