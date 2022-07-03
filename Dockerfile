@@ -20,4 +20,4 @@ VOLUME /input
 VOLUME /output
 VOLUME /archive
 
-ENTRYPOINT ./gradlew :nvidia-shadowplay:run -PinputDirectory="/input" -PoutputDirectory="/output" -ParchiveDirectory="/archive"
+ENTRYPOINT ./entrypoint.sh
