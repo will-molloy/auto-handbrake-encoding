@@ -9,7 +9,7 @@ if [ -z "$(ls -A /archive)" ]; then
   exit 1
 fi
 
-if not ./gradlew :nvidia-shadowplay:run -PinputDirectory="/input" -PoutputDirectory="/output" -ParchiveDirectory="/archive"; then
+if ! ./gradlew :nvidia-shadowplay:run -PinputDirectory="/input" -PoutputDirectory="/output" -ParchiveDirectory="/archive"; then
   sleep infinity
   exit 1
 fi
