@@ -13,3 +13,5 @@ if not ./gradlew :nvidia-shadowplay:run -PinputDirectory="/input" -PoutputDirect
   sleep infinity
   exit 1
 fi
+
+exit 0
