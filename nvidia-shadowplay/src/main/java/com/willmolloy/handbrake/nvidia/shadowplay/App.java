@@ -132,8 +132,9 @@ class App {
       App app = new App(videoEncoder, videoArchiver);
 
       app.run(inputDirectory, outputDirectory, archiveDirectory);
-    } catch (Exception e) {
-      log.fatal("Fatal error", e);
+    } catch (Throwable t) {
+      log.fatal("Fatal error", t);
+      System.exit(1);
     }
   }
 }
