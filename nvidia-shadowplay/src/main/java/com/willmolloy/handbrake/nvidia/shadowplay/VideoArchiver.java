@@ -27,7 +27,7 @@ public class VideoArchiver {
         () -> {
           Stopwatch stopwatch = Stopwatch.createStarted();
           try {
-            log.debug("Archiving: {} -> {}", video.originalPath(), video.archivedPath());
+            log.info("Archiving: {} -> {}", video.originalPath(), video.archivedPath());
 
             if (Files.exists(video.archivedPath())) {
               if (Files.mismatch(video.originalPath(), video.archivedPath()) == -1) {

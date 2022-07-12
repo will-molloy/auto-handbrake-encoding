@@ -1,4 +1,3 @@
-# this workflow verifies the Dockerfile can be built and run
 name: docker
 
 on:
@@ -18,6 +17,3 @@ jobs:
 
       - name: Build Dockerfile
         run: docker build -t handbrake .
-
-      - name: Run container
-        run: docker run --rm handbrake
