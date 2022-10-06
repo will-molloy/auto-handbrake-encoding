@@ -141,26 +141,10 @@ final class UnencodedVideo {
 
       return new UnencodedVideo(
           videoPath,
-          encodedPath(videoPath),
-          tempEncodedPath(videoPath),
-          archivedPath(videoPath),
-          tempArchivedPath(videoPath));
-    }
-
-    private Path encodedPath(Path videoPath) {
-      return newPath(videoPath, ENCODED_SUFFIX, outputDirectory);
-    }
-
-    private Path tempEncodedPath(Path videoPath) {
-      return newPath(videoPath, TEMP_ENCODED_SUFFIX, outputDirectory);
-    }
-
-    private Path archivedPath(Path videoPath) {
-      return newPath(videoPath, ARCHIVED_SUFFIX, archiveDirectory);
-    }
-
-    private Path tempArchivedPath(Path videoPath) {
-      return newPath(videoPath, TEMP_ARCHIVED_SUFFIX, archiveDirectory);
+          newPath(videoPath, ENCODED_SUFFIX, outputDirectory),
+          newPath(videoPath, TEMP_ENCODED_SUFFIX, outputDirectory),
+          newPath(videoPath, ARCHIVED_SUFFIX, archiveDirectory),
+          newPath(videoPath, TEMP_ARCHIVED_SUFFIX, archiveDirectory));
     }
 
     private Path newPath(Path videoPath, String newSuffix, Path newDirectory) {
