@@ -88,7 +88,9 @@ class VideoEncoderTest {
             unencodedMp4File,
             outputDirectory.resolve("file.cfr.mp4.part"),
             "--preset",
-            "Production Standard");
+            "Production Max",
+            "-e",
+            "x265");
     assertThatTestDirectory()
         .containsExactly(
             inputDirectory.resolve("file.mp4"), outputDirectory.resolve("file.cfr.mp4"));
@@ -123,7 +125,9 @@ class VideoEncoderTest {
             unencodedMp4File,
             outputDirectory.resolve("Halo/Campaign/file.cfr.mp4.part"),
             "--preset",
-            "Production Standard");
+            "Production Max",
+            "-e",
+            "x265");
     assertThatTestDirectory()
         .containsExactly(
             inputDirectory.resolve("Halo/Campaign/file.mp4"),

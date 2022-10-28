@@ -45,7 +45,12 @@ public class VideoEncoder {
       // something goes wrong
       boolean encodeSuccessful =
           handBrake.encode(
-              video.originalPath(), video.tempEncodedPath(), "--preset", "Production Standard");
+              video.originalPath(),
+              video.tempEncodedPath(),
+              "--preset",
+              "Production Max",
+              "-e",
+              "x265");
 
       if (encodeSuccessful) {
         Files.move(video.tempEncodedPath(), video.encodedPath());
