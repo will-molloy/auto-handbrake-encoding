@@ -7,3 +7,7 @@ task run(type: JavaExec) {
   main = 'com.willmolloy.handbrake.nvidia.shadowplay.App'
   args = [inputDirectory, outputDirectory, archiveDirectory]
 }
+
+dependencies {
+  implementation project(":auto-handbrake-core")
+}
