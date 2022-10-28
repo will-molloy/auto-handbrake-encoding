@@ -1,8 +1,7 @@
-package com.willmolloy.handbrake.adhoc;
+package com.willmolloy.handbrake.cfr.adhoc;
 
 import static com.google.common.truth.Truth8.assertThat;
 
-import com.willmolloy.handbrake.cfr.adhoc.FileRenamer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.nio.file.Files;

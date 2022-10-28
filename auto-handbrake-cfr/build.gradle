@@ -3,11 +3,11 @@ String outputDirectory = project.getProperties().getOrDefault("outputDirectory",
 String archiveDirectory = project.getProperties().getOrDefault("archiveDirectory", "")
 
 task run(type: JavaExec) {
-    classpath = sourceSets.main.runtimeClasspath
-    main = 'com.willmolloy.handbrake.cfr.App'
-    args = [inputDirectory, outputDirectory, archiveDirectory]
+  classpath = sourceSets.main.runtimeClasspath
+  main = 'com.willmolloy.handbrake.cfr.App'
+  args = [inputDirectory, outputDirectory, archiveDirectory]
 }
 
 dependencies {
-    implementation project(":auto-handbrake-core")
+  implementation project(":auto-handbrake-core")
 }
