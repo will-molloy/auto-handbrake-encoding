@@ -43,7 +43,9 @@ public class VideoEncoder {
 
       // to avoid leaving encoded files in an 'incomplete' state, encode to a temp file in case
       // something goes wrong
-      boolean encodeSuccessful = handBrake.encode(video.originalPath(), video.tempEncodedPath());
+      boolean encodeSuccessful =
+          handBrake.encode(
+              video.originalPath(), video.tempEncodedPath(), "--preset", "Production Standard");
 
       if (encodeSuccessful) {
         Files.move(video.tempEncodedPath(), video.encodedPath());

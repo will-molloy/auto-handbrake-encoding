@@ -64,7 +64,7 @@ class VideoEncoderTest {
   @Test
   void createsEncodedFile() throws IOException {
     // Given
-    when(mockHandBrake.encode(any(), any()))
+    when(mockHandBrake.encode(any(), any(), any()))
         .then(
             (Answer<Boolean>)
                 invocation -> {
@@ -83,7 +83,12 @@ class VideoEncoderTest {
     videoEncoder.encode(unencodedVideo);
 
     // Then
-    verify(mockHandBrake).encode(unencodedMp4File, outputDirectory.resolve("file.cfr.mp4.part"));
+    verify(mockHandBrake)
+        .encode(
+            unencodedMp4File,
+            outputDirectory.resolve("file.cfr.mp4.part"),
+            "--preset",
+            "Production Standard");
     assertThatTestDirectory()
         .containsExactly(
             inputDirectory.resolve("file.mp4"), outputDirectory.resolve("file.cfr.mp4"));
@@ -93,7 +98,7 @@ class VideoEncoderTest {
   void retainsDirectoryStructureRelativeToInputCreatingParentDirectoryIfNeeded()
       throws IOException {
     // Given
-    when(mockHandBrake.encode(any(), any()))
+    when(mockHandBrake.encode(any(), any(), any()))
         .then(
             (Answer<Boolean>)
                 invocation -> {
@@ -114,7 +119,11 @@ class VideoEncoderTest {
 
     // Then
     verify(mockHandBrake)
-        .encode(unencodedMp4File, outputDirectory.resolve("Halo/Campaign/file.cfr.mp4.part"));
+        .encode(
+            unencodedMp4File,
+            outputDirectory.resolve("Halo/Campaign/file.cfr.mp4.part"),
+            "--preset",
+            "Production Standard");
     assertThatTestDirectory()
         .containsExactly(
             inputDirectory.resolve("Halo/Campaign/file.mp4"),

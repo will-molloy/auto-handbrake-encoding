@@ -1,6 +1,7 @@
 package com.willmolloy.handbrake.core;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
@@ -85,5 +86,19 @@ class HandBrakeTest {
     when(mockCli.execute(anyList(), any())).thenThrow(new RuntimeException("error"));
 
     assertThat(handBrake.encode(input, output)).isFalse();
+  }
+
+  @Test
+  void rejectsNonEvenLengthOfOptions() {
+    Path input = Path.of("input.mp4");
+    Path output = Path.of("output.mp4");
+
+    IllegalArgumentException thrown =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> handBrake.encode(input, output, "--preset", "Production Standard", "-e"));
+    assertThat(thrown)
+        .hasMessageThat()
+        .isEqualTo("non-even length of options: [--preset] [Production Standard, -e]");
   }
 }

@@ -1,5 +1,6 @@
 package com.willmolloy.handbrake.core;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.nio.file.Files;
@@ -35,6 +36,7 @@ public class HandBrake {
    * @return {@code true} if encoding was successful
    */
   public boolean encode(Path input, Path output, String... options) {
+    checkArgument(options.length % 2 == 0, "non-even length of options: [%s]", (Object[]) options);
     if (Files.exists(output)) {
       log.warn("Output ({}) already exists", output);
       return true;
