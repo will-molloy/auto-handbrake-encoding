@@ -2,7 +2,6 @@ package com.willmolloy.handbrake.core;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.annotations.VisibleForTesting;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -20,18 +19,17 @@ import org.apache.logging.log4j.Logger;
  *
  * @author <a href=https://willmolloy.com>Will Molloy</a>
  */
-public class Cli {
+class Cli {
 
   private static final Logger log = LogManager.getLogger();
 
   private final Supplier<ProcessBuilder> processBuilderSupplier;
 
-  @VisibleForTesting
   Cli(Supplier<ProcessBuilder> processBuilderSupplier) {
     this.processBuilderSupplier = checkNotNull(processBuilderSupplier);
   }
 
-  public Cli() {
+  Cli() {
     this(ProcessBuilder::new);
   }
 

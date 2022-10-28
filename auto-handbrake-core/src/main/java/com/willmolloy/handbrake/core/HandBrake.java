@@ -24,8 +24,12 @@ public class HandBrake {
 
   private final Cli cli;
 
-  public HandBrake(Cli cli) {
+  HandBrake(Cli cli) {
     this.cli = checkNotNull(cli);
+  }
+
+  public HandBrake() {
+    this(new Cli());
   }
 
   /**
