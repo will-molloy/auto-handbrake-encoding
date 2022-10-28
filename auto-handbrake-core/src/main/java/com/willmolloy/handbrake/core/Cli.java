@@ -2,6 +2,7 @@ package com.willmolloy.handbrake.core;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.annotations.VisibleForTesting;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -25,7 +26,8 @@ public class Cli {
 
   private final Supplier<ProcessBuilder> processBuilderSupplier;
 
-  public Cli(Supplier<ProcessBuilder> processBuilderSupplier) {
+  @VisibleForTesting
+  Cli(Supplier<ProcessBuilder> processBuilderSupplier) {
     this.processBuilderSupplier = checkNotNull(processBuilderSupplier);
   }
 
@@ -42,7 +44,7 @@ public class Cli {
    * @return {@code true} if execution was successful
    */
   @SuppressFBWarnings("REC_CATCH_EXCEPTION")
-  public boolean execute(List<String> command, Consumer<String> processLogConsumer) {
+  boolean execute(List<String> command, Consumer<String> processLogConsumer) {
     log.debug("Executing: {}", command);
 
     Process process = null;

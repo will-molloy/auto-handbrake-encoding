@@ -38,18 +38,18 @@ class HandBrakeTest {
 
     when(mockCli.execute(anyList(), any())).thenReturn(true);
 
-    assertThat(handBrake.encode(input, output)).isTrue();
+    assertThat(handBrake.encode(input, output, "--preset", "Production Standard")).isTrue();
     verify(mockCli)
         .execute(
             eq(
                 List.of(
                     "HandBrakeCLI",
-                    "--preset",
-                    "Production Standard",
                     "-i",
                     "input.mp4",
                     "-o",
-                    "output.mp4")),
+                    "output.mp4",
+                    "--preset",
+                    "Production Standard")),
             isA(HandBrakeLogger.class));
   }
 
