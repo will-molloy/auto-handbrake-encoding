@@ -11,7 +11,7 @@ import org.apache.logging.log4j.Logger;
 
 /**
  * Useful for renaming files, e.g. removing the suffix to quickly unarchive files (or if the
- * suffixes in {@link com.willmolloy.handbrake.nvidia.shadowplay.UnencodedVideo} change).
+ * suffixes in {@link com.willmolloy.handbrake.cfr.UnencodedVideo} change).
  *
  * @author <a href=https://willmolloy.com>Will Molloy</a>
  */

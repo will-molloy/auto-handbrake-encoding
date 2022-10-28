@@ -4,7 +4,7 @@ String archiveDirectory = project.getProperties().getOrDefault("archiveDirectory
 
 task run(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
-    main = 'com.willmolloy.handbrake.nvidia.shadowplay.App'
+    main = 'com.willmolloy.handbrake.cfr.App'
     args = [inputDirectory, outputDirectory, archiveDirectory]
 }
 

@@ -8,7 +8,7 @@ if [ -z "$(ls -A /archive)" ]; then
   exit 1
 fi
 
-if ! ./gradlew :nvidia-shadowplay:run -PinputDirectory="/input" -PoutputDirectory="/output" -ParchiveDirectory="/archive"; then
+if ! ./gradlew :auto-handbrake-cfr:run -PinputDirectory="/input" -PoutputDirectory="/output" -ParchiveDirectory="/archive"; then
   exit 1
 fi
 
