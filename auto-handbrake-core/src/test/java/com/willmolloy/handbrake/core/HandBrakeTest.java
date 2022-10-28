@@ -39,7 +39,7 @@ class HandBrakeTest {
 
     when(mockCli.execute(anyList(), any())).thenReturn(true);
 
-    assertThat(handBrake.encode(input, output, "--preset", "Production Standard")).isTrue();
+    assertThat(handBrake.encode(input, output, "--preset", "Production Max")).isTrue();
     verify(mockCli)
         .execute(
             eq(
@@ -50,7 +50,7 @@ class HandBrakeTest {
                     "-o",
                     "output.mp4",
                     "--preset",
-                    "Production Standard")),
+                    "Production Max")),
             isA(HandBrakeLogger.class));
   }
 
@@ -96,9 +96,9 @@ class HandBrakeTest {
     IllegalArgumentException thrown =
         assertThrows(
             IllegalArgumentException.class,
-            () -> handBrake.encode(input, output, "--preset", "Production Standard", "-e"));
+            () -> handBrake.encode(input, output, "--preset", "Production Max", "-e"));
     assertThat(thrown)
         .hasMessageThat()
-        .isEqualTo("non-even length of options: [--preset] [Production Standard, -e]");
+        .isEqualTo("non-even length of options: [--preset] [Production Max, -e]");
   }
 }
