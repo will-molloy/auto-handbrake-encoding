@@ -8,11 +8,12 @@ Automating HandBrake encoding
 
 ## Use cases
 
-### Encoding Nvidia ShadowPlay videos with a CFR preset
+### Converting to CFR video
 
 #### Why?
 
-- Nvidia ShadowPlay records video with a variable/peak frame rate (VFR/PFR), leading to audio sync issues in video editing software
+- You might have variable/peak frame rate (VFR/PFR) recordings, leading to audio sync issues in video editing software
+  - This is a problem with NVIDIA ShadowPlay and AMD ReLive
 
 #### How?
 
@@ -47,7 +48,7 @@ The app requires the following arguments:
 
 2. Run:
    ```bash
-   ./gradlew :nvidia-shadowplay:run -PinputDirectory="" -PoutputDirectory="" -ParchiveDirectory=""
+   ./gradlew :auto-handbrake-cfr:run -PinputDirectory="" -PoutputDirectory="" -ParchiveDirectory=""
    ```
 
 ##### Run with Docker

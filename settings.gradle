@@ -1,2 +1,3 @@
 rootProject.name = 'auto-handbrake-encoding'
-include 'nvidia-shadowplay'
+include 'auto-handbrake-core'
+include 'auto-handbrake-cfr'
