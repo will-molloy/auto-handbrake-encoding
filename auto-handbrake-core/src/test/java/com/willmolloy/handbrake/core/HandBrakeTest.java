@@ -9,6 +9,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.willmolloy.handbrake.core.options.Encoders;
+import com.willmolloy.handbrake.core.options.FrameRateControls;
 import com.willmolloy.handbrake.core.options.Presets;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -39,7 +41,14 @@ class HandBrakeTest {
 
     when(mockCli.execute(anyList(), any())).thenReturn(true);
 
-    assertThat(handBrake.encode(input, output, List.of(Presets.productionStandard()))).isTrue();
+    assertThat(
+            handBrake.encode(
+                input,
+                output,
+                Presets.productionStandard(),
+                Encoders.h264(),
+                FrameRateControls.cfr()))
+        .isTrue();
     verify(mockCli)
         .execute(
             eq(
@@ -50,7 +59,10 @@ class HandBrakeTest {
                     "-o",
                     "output.mp4",
                     "--preset",
-                    "Production Standard")),
+                    "Production Standard",
+                    "--encoder",
+                    "x264",
+                    "--cfr")),
             isA(HandBrakeLogger.class));
   }
 
@@ -61,7 +73,7 @@ class HandBrakeTest {
 
     try {
       Files.createFile(output);
-      assertThat(handBrake.encode(input, output, List.of())).isTrue();
+      assertThat(handBrake.encode(input, output)).isTrue();
       verify(mockCli, never()).execute(anyList(), any());
     } finally {
       Files.delete(output);
@@ -75,7 +87,7 @@ class HandBrakeTest {
 
     when(mockCli.execute(anyList(), any())).thenReturn(false);
 
-    assertThat(handBrake.encode(input, output, List.of())).isFalse();
+    assertThat(handBrake.encode(input, output)).isFalse();
   }
 
   @Test
@@ -85,6 +97,6 @@ class HandBrakeTest {
 
     when(mockCli.execute(anyList(), any())).thenThrow(new RuntimeException("error"));
 
-    assertThat(handBrake.encode(input, output, List.of())).isFalse();
+    assertThat(handBrake.encode(input, output)).isFalse();
   }
 }

@@ -10,11 +10,11 @@ import com.google.common.io.Resources;
 import com.google.common.truth.StreamSubject;
 import com.willmolloy.handbrake.core.HandBrake;
 import com.willmolloy.handbrake.core.options.Encoders;
+import com.willmolloy.handbrake.core.options.FrameRateControls;
 import com.willmolloy.handbrake.core.options.Presets;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -90,7 +90,9 @@ class VideoEncoderTest {
         .encode(
             unencodedMp4File,
             outputDirectory.resolve("file.cfr.mp4.part"),
-            List.of(Presets.productionStandard(), Encoders.h264()));
+            Presets.productionStandard(),
+            Encoders.h264(),
+            FrameRateControls.cfr());
     assertThatTestDirectory()
         .containsExactly(
             inputDirectory.resolve("file.mp4"), outputDirectory.resolve("file.cfr.mp4"));
@@ -124,7 +126,9 @@ class VideoEncoderTest {
         .encode(
             unencodedMp4File,
             outputDirectory.resolve("Halo/Campaign/file.cfr.mp4.part"),
-            List.of(Presets.productionStandard(), Encoders.h264()));
+            Presets.productionStandard(),
+            Encoders.h264(),
+            FrameRateControls.cfr());
     assertThatTestDirectory()
         .containsExactly(
             inputDirectory.resolve("Halo/Campaign/file.mp4"),

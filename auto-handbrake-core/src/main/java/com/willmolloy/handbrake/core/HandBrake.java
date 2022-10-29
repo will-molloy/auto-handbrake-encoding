@@ -5,6 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.willmolloy.handbrake.core.options.Option;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -41,7 +42,7 @@ public class HandBrake {
    * @param options HandBrake options
    * @return {@code true} if encoding was successful
    */
-  public boolean encode(Path input, Path output, List<? extends Option> options) {
+  public boolean encode(Path input, Path output, Option... options) {
     if (Files.exists(output)) {
       log.warn("Output ({}) already exists", output);
       return true;
@@ -50,7 +51,7 @@ public class HandBrake {
     List<String> command =
         Stream.concat(
                 Stream.of("HandBrakeCLI", "-i", input.toString(), "-o", output.toString()),
-                options.stream()
+                Arrays.stream(options)
                     .flatMap(
                         option -> {
                           // TODO exhaustive switch for sealed type
