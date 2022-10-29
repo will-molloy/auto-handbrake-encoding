@@ -11,9 +11,9 @@ public final class Presets {
   private Presets() {}
 
   /**
-   * Encoder record.
+   * Preset record.
    *
-   * @param key option key "--encoder"
+   * @param key option key
    * @param value option value
    */
   record Preset(String key, String value) implements Option {

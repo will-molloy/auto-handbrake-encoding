@@ -13,7 +13,7 @@ public final class Encoders {
   /**
    * Encoder record.
    *
-   * @param key option key "--encoder"
+   * @param key option key
    * @param value option value
    */
   record Encoder(String key, String value) implements Option {
