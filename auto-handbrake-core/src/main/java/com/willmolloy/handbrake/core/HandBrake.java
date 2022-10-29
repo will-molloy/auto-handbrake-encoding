@@ -38,6 +38,7 @@ public class HandBrake {
    *
    * @param input input file
    * @param output output file
+   * @param options HandBrake options
    * @return {@code true} if encoding was successful
    */
   public boolean encode(Path input, Path output, List<? extends Option> options) {

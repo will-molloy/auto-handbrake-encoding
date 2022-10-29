@@ -20,7 +20,7 @@ Automating HandBrake encoding
 1. Recursively scans input directory for `.mp4` files to encode
 2. Encodes `.mp4` files with a Constant Frame Rate (CFR) preset
     - Encoded files are named with the suffix `.cfr.mp4`
-    - The preset used is "Production Max" H.265
+    - The preset used is "Production Standard" H.264
       - It works with any video resolution
       - It works with any framerate
       - It creates quite a large file afterwards, but it's ideal "as an intermediate format for video editing"
