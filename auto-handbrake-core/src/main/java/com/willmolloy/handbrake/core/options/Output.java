@@ -5,33 +5,13 @@ import java.nio.file.Path;
 /**
  * HandBrake output option.
  *
+ * @see <a href=https://handbrake.fr/docs/en/latest/cli/command-line-reference.html>Source
+ *     Options</a>
  * @author <a href=https://willmolloy.com>Will Molloy</a>
  */
-public sealed interface Output extends Option permits Output.Internal.OutputImpl {
-  String key();
-
-  Path path();
+public sealed interface Output extends Option.KeyValueOption<Path> permits Internal.OutputImpl {
 
   static Output of(Path path) {
-    return new Internal.OutputImpl(path);
-  }
-
-  /** Internal detail, don't reference. */
-  // can't make this private unfortunately
-  final class Internal {
-
-    /**
-     * Output record.
-     *
-     * @param key option key
-     * @param path option value
-     */
-    record OutputImpl(String key, Path path) implements Output {
-      private OutputImpl(Path path) {
-        this("--output", path);
-      }
-    }
-
-    private Internal() {}
+    return new Internal.OutputImpl("--output", path);
   }
 }

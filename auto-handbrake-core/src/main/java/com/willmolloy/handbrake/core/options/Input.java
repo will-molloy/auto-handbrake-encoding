@@ -5,33 +5,13 @@ import java.nio.file.Path;
 /**
  * HandBrake input option.
  *
+ * @see <a href=https://handbrake.fr/docs/en/latest/cli/command-line-reference.html>Source
+ *     Options</a>
  * @author <a href=https://willmolloy.com>Will Molloy</a>
  */
-public sealed interface Input extends Option permits Input.Internal.InputImpl {
-  String key();
-
-  Path path();
+public sealed interface Input extends Option.KeyValueOption<Path> permits Internal.InputImpl {
 
   static Input of(Path path) {
     return new Internal.InputImpl(path);
-  }
-
-  /** Internal detail, don't reference. */
-  // can't make this private unfortunately
-  final class Internal {
-
-    /**
-     * Input record.
-     *
-     * @param key option key
-     * @param path option value
-     */
-    record InputImpl(String key, Path path) implements Input {
-      private InputImpl(Path path) {
-        this("--input", path);
-      }
-    }
-
-    private Internal() {}
   }
 }

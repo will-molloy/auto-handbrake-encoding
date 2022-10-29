@@ -7,11 +7,11 @@ package com.willmolloy.handbrake.core.options;
  *     Options</a>
  * @author <a href=https://willmolloy.com>Will Molloy</a>
  */
-public final class Encoders {
+public sealed interface Encoder extends Option.KeyValueOption<String> permits Internal.EncoderImpl {
 
   /** H.264 (CPU). */
-  public static Encoder h264() {
-    return new Encoder("x264");
+  static Encoder h264() {
+    return new Internal.EncoderImpl("x264");
   }
 
   /**
@@ -19,8 +19,8 @@ public final class Encoders {
    *
    * <p>More efficient, but slow, compared to {@link #h264()}.
    */
-  public static Encoder h265() {
-    return new Encoder("x265");
+  static Encoder h265() {
+    return new Internal.EncoderImpl("x265");
   }
 
   /**
@@ -28,8 +28,8 @@ public final class Encoders {
    *
    * <p>Faster and more efficient, but lower quality, compared to {@link #h264()}.
    */
-  public static Encoder h264Gpu() {
-    return new Encoder("nvenc_h264");
+  static Encoder h264Gpu() {
+    return new Internal.EncoderImpl("nvenc_h264");
   }
 
   /**
@@ -37,21 +37,7 @@ public final class Encoders {
    *
    * <p>Faster and more efficient, but lower quality, compared to {@link #h265()}.
    */
-  public static Encoder h265Gpu() {
-    return new Encoder("nvenc_h265");
+  static Encoder h265Gpu() {
+    return new Internal.EncoderImpl("nvenc_h265");
   }
-
-  /**
-   * Encoder record.
-   *
-   * @param key option key
-   * @param value option value
-   */
-  record Encoder(String key, String value) implements Option.KeyValueOption {
-    private Encoder(String value) {
-      this("--encoder", value);
-    }
-  }
-
-  private Encoders() {}
 }

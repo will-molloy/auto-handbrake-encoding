@@ -44,8 +44,8 @@ public class HandBrake {
    * @return {@code true} if encoding was successful
    */
   public boolean encode(Input input, Output output, Option... options) {
-    if (Files.exists(output.path())) {
-      log.warn("Output ({}) already exists", output.path());
+    if (Files.exists(output.value())) {
+      log.warn("Output ({}) already exists", output.value());
       return true;
     }
 
@@ -54,21 +54,19 @@ public class HandBrake {
                 Stream.of(
                     "HandBrakeCLI",
                     input.key(),
-                    input.path().toString(),
+                    input.value().toString(),
                     output.key(),
-                    output.path().toString()),
+                    output.value().toString()),
                 Arrays.stream(options)
                     .flatMap(
                         option -> {
                           // TODO exhaustive switch for sealed type
                           // TODO record deconstructor
-                          if (option instanceof Option.KeyValueOption o) {
-                            return Stream.of(o.key(), o.value());
+                          if (option instanceof Option.KeyValueOption<?> o) {
+                            return Stream.of(o.key(), o.value().toString());
+                          } else {
+                            return Stream.of(option.key());
                           }
-                          if (option instanceof Option.ValueOnlyOption o) {
-                            return Stream.of(o.value());
-                          }
-                          return Stream.of();
                         }))
             .toList();
 
