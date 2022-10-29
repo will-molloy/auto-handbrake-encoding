@@ -2,9 +2,10 @@ package com.willmolloy.handbrake.core;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.willmolloy.handbrake.core.options.Input;
 import com.willmolloy.handbrake.core.options.Option;
+import com.willmolloy.handbrake.core.options.Output;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
@@ -42,15 +43,20 @@ public class HandBrake {
    * @param options HandBrake options
    * @return {@code true} if encoding was successful
    */
-  public boolean encode(Path input, Path output, Option... options) {
-    if (Files.exists(output)) {
-      log.warn("Output ({}) already exists", output);
+  public boolean encode(Input input, Output output, Option... options) {
+    if (Files.exists(output.path())) {
+      log.warn("Output ({}) already exists", output.path());
       return true;
     }
 
     List<String> command =
         Stream.concat(
-                Stream.of("HandBrakeCLI", "-i", input.toString(), "-o", output.toString()),
+                Stream.of(
+                    "HandBrakeCLI",
+                    input.key(),
+                    input.path().toString(),
+                    output.key(),
+                    output.path().toString()),
                 Arrays.stream(options)
                     .flatMap(
                         option -> {

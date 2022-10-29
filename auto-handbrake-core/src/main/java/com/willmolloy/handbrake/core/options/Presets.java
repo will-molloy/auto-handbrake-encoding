@@ -30,7 +30,7 @@ public final class Presets {
    * @param value option value
    */
   record Preset(String key, String value) implements Option.KeyValueOption {
-    Preset(String value) {
+    private Preset(String value) {
       this("--preset", value);
     }
   }

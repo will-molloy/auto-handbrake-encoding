@@ -7,7 +7,8 @@ package com.willmolloy.handbrake.core.options;
  *     reference</a>
  * @author <a href=https://willmolloy.com>Will Molloy</a>
  */
-public sealed interface Option {
+public sealed interface Option
+    permits Input, Output, Option.KeyValueOption, Option.ValueOnlyOption {
 
   /** Option with key and value. */
   sealed interface KeyValueOption extends Option permits Encoders.Encoder, Presets.Preset {

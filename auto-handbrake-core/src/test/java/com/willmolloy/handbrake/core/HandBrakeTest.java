@@ -11,6 +11,8 @@ import static org.mockito.Mockito.when;
 
 import com.willmolloy.handbrake.core.options.Encoders;
 import com.willmolloy.handbrake.core.options.FrameRateControls;
+import com.willmolloy.handbrake.core.options.Input;
+import com.willmolloy.handbrake.core.options.Output;
 import com.willmolloy.handbrake.core.options.Presets;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -43,8 +45,8 @@ class HandBrakeTest {
 
     assertThat(
             handBrake.encode(
-                input,
-                output,
+                Input.of(input),
+                Output.of(output),
                 Presets.productionStandard(),
                 Encoders.h264(),
                 FrameRateControls.cfr()))
@@ -54,9 +56,9 @@ class HandBrakeTest {
             eq(
                 List.of(
                     "HandBrakeCLI",
-                    "-i",
+                    "--input",
                     "input.mp4",
-                    "-o",
+                    "--output",
                     "output.mp4",
                     "--preset",
                     "Production Standard",
@@ -73,7 +75,7 @@ class HandBrakeTest {
 
     try {
       Files.createFile(output);
-      assertThat(handBrake.encode(input, output)).isTrue();
+      assertThat(handBrake.encode(Input.of(input), Output.of(output))).isTrue();
       verify(mockCli, never()).execute(anyList(), any());
     } finally {
       Files.delete(output);
@@ -87,7 +89,7 @@ class HandBrakeTest {
 
     when(mockCli.execute(anyList(), any())).thenReturn(false);
 
-    assertThat(handBrake.encode(input, output)).isFalse();
+    assertThat(handBrake.encode(Input.of(input), Output.of(output))).isFalse();
   }
 
   @Test
@@ -97,6 +99,6 @@ class HandBrakeTest {
 
     when(mockCli.execute(anyList(), any())).thenThrow(new RuntimeException("error"));
 
-    assertThat(handBrake.encode(input, output)).isFalse();
+    assertThat(handBrake.encode(Input.of(input), Output.of(output))).isFalse();
   }
 }

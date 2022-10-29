@@ -6,6 +6,8 @@ import com.google.common.base.Stopwatch;
 import com.willmolloy.handbrake.core.HandBrake;
 import com.willmolloy.handbrake.core.options.Encoders;
 import com.willmolloy.handbrake.core.options.FrameRateControls;
+import com.willmolloy.handbrake.core.options.Input;
+import com.willmolloy.handbrake.core.options.Output;
 import com.willmolloy.handbrake.core.options.Presets;
 import java.nio.file.Files;
 import org.apache.logging.log4j.LogManager;
@@ -48,8 +50,8 @@ public class VideoEncoder {
       // something goes wrong
       boolean encodeSuccessful =
           handBrake.encode(
-              video.originalPath(),
-              video.tempEncodedPath(),
+              Input.of(video.originalPath()),
+              Output.of(video.tempEncodedPath()),
               Presets.productionStandard(),
               Encoders.h264(),
               FrameRateControls.cfr());

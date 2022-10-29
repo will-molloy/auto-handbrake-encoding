@@ -11,6 +11,8 @@ import com.google.common.truth.StreamSubject;
 import com.willmolloy.handbrake.core.HandBrake;
 import com.willmolloy.handbrake.core.options.Encoders;
 import com.willmolloy.handbrake.core.options.FrameRateControls;
+import com.willmolloy.handbrake.core.options.Input;
+import com.willmolloy.handbrake.core.options.Output;
 import com.willmolloy.handbrake.core.options.Presets;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -73,8 +75,8 @@ class VideoEncoderTest {
                 invocation -> {
                   // bit of an ugly hack...
                   // need to create the temp encoded file as its expected as output from HandBrake
-                  Path handBrakeOutput = invocation.getArgument(1);
-                  Files.createFile(handBrakeOutput);
+                  Output handBrakeOutput = invocation.getArgument(1);
+                  Files.createFile(handBrakeOutput.path());
                   return true;
                 });
 
@@ -88,8 +90,8 @@ class VideoEncoderTest {
     // Then
     verify(mockHandBrake)
         .encode(
-            unencodedMp4File,
-            outputDirectory.resolve("file.cfr.mp4.part"),
+            Input.of(unencodedMp4File),
+            Output.of(outputDirectory.resolve("file.cfr.mp4.part")),
             Presets.productionStandard(),
             Encoders.h264(),
             FrameRateControls.cfr());
@@ -108,8 +110,8 @@ class VideoEncoderTest {
                 invocation -> {
                   // bit of an ugly hack...
                   // need to create the temp encoded file as its expected as output from HandBrake
-                  Path handBrakeOutput = invocation.getArgument(1);
-                  Files.createFile(handBrakeOutput);
+                  Output handBrakeOutput = invocation.getArgument(1);
+                  Files.createFile(handBrakeOutput.path());
                   return true;
                 });
 
@@ -124,8 +126,8 @@ class VideoEncoderTest {
     // Then
     verify(mockHandBrake)
         .encode(
-            unencodedMp4File,
-            outputDirectory.resolve("Halo/Campaign/file.cfr.mp4.part"),
+            Input.of(unencodedMp4File),
+            Output.of(outputDirectory.resolve("Halo/Campaign/file.cfr.mp4.part")),
             Presets.productionStandard(),
             Encoders.h264(),
             FrameRateControls.cfr());

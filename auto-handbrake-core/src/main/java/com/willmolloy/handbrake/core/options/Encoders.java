@@ -48,7 +48,7 @@ public final class Encoders {
    * @param value option value
    */
   record Encoder(String key, String value) implements Option.KeyValueOption {
-    Encoder(String value) {
+    private Encoder(String value) {
       this("--encoder", value);
     }
   }
