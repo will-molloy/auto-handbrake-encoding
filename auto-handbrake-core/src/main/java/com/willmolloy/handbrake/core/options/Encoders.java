@@ -8,19 +8,6 @@ package com.willmolloy.handbrake.core.options;
  * @author <a href=https://willmolloy.com>Will Molloy</a>
  */
 public final class Encoders {
-  private Encoders() {}
-
-  /**
-   * Encoder record.
-   *
-   * @param key option key
-   * @param value option value
-   */
-  record Encoder(String key, String value) implements Option.KeyValueOption {
-    Encoder(String value) {
-      this("--encoder", value);
-    }
-  }
 
   /** H.264 (CPU). */
   public static Encoder h264() {
@@ -53,4 +40,18 @@ public final class Encoders {
   public static Encoder h265Gpu() {
     return new Encoder("nvenc_h265");
   }
+
+  /**
+   * Encoder record.
+   *
+   * @param key option key
+   * @param value option value
+   */
+  record Encoder(String key, String value) implements Option.KeyValueOption {
+    Encoder(String value) {
+      this("--encoder", value);
+    }
+  }
+
+  private Encoders() {}
 }

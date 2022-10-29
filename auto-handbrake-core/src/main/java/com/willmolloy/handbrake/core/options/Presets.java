@@ -8,19 +8,6 @@ package com.willmolloy.handbrake.core.options;
  * @author <a href=https://willmolloy.com>Will Molloy</a>
  */
 public final class Presets {
-  private Presets() {}
-
-  /**
-   * Preset record.
-   *
-   * @param key option key
-   * @param value option value
-   */
-  record Preset(String key, String value) implements Option.KeyValueOption {
-    Preset(String value) {
-      this("--preset", value);
-    }
-  }
 
   /** Production Max preset. */
   public static Preset productionMax() {
@@ -35,4 +22,18 @@ public final class Presets {
   public static Preset productionStandard() {
     return new Preset("Production Standard");
   }
+
+  /**
+   * Preset record.
+   *
+   * @param key option key
+   * @param value option value
+   */
+  record Preset(String key, String value) implements Option.KeyValueOption {
+    Preset(String value) {
+      this("--preset", value);
+    }
+  }
+
+  private Presets() {}
 }

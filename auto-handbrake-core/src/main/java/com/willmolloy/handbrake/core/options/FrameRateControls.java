@@ -8,7 +8,11 @@ package com.willmolloy.handbrake.core.options;
  * @author <a href=https://willmolloy.com>Will Molloy</a>
  */
 public final class FrameRateControls {
-  private FrameRateControls() {}
+
+  /** Constant frame rate. */
+  public static FrameRateControl cfr() {
+    return new FrameRateControl("--cfr");
+  }
 
   /**
    * Frame rate control record.
@@ -17,8 +21,5 @@ public final class FrameRateControls {
    */
   record FrameRateControl(String value) implements Option.ValueOnlyOption {}
 
-  /** Constant frame rate. */
-  public static FrameRateControl cfr() {
-    return new FrameRateControl("--cfr");
-  }
+  private FrameRateControls() {}
 }

@@ -11,7 +11,6 @@ public sealed interface Option {
 
   /** Option with key and value. */
   sealed interface KeyValueOption extends Option permits Encoders.Encoder, Presets.Preset {
-
     String key();
 
     String value();
