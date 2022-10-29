@@ -9,7 +9,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.willmolloy.handbrake.core.options.Preset;
+import com.willmolloy.handbrake.core.options.Presets;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -39,7 +39,7 @@ class HandBrakeTest {
 
     when(mockCli.execute(anyList(), any())).thenReturn(true);
 
-    assertThat(handBrake.encode(input, output, List.of(new Preset.ProductionStandard()))).isTrue();
+    assertThat(handBrake.encode(input, output, List.of(Presets.productionStandard()))).isTrue();
     verify(mockCli)
         .execute(
             eq(

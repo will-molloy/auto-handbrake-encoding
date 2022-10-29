@@ -9,8 +9,8 @@ import static org.mockito.Mockito.when;
 import com.google.common.io.Resources;
 import com.google.common.truth.StreamSubject;
 import com.willmolloy.handbrake.core.HandBrake;
-import com.willmolloy.handbrake.core.options.Encoder;
-import com.willmolloy.handbrake.core.options.Preset;
+import com.willmolloy.handbrake.core.options.Encoders;
+import com.willmolloy.handbrake.core.options.Presets;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -90,7 +90,7 @@ class VideoEncoderTest {
         .encode(
             unencodedMp4File,
             outputDirectory.resolve("file.cfr.mp4.part"),
-            List.of(new Preset.ProductionStandard(), new Encoder.H264()));
+            List.of(Presets.productionStandard(), Encoders.h264()));
     assertThatTestDirectory()
         .containsExactly(
             inputDirectory.resolve("file.mp4"), outputDirectory.resolve("file.cfr.mp4"));
@@ -124,7 +124,7 @@ class VideoEncoderTest {
         .encode(
             unencodedMp4File,
             outputDirectory.resolve("Halo/Campaign/file.cfr.mp4.part"),
-            List.of(new Preset.ProductionStandard(), new Encoder.H264()));
+            List.of(Presets.productionStandard(), Encoders.h264()));
     assertThatTestDirectory()
         .containsExactly(
             inputDirectory.resolve("Halo/Campaign/file.mp4"),

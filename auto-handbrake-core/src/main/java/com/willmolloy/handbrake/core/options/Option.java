@@ -7,7 +7,7 @@ package com.willmolloy.handbrake.core.options;
  *     reference</a>
  * @author <a href=https://willmolloy.com>Will Molloy</a>
  */
-public sealed interface Option permits Encoder, Preset {
+public sealed interface Option permits Encoders.Encoder, Presets.Preset {
 
   String key();
 

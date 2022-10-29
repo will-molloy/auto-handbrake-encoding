@@ -4,8 +4,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Stopwatch;
 import com.willmolloy.handbrake.core.HandBrake;
-import com.willmolloy.handbrake.core.options.Encoder;
-import com.willmolloy.handbrake.core.options.Preset;
+import com.willmolloy.handbrake.core.options.Encoders;
+import com.willmolloy.handbrake.core.options.Presets;
 import java.nio.file.Files;
 import java.util.List;
 import org.apache.logging.log4j.LogManager;
@@ -50,7 +50,7 @@ public class VideoEncoder {
           handBrake.encode(
               video.originalPath(),
               video.tempEncodedPath(),
-              List.of(new Preset.ProductionStandard(), new Encoder.H264()));
+              List.of(Presets.productionStandard(), Encoders.h264()));
 
       if (encodeSuccessful) {
         Files.move(video.tempEncodedPath(), video.encodedPath());
