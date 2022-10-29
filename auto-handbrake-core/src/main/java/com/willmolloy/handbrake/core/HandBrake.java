@@ -1,10 +1,11 @@
 package com.willmolloy.handbrake.core;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.willmolloy.handbrake.core.options.Option;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Stream;
@@ -39,21 +40,21 @@ public class HandBrake {
    * @param output output file
    * @return {@code true} if encoding was successful
    */
-  public boolean encode(Path input, Path output, String... options) {
-    checkArgument(options.length % 2 == 0, "non-even length of options: [%s]", (Object[]) options);
+  public boolean encode(Path input, Path output, List<? extends Option> options) {
     if (Files.exists(output)) {
       log.warn("Output ({}) already exists", output);
       return true;
     }
 
+    List<String> command =
+        Stream.concat(
+                Stream.of("HandBrakeCLI", "-i", input.toString(), "-o", output.toString()),
+                options.stream().flatMap(option -> Stream.of(option.key(), option.value())))
+            .toList();
+
     LOCK.lock();
     try {
-      return cli.execute(
-          Stream.concat(
-                  Stream.of("HandBrakeCLI", "-i", input.toString(), "-o", output.toString()),
-                  Stream.of(options))
-              .toList(),
-          new HandBrakeLogger(log));
+      return cli.execute(command, new HandBrakeLogger(log));
     } catch (Exception e) {
       log.error("Error encoding: %s".formatted(input), e);
       return false;

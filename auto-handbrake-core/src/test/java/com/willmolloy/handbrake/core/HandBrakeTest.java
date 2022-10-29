@@ -1,7 +1,6 @@
 package com.willmolloy.handbrake.core;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
@@ -10,6 +9,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.willmolloy.handbrake.core.options.Preset;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -39,7 +39,7 @@ class HandBrakeTest {
 
     when(mockCli.execute(anyList(), any())).thenReturn(true);
 
-    assertThat(handBrake.encode(input, output, "--preset", "Production Max")).isTrue();
+    assertThat(handBrake.encode(input, output, List.of(new Preset.ProductionStandard()))).isTrue();
     verify(mockCli)
         .execute(
             eq(
@@ -50,7 +50,7 @@ class HandBrakeTest {
                     "-o",
                     "output.mp4",
                     "--preset",
-                    "Production Max")),
+                    "Production Standard")),
             isA(HandBrakeLogger.class));
   }
 
@@ -61,7 +61,7 @@ class HandBrakeTest {
 
     try {
       Files.createFile(output);
-      assertThat(handBrake.encode(input, output)).isTrue();
+      assertThat(handBrake.encode(input, output, List.of())).isTrue();
       verify(mockCli, never()).execute(anyList(), any());
     } finally {
       Files.delete(output);
@@ -75,7 +75,7 @@ class HandBrakeTest {
 
     when(mockCli.execute(anyList(), any())).thenReturn(false);
 
-    assertThat(handBrake.encode(input, output)).isFalse();
+    assertThat(handBrake.encode(input, output, List.of())).isFalse();
   }
 
   @Test
@@ -85,20 +85,6 @@ class HandBrakeTest {
 
     when(mockCli.execute(anyList(), any())).thenThrow(new RuntimeException("error"));
 
-    assertThat(handBrake.encode(input, output)).isFalse();
-  }
-
-  @Test
-  void rejectsNonEvenLengthOfOptions() {
-    Path input = Path.of("input.mp4");
-    Path output = Path.of("output.mp4");
-
-    IllegalArgumentException thrown =
-        assertThrows(
-            IllegalArgumentException.class,
-            () -> handBrake.encode(input, output, "--preset", "Production Max", "-e"));
-    assertThat(thrown)
-        .hasMessageThat()
-        .isEqualTo("non-even length of options: [--preset] [Production Max, -e]");
+    assertThat(handBrake.encode(input, output, List.of())).isFalse();
   }
 }
