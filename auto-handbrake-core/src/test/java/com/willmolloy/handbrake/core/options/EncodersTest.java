@@ -16,7 +16,7 @@ class EncodersTest {
 
   @ParameterizedTest
   @MethodSource
-  void testExpectedKeysAndValues(Option encoder, String key, String value) {
+  void testExpectedKeysAndValues(Encoders.Encoder encoder, String key, String value) {
     assertThat(encoder.key()).isEqualTo(key);
     assertThat(encoder.value()).isEqualTo(value);
   }

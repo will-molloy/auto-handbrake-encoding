@@ -7,9 +7,18 @@ package com.willmolloy.handbrake.core.options;
  *     reference</a>
  * @author <a href=https://willmolloy.com>Will Molloy</a>
  */
-public sealed interface Option permits Encoders.Encoder, Presets.Preset {
+public sealed interface Option {
 
-  String key();
+  /** Option with key and value. */
+  sealed interface KeyValueOption extends Option permits Encoders.Encoder, Presets.Preset {
 
-  String value();
+    String key();
+
+    String value();
+  }
+
+  /** Option with value only. */
+  sealed interface ValueOnlyOption extends Option permits FrameRateControls.FrameRateControl {
+    String value();
+  }
 }

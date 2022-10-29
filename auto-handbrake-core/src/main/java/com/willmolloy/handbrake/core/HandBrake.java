@@ -50,7 +50,19 @@ public class HandBrake {
     List<String> command =
         Stream.concat(
                 Stream.of("HandBrakeCLI", "-i", input.toString(), "-o", output.toString()),
-                options.stream().flatMap(option -> Stream.of(option.key(), option.value())))
+                options.stream()
+                    .flatMap(
+                        option -> {
+                          // TODO exhaustive switch for sealed type
+                          // TODO record deconstructor
+                          if (option instanceof Option.KeyValueOption o) {
+                            return Stream.of(o.key(), o.value());
+                          }
+                          if (option instanceof Option.ValueOnlyOption o) {
+                            return Stream.of(o.value());
+                          }
+                          return Stream.of();
+                        }))
             .toList();
 
     LOCK.lock();

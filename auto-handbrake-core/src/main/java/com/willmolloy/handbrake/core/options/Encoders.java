@@ -16,7 +16,7 @@ public final class Encoders {
    * @param key option key
    * @param value option value
    */
-  record Encoder(String key, String value) implements Option {
+  record Encoder(String key, String value) implements Option.KeyValueOption {
     Encoder(String value) {
       this("--encoder", value);
     }

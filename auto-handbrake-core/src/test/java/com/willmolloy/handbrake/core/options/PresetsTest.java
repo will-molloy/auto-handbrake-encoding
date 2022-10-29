@@ -16,7 +16,7 @@ class PresetsTest {
 
   @ParameterizedTest
   @MethodSource
-  void testExpectedKeysAndValues(Option preset, String key, String value) {
+  void testExpectedKeysAndValues(Presets.Preset preset, String key, String value) {
     assertThat(preset.key()).isEqualTo(key);
     assertThat(preset.value()).isEqualTo(value);
   }

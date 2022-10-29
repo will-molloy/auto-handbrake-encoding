@@ -16,7 +16,7 @@ public final class Presets {
    * @param key option key
    * @param value option value
    */
-  record Preset(String key, String value) implements Option {
+  record Preset(String key, String value) implements Option.KeyValueOption {
     Preset(String value) {
       this("--preset", value);
     }
