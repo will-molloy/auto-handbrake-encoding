@@ -11,55 +11,27 @@ import java.nio.file.Path;
 final class Internal {
 
   /**
-   * Input record.
+   * Option implementation.
+   *
+   * @param key option key
+   */
+  record OptionImpl(String key) implements FrameRateControl {}
+
+  /**
+   * Key value option implementation.
    *
    * @param key option key
    * @param value option value
    */
-  record InputImpl(String key, Path value) implements Input {
-    InputImpl(Path value) {
-      this("--input", value);
-    }
-  }
+  record KeyStringValueOptionImpl(String key, String value) implements Preset, Encoder {}
 
   /**
-   * Output record.
+   * Key value option implementation.
    *
    * @param key option key
    * @param value option value
    */
-  record OutputImpl(String key, Path value) implements Output {}
-
-  /**
-   * Preset record.
-   *
-   * @param key option key
-   * @param value option value
-   */
-  record PresetImpl(String key, String value) implements Preset {
-    PresetImpl(String value) {
-      this("--preset", value);
-    }
-  }
-
-  /**
-   * Encoder record.
-   *
-   * @param key option key
-   * @param value option value
-   */
-  record EncoderImpl(String key, String value) implements Encoder {
-    EncoderImpl(String value) {
-      this("--encoder", value);
-    }
-  }
-
-  /**
-   * Frame rate control record.
-   *
-   * @param key option key
-   */
-  record FrameRateControlImpl(String key) implements FrameRateControl {}
+  record KeyPathValueOptionImpl(String key, Path value) implements Input, Output {}
 
   private Internal() {}
 }
