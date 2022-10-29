@@ -16,11 +16,11 @@ class FrameRateControlsTest {
 
   @ParameterizedTest
   @MethodSource
-  void testExpectedKeys(FrameRateControl frameRateControl, String value) {
+  void testExpectedKeys(Option frameRateControl, String value) {
     assertThat(frameRateControl.key()).isEqualTo(value);
   }
 
   static Stream<Arguments> testExpectedKeys() {
-    return Stream.of(Arguments.of(FrameRateControl.cfr(), "--cfr"));
+    return Stream.of(Arguments.of(FrameRateControls.cfr(), "--cfr"));
   }
 }

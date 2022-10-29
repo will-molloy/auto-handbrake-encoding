@@ -9,11 +9,11 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.willmolloy.handbrake.core.options.Encoder;
-import com.willmolloy.handbrake.core.options.FrameRateControl;
+import com.willmolloy.handbrake.core.options.Encoders;
+import com.willmolloy.handbrake.core.options.FrameRateControls;
 import com.willmolloy.handbrake.core.options.Input;
 import com.willmolloy.handbrake.core.options.Output;
-import com.willmolloy.handbrake.core.options.Preset;
+import com.willmolloy.handbrake.core.options.Presets;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -47,9 +47,9 @@ class HandBrakeTest {
             handBrake.encode(
                 Input.of(input),
                 Output.of(output),
-                Preset.productionStandard(),
-                Encoder.h264(),
-                FrameRateControl.cfr()))
+                Presets.productionStandard(),
+                Encoders.h264(),
+                FrameRateControls.cfr()))
         .isTrue();
     verify(mockCli)
         .execute(

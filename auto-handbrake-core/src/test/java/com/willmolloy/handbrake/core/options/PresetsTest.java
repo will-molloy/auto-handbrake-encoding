@@ -12,18 +12,18 @@ import org.junit.jupiter.params.provider.MethodSource;
  *
  * @author <a href=https://willmolloy.com>Will Molloy</a>
  */
-class PresetTest {
+class PresetsTest {
 
   @ParameterizedTest
   @MethodSource
-  void testExpectedKeysAndValues(Preset preset, String key, String value) {
+  void testExpectedKeysAndValues(Option.KeyValueOption<String> preset, String key, String value) {
     assertThat(preset.key()).isEqualTo(key);
     assertThat(preset.value()).isEqualTo(value);
   }
 
   static Stream<Arguments> testExpectedKeysAndValues() {
     return Stream.of(
-        Arguments.of(Preset.productionMax(), "--preset", "Production Max"),
-        Arguments.of(Preset.productionStandard(), "--preset", "Production Standard"));
+        Arguments.of(Presets.productionMax(), "--preset", "Production Max"),
+        Arguments.of(Presets.productionStandard(), "--preset", "Production Standard"));
   }
 }
