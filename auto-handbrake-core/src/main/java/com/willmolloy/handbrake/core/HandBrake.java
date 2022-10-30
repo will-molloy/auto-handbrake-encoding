@@ -61,12 +61,14 @@ public class HandBrake {
                     .flatMap(
                         option -> {
                           // TODO exhaustive switch for sealed type
-                          // TODO record deconstructor
+                          // TODO record deconstructor - can't since we have interfaces??
+                          if (option instanceof Option.KeyOnlyOption o) {
+                            return Stream.of(o.key());
+                          }
                           if (option instanceof Option.KeyValueOption<?> o) {
                             return Stream.of(o.key(), o.value().toString());
-                          } else {
-                            return Stream.of(option.key());
                           }
+                          return Stream.of();
                         }))
             .toList();
 
