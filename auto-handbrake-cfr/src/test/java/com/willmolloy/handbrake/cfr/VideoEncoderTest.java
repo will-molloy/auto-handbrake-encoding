@@ -9,11 +9,11 @@ import static org.mockito.Mockito.when;
 import com.google.common.io.Resources;
 import com.google.common.truth.StreamSubject;
 import com.willmolloy.handbrake.core.HandBrake;
-import com.willmolloy.handbrake.core.options.Encoders;
-import com.willmolloy.handbrake.core.options.FrameRateControls;
+import com.willmolloy.handbrake.core.options.Encoder;
+import com.willmolloy.handbrake.core.options.FrameRateControl;
 import com.willmolloy.handbrake.core.options.Input;
 import com.willmolloy.handbrake.core.options.Output;
-import com.willmolloy.handbrake.core.options.Presets;
+import com.willmolloy.handbrake.core.options.Preset;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -92,9 +92,9 @@ class VideoEncoderTest {
         .encode(
             Input.of(unencodedMp4File),
             Output.of(outputDirectory.resolve("file.cfr.mp4.part")),
-            Presets.productionStandard(),
-            Encoders.h264(),
-            FrameRateControls.cfr());
+            Preset.productionStandard(),
+            Encoder.h264(),
+            FrameRateControl.cfr());
     assertThatTestDirectory()
         .containsExactly(
             inputDirectory.resolve("file.mp4"), outputDirectory.resolve("file.cfr.mp4"));
@@ -128,9 +128,9 @@ class VideoEncoderTest {
         .encode(
             Input.of(unencodedMp4File),
             Output.of(outputDirectory.resolve("Halo/Campaign/file.cfr.mp4.part")),
-            Presets.productionStandard(),
-            Encoders.h264(),
-            FrameRateControls.cfr());
+            Preset.productionStandard(),
+            Encoder.h264(),
+            FrameRateControl.cfr());
     assertThatTestDirectory()
         .containsExactly(
             inputDirectory.resolve("Halo/Campaign/file.mp4"),

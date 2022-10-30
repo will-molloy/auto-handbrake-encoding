@@ -7,12 +7,10 @@ package com.willmolloy.handbrake.core.options;
  *     Options</a>
  * @author <a href=https://willmolloy.com>Will Molloy</a>
  */
-public final class FrameRateControls {
+public sealed interface FrameRateControl extends Option permits Internal.OptionImpl {
 
   /** Constant frame rate. */
-  public static Option cfr() {
-    return new Internals.OptionImpl("--cfr");
+  static FrameRateControl cfr() {
+    return new Internal.OptionImpl("--cfr");
   }
-
-  private FrameRateControls() {}
 }
