@@ -41,9 +41,7 @@ class AppIntegrationTest {
     testDirectory = Path.of(this.getClass().getSimpleName());
     testVideo = Path.of(Resources.getResource("Big_Buck_Bunny_360_10s_1MB.mp4").toURI());
     testVideoEncoded =
-        Path.of(
-            Resources.getResource("Big_Buck_Bunny_360_10s_1MB_encoded_Production_Standard.mp4")
-                .toURI());
+        Path.of(Resources.getResource("Big_Buck_Bunny_360_10s_1MB_encoded.mp4").toURI());
     testVideo2 = Path.of(Resources.getResource("Big_Buck_Bunny_360_10s_2MB.mp4").toURI());
   }
 

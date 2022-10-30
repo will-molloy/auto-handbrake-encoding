@@ -4,7 +4,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Stopwatch;
-import com.willmolloy.handbrake.core.Cli;
 import com.willmolloy.handbrake.core.HandBrake;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -127,7 +126,7 @@ class App {
       Path outputDirectory = Path.of(args[1]);
       Path archiveDirectory = Path.of(args[2]);
 
-      VideoEncoder videoEncoder = new VideoEncoder(new HandBrake(new Cli()));
+      VideoEncoder videoEncoder = new VideoEncoder(new HandBrake());
       VideoArchiver videoArchiver = new VideoArchiver();
       App app = new App(videoEncoder, videoArchiver);
 
