@@ -8,11 +8,11 @@ package com.willmolloy.handbrake.core.options;
  * @author <a href=https://willmolloy.com>Will Molloy</a>
  */
 public sealed interface Preset extends Option.KeyValueOption<String>
-    permits Internal.KeyStringValueOptionImpl {
+    permits Internals.KeyStringValueOptionImpl {
 
   /** Production Max preset. */
   static Preset productionMax() {
-    return new Internal.KeyStringValueOptionImpl("--preset", "Production Max");
+    return preset("Production Max");
   }
 
   /**
@@ -21,6 +21,10 @@ public sealed interface Preset extends Option.KeyValueOption<String>
    * <p>More efficient and (IMO) indistinguishable quality, compared to {@link #productionMax()}.
    */
   static Preset productionStandard() {
-    return new Internal.KeyStringValueOptionImpl("--preset", "Production Standard");
+    return preset("Production Standard");
+  }
+
+  private static Preset preset(String value) {
+    return new Internals.KeyStringValueOptionImpl("--preset", value);
   }
 }

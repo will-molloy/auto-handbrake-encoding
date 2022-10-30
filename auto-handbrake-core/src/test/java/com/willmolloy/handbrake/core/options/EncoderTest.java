@@ -8,7 +8,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 /**
- * EncodersTest.
+ * EncoderTest.
  *
  * @author <a href=https://willmolloy.com>Will Molloy</a>
  */
@@ -16,12 +16,12 @@ class EncoderTest {
 
   @ParameterizedTest
   @MethodSource
-  void testExpectedKeysAndValues(Encoder encoder, String key, String value) {
+  void testFactoriesExpectedKeysAndValues(Encoder encoder, String key, String value) {
     assertThat(encoder.key()).isEqualTo(key);
     assertThat(encoder.value()).isEqualTo(value);
   }
 
-  static Stream<Arguments> testExpectedKeysAndValues() {
+  static Stream<Arguments> testFactoriesExpectedKeysAndValues() {
     return Stream.of(
         Arguments.of(Encoder.h264(), "--encoder", "x264"),
         Arguments.of(Encoder.h265(), "--encoder", "x265"),

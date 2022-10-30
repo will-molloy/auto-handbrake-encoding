@@ -10,9 +10,9 @@ import java.nio.file.Path;
  * @author <a href=https://willmolloy.com>Will Molloy</a>
  */
 public sealed interface Output extends Option.KeyValueOption<Path>
-    permits Internal.KeyPathValueOptionImpl {
+    permits Internals.KeyPathValueOptionImpl {
 
   static Output of(Path path) {
-    return new Internal.KeyPathValueOptionImpl("--output", path);
+    return new Internals.KeyPathValueOptionImpl("--output", path);
   }
 }

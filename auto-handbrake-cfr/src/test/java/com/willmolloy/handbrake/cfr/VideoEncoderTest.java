@@ -94,7 +94,7 @@ class VideoEncoderTest {
             Output.of(outputDirectory.resolve("file.cfr.mp4.part")),
             Preset.productionStandard(),
             Encoder.h264(),
-            FrameRateControl.cfr());
+            FrameRateControl.constant());
     assertThatTestDirectory()
         .containsExactly(
             inputDirectory.resolve("file.mp4"), outputDirectory.resolve("file.cfr.mp4"));
@@ -130,7 +130,7 @@ class VideoEncoderTest {
             Output.of(outputDirectory.resolve("Halo/Campaign/file.cfr.mp4.part")),
             Preset.productionStandard(),
             Encoder.h264(),
-            FrameRateControl.cfr());
+            FrameRateControl.constant());
     assertThatTestDirectory()
         .containsExactly(
             inputDirectory.resolve("Halo/Campaign/file.mp4"),

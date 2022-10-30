@@ -49,7 +49,7 @@ class HandBrakeTest {
                 Output.of(output),
                 Preset.productionStandard(),
                 Encoder.h264(),
-                FrameRateControl.cfr()))
+                FrameRateControl.constant()))
         .isTrue();
     verify(mockCli)
         .execute(

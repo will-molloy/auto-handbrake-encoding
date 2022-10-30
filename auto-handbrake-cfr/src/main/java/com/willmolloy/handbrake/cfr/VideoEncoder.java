@@ -54,7 +54,7 @@ public class VideoEncoder {
               Output.of(video.tempEncodedPath()),
               Preset.productionStandard(),
               Encoder.h264(),
-              FrameRateControl.cfr());
+              FrameRateControl.constant());
 
       if (encodeSuccessful) {
         Files.move(video.tempEncodedPath(), video.encodedPath());

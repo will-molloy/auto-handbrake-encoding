@@ -8,19 +8,22 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 /**
- * FrameRateControlsTest.
+ * FrameRateControlTest.
  *
  * @author <a href=https://willmolloy.com>Will Molloy</a>
  */
-class FrameRateControlsTest {
+class FrameRateControlTest {
 
   @ParameterizedTest
   @MethodSource
-  void testExpectedKeys(FrameRateControl frameRateControl, String value) {
+  void testFactoriesExpectedKeys(FrameRateControl frameRateControl, String value) {
     assertThat(frameRateControl.key()).isEqualTo(value);
   }
 
-  static Stream<Arguments> testExpectedKeys() {
-    return Stream.of(Arguments.of(FrameRateControl.cfr(), "--cfr"));
+  static Stream<Arguments> testFactoriesExpectedKeys() {
+    return Stream.of(
+        Arguments.of(FrameRateControl.constant(), "--cfr"),
+        Arguments.of(FrameRateControl.variable(), "--vfr"),
+        Arguments.of(FrameRateControl.peak(), "--pfr"));
   }
 }

@@ -8,11 +8,11 @@ package com.willmolloy.handbrake.core.options;
  * @author <a href=https://willmolloy.com>Will Molloy</a>
  */
 public sealed interface Encoder extends Option.KeyValueOption<String>
-    permits Internal.KeyStringValueOptionImpl {
+    permits Internals.KeyStringValueOptionImpl {
 
   /** H.264 (CPU). */
   static Encoder h264() {
-    return new Internal.KeyStringValueOptionImpl("--encoder", "x264");
+    return encoder("x264");
   }
 
   /**
@@ -21,7 +21,7 @@ public sealed interface Encoder extends Option.KeyValueOption<String>
    * <p>More efficient, but slow, compared to {@link #h264()}.
    */
   static Encoder h265() {
-    return new Internal.KeyStringValueOptionImpl("--encoder", "x265");
+    return encoder("x265");
   }
 
   /**
@@ -30,7 +30,7 @@ public sealed interface Encoder extends Option.KeyValueOption<String>
    * <p>Faster and more efficient, but lower quality, compared to {@link #h264()}.
    */
   static Encoder h264Gpu() {
-    return new Internal.KeyStringValueOptionImpl("--encoder", "nvenc_h264");
+    return encoder("nvenc_h264");
   }
 
   /**
@@ -39,6 +39,10 @@ public sealed interface Encoder extends Option.KeyValueOption<String>
    * <p>Faster and more efficient, but lower quality, compared to {@link #h265()}.
    */
   static Encoder h265Gpu() {
-    return new Internal.KeyStringValueOptionImpl("--encoder", "nvenc_h265");
+    return encoder("nvenc_h265");
+  }
+
+  private static Encoder encoder(String value) {
+    return new Internals.KeyStringValueOptionImpl("--encoder", value);
   }
 }

@@ -16,12 +16,12 @@ class PresetTest {
 
   @ParameterizedTest
   @MethodSource
-  void testExpectedKeysAndValues(Preset preset, String key, String value) {
+  void testFactoriesExpectedKeysAndValues(Preset preset, String key, String value) {
     assertThat(preset.key()).isEqualTo(key);
     assertThat(preset.value()).isEqualTo(value);
   }
 
-  static Stream<Arguments> testExpectedKeysAndValues() {
+  static Stream<Arguments> testFactoriesExpectedKeysAndValues() {
     return Stream.of(
         Arguments.of(Preset.productionMax(), "--preset", "Production Max"),
         Arguments.of(Preset.productionStandard(), "--preset", "Production Standard"));
