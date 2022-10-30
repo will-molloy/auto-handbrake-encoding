@@ -1,10 +1,13 @@
 package com.willmolloy.handbrake.core;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.willmolloy.handbrake.core.options.Input;
+import com.willmolloy.handbrake.core.options.Option;
+import com.willmolloy.handbrake.core.options.Output;
 import java.nio.file.Files;
-import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Stream;
@@ -24,8 +27,12 @@ public class HandBrake {
 
   private final Cli cli;
 
-  public HandBrake(Cli cli) {
+  HandBrake(Cli cli) {
     this.cli = checkNotNull(cli);
+  }
+
+  public HandBrake() {
+    this(new Cli());
   }
 
   /**
@@ -33,23 +40,41 @@ public class HandBrake {
    *
    * @param input input file
    * @param output output file
+   * @param options HandBrake options
    * @return {@code true} if encoding was successful
    */
-  public boolean encode(Path input, Path output, String... options) {
-    checkArgument(options.length % 2 == 0, "non-even length of options: [%s]", (Object[]) options);
-    if (Files.exists(output)) {
-      log.warn("Output ({}) already exists", output);
+  public boolean encode(Input input, Output output, Option... options) {
+    if (Files.exists(output.value())) {
+      log.warn("Output ({}) already exists", output.value());
       return true;
     }
 
+    List<String> command =
+        Stream.concat(
+                Stream.of(
+                    "HandBrakeCLI",
+                    input.key(),
+                    input.value().toString(),
+                    output.key(),
+                    output.value().toString()),
+                Arrays.stream(options)
+                    .flatMap(
+                        option -> {
+                          // TODO exhaustive switch for sealed type
+                          // TODO record deconstructor - can't since we have interfaces??
+                          if (option instanceof Option.KeyOnlyOption o) {
+                            return Stream.of(o.key());
+                          }
+                          if (option instanceof Option.KeyValueOption<?> o) {
+                            return Stream.of(o.key(), o.value().toString());
+                          }
+                          return Stream.of();
+                        }))
+            .toList();
+
     LOCK.lock();
     try {
-      return cli.execute(
-          Stream.concat(
-                  Stream.of("HandBrakeCLI", "-i", input.toString(), "-o", output.toString()),
-                  Stream.of(options))
-              .toList(),
-          new HandBrakeLogger(log));
+      return cli.execute(command, new HandBrakeLogger(log));
     } catch (Exception e) {
       log.error("Error encoding: %s".formatted(input), e);
       return false;
