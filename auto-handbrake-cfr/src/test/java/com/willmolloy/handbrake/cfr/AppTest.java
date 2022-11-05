@@ -1,6 +1,8 @@
 package com.willmolloy.handbrake.cfr;
 
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.never;
@@ -65,7 +67,7 @@ class AppTest {
   void encodesVideoFilesAndArchivesOriginals() throws Exception {
     // Given
     when(mockVideoEncoder.encode(any())).thenReturn(true);
-    when(mockVideoArchiver.archiveAsync(any())).thenReturn(CompletableFuture.completedFuture(null));
+    when(mockVideoArchiver.archiveAsync(any())).thenReturn(CompletableFuture.completedFuture(true));
 
     Files.createDirectories(inputDirectory.resolve("NestedFolder"));
     Files.copy(testVideo, inputDirectory.resolve("video1.mp4"));
@@ -104,15 +106,17 @@ class AppTest {
                         .equals(inputDirectory.resolve("NestedFolder/video3.mp4"))));
   }
 
+  // TODO test continues with other videos and throws error at the end
   @Test
-  void skipsArchivingOriginalIfEncodingFails() throws Exception {
+  void throwsErrorAndSkipsArchivingIfEncodingFails() throws Exception {
     // Given
     when(mockVideoEncoder.encode(any())).thenReturn(false);
 
     Files.copy(testVideo, inputDirectory.resolve("video1.mp4"));
 
     // When
-    app.run(inputDirectory, outputDirectory, archiveDirectory);
+    Error thrown =
+        assertThrows(Error.class, () -> app.run(inputDirectory, outputDirectory, archiveDirectory));
 
     // Then
     verify(mockVideoEncoder)
@@ -121,6 +125,30 @@ class AppTest {
     verify(mockVideoArchiver, never())
         .archiveAsync(
             argThat(video -> video.originalPath().equals(inputDirectory.resolve("video1.mp4"))));
+    assertThat(thrown).hasMessageThat().isEqualTo("Run failed. Read the logs.");
+  }
+
+  @Test
+  void throwsErrorIfArchivingFails() throws Exception {
+    // Given
+    when(mockVideoEncoder.encode(any())).thenReturn(true);
+    when(mockVideoArchiver.archiveAsync(any()))
+        .thenReturn(CompletableFuture.completedFuture(false));
+
+    Files.copy(testVideo, inputDirectory.resolve("video1.mp4"));
+
+    // When
+    Error thrown =
+        assertThrows(Error.class, () -> app.run(inputDirectory, outputDirectory, archiveDirectory));
+
+    // Then
+    verify(mockVideoEncoder)
+        .encode(
+            argThat(video -> video.originalPath().equals(inputDirectory.resolve("video1.mp4"))));
+    verify(mockVideoArchiver)
+        .archiveAsync(
+            argThat(video -> video.originalPath().equals(inputDirectory.resolve("video1.mp4"))));
+    assertThat(thrown).hasMessageThat().isEqualTo("Run failed. Read the logs.");
   }
 
   @Test

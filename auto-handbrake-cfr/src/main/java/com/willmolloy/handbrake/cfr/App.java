@@ -48,7 +48,10 @@ class App {
           new UnencodedVideo.Factory(inputDirectory, outputDirectory, archiveDirectory);
       List<UnencodedVideo> unencodedVideos = getUnencodedVideos(inputDirectory, factory);
 
-      encodeAndArchiveVideos(unencodedVideos);
+      if (!encodeAndArchiveVideos(unencodedVideos)) {
+        // TODO aggregate exceptions/errors somehow. Need to change boolean returns.
+        throw new Error("Run failed. Read the logs.");
+      }
     } finally {
       log.info("run finished - elapsed: {}", stopwatch.elapsed());
     }
@@ -96,7 +99,9 @@ class App {
         .toList();
   }
 
-  private void encodeAndArchiveVideos(List<UnencodedVideo> videos) {
+  private boolean encodeAndArchiveVideos(List<UnencodedVideo> videos) {
+    boolean overallSuccess = true;
+
     log.info("Detected {} video(s) to encode", videos.size());
     int i = 0;
     for (UnencodedVideo video : videos) {
@@ -104,19 +109,23 @@ class App {
     }
 
     i = 0;
-    List<CompletableFuture<?>> archiverFutures = new ArrayList<>();
+    List<CompletableFuture<Boolean>> archiverFutures = new ArrayList<>();
     for (UnencodedVideo video : videos) {
       log.info("Encoding ({}/{}): {}", ++i, videos.size(), video);
       if (videoEncoder.encode(video)) {
         // run archiving async as it can be expensive (e.g. moving to another disk or NAS)
         // then while it's archiving it can encode the next video
         archiverFutures.add(videoArchiver.archiveAsync(video));
+      } else {
+        overallSuccess = false;
       }
     }
 
-    for (CompletableFuture<?> future : archiverFutures) {
-      future.join();
+    for (CompletableFuture<Boolean> future : archiverFutures) {
+      overallSuccess &= future.join();
     }
+
+    return overallSuccess;
   }
 
   public static void main(String... args) {

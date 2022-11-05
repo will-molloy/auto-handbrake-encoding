@@ -21,9 +21,10 @@ public class VideoArchiver {
    * Archives the given video.
    *
    * @param video video to archive
+   * @return {@code true} if archiving was successful
    */
-  public CompletableFuture<Void> archiveAsync(UnencodedVideo video) {
-    return CompletableFuture.runAsync(
+  public CompletableFuture<Boolean> archiveAsync(UnencodedVideo video) {
+    return CompletableFuture.supplyAsync(
         () -> {
           Stopwatch stopwatch = Stopwatch.createStarted();
           try {
@@ -39,7 +40,7 @@ public class VideoArchiver {
                     "Archive file ({}) already exists but contents differ, keeping original",
                     video.archivedPath());
               }
-              return;
+              return true;
             }
 
             Files.createDirectories(checkNotNull(video.archivedPath().getParent()));
@@ -50,8 +51,10 @@ public class VideoArchiver {
             Files.move(video.tempArchivedPath(), video.archivedPath());
 
             log.info("Archived: {} - elapsed: {}", video.archivedPath(), stopwatch.elapsed());
+            return true;
           } catch (Exception e) {
             log.error("Error archiving: %s".formatted(video), e);
+            return false;
           }
         });
   }
