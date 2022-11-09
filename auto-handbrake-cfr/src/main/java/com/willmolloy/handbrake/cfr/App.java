@@ -10,6 +10,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
@@ -93,6 +94,7 @@ class App {
         // if somebody wants to encode again, they'll need to remove the 'Archived' suffix
         .filter(path -> !UnencodedVideo.isEncodedMp4(path) && !UnencodedVideo.isArchivedMp4(path))
         .map(factory::newUnencodedVideo)
+        .sorted(Comparator.comparing(video -> video.originalPath().toString()))
         .toList();
   }
 
