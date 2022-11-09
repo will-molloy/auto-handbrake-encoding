@@ -1,10 +1,8 @@
 package com.willmolloy.handbrake.cfr;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Stopwatch;
-import com.willmolloy.handbrake.core.HandBrake;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -34,6 +32,14 @@ class App {
     this.videoArchiver = checkNotNull(videoArchiver);
   }
 
+  /**
+   * Runs the app.
+   *
+   * @param inputDirectory directory containing unencoded files
+   * @param outputDirectory directory to contain encoded files
+   * @param archiveDirectory directory to contain archived files
+   * @return {@code true} if all encoding and archiving was successful
+   */
   boolean run(Path inputDirectory, Path outputDirectory, Path archiveDirectory) throws Exception {
     Stopwatch stopwatch = Stopwatch.createStarted();
     log.info(
@@ -125,25 +131,5 @@ class App {
     }
 
     return overallSuccess;
-  }
-
-  public static void main(String... args) {
-    try {
-      checkArgument(args.length == 3, "Expected 3 args to main method");
-      Path inputDirectory = Path.of(args[0]);
-      Path outputDirectory = Path.of(args[1]);
-      Path archiveDirectory = Path.of(args[2]);
-
-      VideoEncoder videoEncoder = new VideoEncoder(new HandBrake());
-      VideoArchiver videoArchiver = new VideoArchiver();
-      App app = new App(videoEncoder, videoArchiver);
-
-      if (!app.run(inputDirectory, outputDirectory, archiveDirectory)) {
-        System.exit(1);
-      }
-    } catch (Throwable t) {
-      log.fatal("Fatal error", t);
-      System.exit(1);
-    }
   }
 }

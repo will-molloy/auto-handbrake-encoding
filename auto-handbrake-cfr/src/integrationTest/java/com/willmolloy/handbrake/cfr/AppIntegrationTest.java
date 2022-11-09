@@ -7,6 +7,7 @@ import com.google.common.io.Resources;
 import com.google.common.truth.Correspondence;
 import com.google.common.truth.IterableSubject;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.willmolloy.handbrake.core.HandBrake;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -22,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
 /**
- * AppIntegrationTest.
+ * Contains various scenarios testing {@link App} as a black box. Read the logs to understand each scenario further.
  *
  * <p>Requires HandBrakeCLI to be installed.
  *
@@ -54,16 +55,17 @@ class AppIntegrationTest {
 
   @Test
   @Order(0)
-  void singleVideo() throws IOException {
+  void singleVideo() throws Exception {
     // Given
     // video to encode
     Path inputDirectory = createDirectoryAt(testDirectory.resolve("Gameplay"));
     createVideoAt(inputDirectory.resolve("my video.mp4"), testVideo);
 
     // When
-    runApp(inputDirectory, inputDirectory, inputDirectory);
+    boolean result = runApp(inputDirectory, inputDirectory, inputDirectory);
 
     // Then
+    assertThat(result).isTrue();
     assertThatTestDirectory()
         .containsExactly(
             // encoding
@@ -74,7 +76,7 @@ class AppIntegrationTest {
 
   @Test
   @Order(1)
-  void singleVideo_encodeToDifferentDirectory() throws IOException {
+  void singleVideo_encodeToDifferentDirectory() throws Exception {
     // Given
     // video to encode
     Path inputDirectory = createDirectoryAt(testDirectory.resolve("Gameplay"));
@@ -83,9 +85,10 @@ class AppIntegrationTest {
     Path outputDirectory = createDirectoryAt(testDirectory.resolve("Gameplay Encoded"));
 
     // When
-    runApp(inputDirectory, outputDirectory, inputDirectory);
+    boolean result = runApp(inputDirectory, outputDirectory, inputDirectory);
 
     // Then
+    assertThat(result).isTrue();
     assertThatTestDirectory()
         .containsExactly(
             // encoding
@@ -96,7 +99,7 @@ class AppIntegrationTest {
 
   @Test
   @Order(2)
-  void singleVideo_archiveToDifferentDirectory() throws IOException {
+  void singleVideo_archiveToDifferentDirectory() throws Exception {
     // Given
     // video to encode
     Path inputDirectory = createDirectoryAt(testDirectory.resolve("Gameplay"));
@@ -105,9 +108,10 @@ class AppIntegrationTest {
     Path archiveDirectory = createDirectoryAt(testDirectory.resolve("Gameplay Archive"));
 
     // When
-    runApp(inputDirectory, inputDirectory, archiveDirectory);
+    boolean result = runApp(inputDirectory, inputDirectory, archiveDirectory);
 
     // Then
+    assertThat(result).isTrue();
     assertThatTestDirectory()
         .containsExactly(
             // encoding
@@ -118,7 +122,7 @@ class AppIntegrationTest {
 
   @Test
   @Order(3)
-  void singleVideo_encodeAndArchiveToDifferentDirectory() throws IOException {
+  void singleVideo_encodeAndArchiveToDifferentDirectory() throws Exception {
     // Given
     // video to encode
     Path inputDirectory = createDirectoryAt(testDirectory.resolve("Gameplay"));
@@ -129,9 +133,10 @@ class AppIntegrationTest {
     Path archiveDirectory = createDirectoryAt(testDirectory.resolve("Gameplay Archive"));
 
     // When
-    runApp(inputDirectory, outputDirectory, archiveDirectory);
+    boolean result = runApp(inputDirectory, outputDirectory, archiveDirectory);
 
     // Then
+    assertThat(result).isTrue();
     assertThatTestDirectory()
         .containsExactly(
             // encoding
@@ -142,16 +147,17 @@ class AppIntegrationTest {
 
   @Test
   @Order(10)
-  void singleVideo_nestedDirectoryStructure() throws IOException {
+  void singleVideo_nestedDirectoryStructure() throws Exception {
     // Given
     // video to encode
     Path inputDirectory = createDirectoryAt(testDirectory.resolve("Gameplay"));
     createVideoAt(inputDirectory.resolve("League of Legends/ranked_game1.mp4"), testVideo);
 
     // When
-    runApp(inputDirectory, inputDirectory, inputDirectory);
+    boolean result = runApp(inputDirectory, inputDirectory, inputDirectory);
 
     // Then
+    assertThat(result).isTrue();
     assertThatTestDirectory()
         .containsExactly(
             // encoding
@@ -164,7 +170,7 @@ class AppIntegrationTest {
 
   @Test
   @Order(11)
-  void singleVideo_nestedDirectoryStructure_encodeToDifferentDirectory() throws IOException {
+  void singleVideo_nestedDirectoryStructure_encodeToDifferentDirectory() throws Exception {
     // Given
     // video to encode
     Path inputDirectory = createDirectoryAt(testDirectory.resolve("Gameplay"));
@@ -173,9 +179,10 @@ class AppIntegrationTest {
     Path outputDirectory = createDirectoryAt(testDirectory.resolve("Gameplay Encoded"));
 
     // When
-    runApp(inputDirectory, outputDirectory, inputDirectory);
+    boolean result = runApp(inputDirectory, outputDirectory, inputDirectory);
 
     // Then
+    assertThat(result).isTrue();
     assertThatTestDirectory()
         .containsExactly(
             // encoding
@@ -188,7 +195,7 @@ class AppIntegrationTest {
 
   @Test
   @Order(12)
-  void singleVideo_nestedDirectoryStructure_archiveToDifferentDirectory() throws IOException {
+  void singleVideo_nestedDirectoryStructure_archiveToDifferentDirectory() throws Exception {
     // Given
     // video to encode
     Path inputDirectory = createDirectoryAt(testDirectory.resolve("Gameplay"));
@@ -197,9 +204,10 @@ class AppIntegrationTest {
     Path archiveDirectory = createDirectoryAt(testDirectory.resolve("Gameplay Archive"));
 
     // When
-    runApp(inputDirectory, inputDirectory, archiveDirectory);
+    boolean result = runApp(inputDirectory, inputDirectory, archiveDirectory);
 
     // Then
+    assertThat(result).isTrue();
     assertThatTestDirectory()
         .containsExactly(
             // encoding
@@ -215,7 +223,7 @@ class AppIntegrationTest {
   @Test
   @Order(13)
   void singleVideo_nestedDirectoryStructure_encodeAndArchiveToDifferentDirectory()
-      throws IOException {
+      throws Exception {
     // Given
     // video to encode
     Path inputDirectory = createDirectoryAt(testDirectory.resolve("Gameplay"));
@@ -227,9 +235,10 @@ class AppIntegrationTest {
     Path archiveDirectory = createDirectoryAt(testDirectory.resolve("Gameplay Archive"));
 
     // When
-    runApp(inputDirectory, outputDirectory, archiveDirectory);
+    boolean result = runApp(inputDirectory, outputDirectory, archiveDirectory);
 
     // Then
+    assertThat(result).isTrue();
     assertThatTestDirectory()
         .containsExactly(
             // encoding
@@ -245,7 +254,7 @@ class AppIntegrationTest {
 
   @Test
   @Order(20)
-  void severalVideos_nestedDirectoryStructure() throws IOException {
+  void severalVideos_nestedDirectoryStructure() throws Exception {
     // Given
     // videos to encode
     Path inputDirectory = createDirectoryAt(testDirectory.resolve("Gameplay"));
@@ -255,9 +264,10 @@ class AppIntegrationTest {
     createVideoAt(inputDirectory.resolve("Nested1/Nested2/recording4.mp4"), testVideo);
 
     // When
-    runApp(inputDirectory, inputDirectory, inputDirectory);
+    boolean result = runApp(inputDirectory, inputDirectory, inputDirectory);
 
     // Then
+    assertThat(result).isTrue();
     assertThatTestDirectory()
         .containsExactly(
             // encodings
@@ -278,7 +288,7 @@ class AppIntegrationTest {
 
   @Test
   @Order(21)
-  void severalVideos_nestedDirectoryStructure_encodeToDifferentDirectory() throws IOException {
+  void severalVideos_nestedDirectoryStructure_encodeToDifferentDirectory() throws Exception {
     // Given
     // videos to encode
     Path inputDirectory = createDirectoryAt(testDirectory.resolve("Gameplay"));
@@ -290,9 +300,10 @@ class AppIntegrationTest {
     Path outputDirectory = createDirectoryAt(testDirectory.resolve("Gameplay Encoded"));
 
     // When
-    runApp(inputDirectory, outputDirectory, inputDirectory);
+    boolean result = runApp(inputDirectory, outputDirectory, inputDirectory);
 
     // Then
+    assertThat(result).isTrue();
     assertThatTestDirectory()
         .containsExactly(
             // encodings
@@ -313,7 +324,7 @@ class AppIntegrationTest {
 
   @Test
   @Order(22)
-  void severalVideos_nestedDirectoryStructure_archiveToDifferentDirectory() throws IOException {
+  void severalVideos_nestedDirectoryStructure_archiveToDifferentDirectory() throws Exception {
     // Given
     // videos to encode
     Path inputDirectory = createDirectoryAt(testDirectory.resolve("Gameplay"));
@@ -325,9 +336,10 @@ class AppIntegrationTest {
     Path archiveDirectory = createDirectoryAt(testDirectory.resolve("Gameplay Archive"));
 
     // When
-    runApp(inputDirectory, inputDirectory, archiveDirectory);
+    boolean result = runApp(inputDirectory, inputDirectory, archiveDirectory);
 
     // Then
+    assertThat(result).isTrue();
     assertThatTestDirectory()
         .containsExactly(
             // encodings
@@ -349,7 +361,7 @@ class AppIntegrationTest {
   @Test
   @Order(23)
   void severalVideos_nestedDirectoryStructure_encodeAndArchiveToDifferentDirectory()
-      throws IOException {
+      throws Exception {
     // Given
     // videos to encode
     Path inputDirectory = createDirectoryAt(testDirectory.resolve("Gameplay"));
@@ -363,9 +375,10 @@ class AppIntegrationTest {
     Path archiveDirectory = createDirectoryAt(testDirectory.resolve("Gameplay Archive"));
 
     // When
-    runApp(inputDirectory, outputDirectory, archiveDirectory);
+    boolean result = runApp(inputDirectory, outputDirectory, archiveDirectory);
 
     // Then
+    assertThat(result).isTrue();
     assertThatTestDirectory()
         .containsExactly(
             // encodings
@@ -386,7 +399,7 @@ class AppIntegrationTest {
 
   @Test
   @Order(30)
-  void singleVideo_and_deletesIncompleteEncodingsAndArchives() throws IOException {
+  void singleVideo_and_deletesIncompleteEncodingsAndArchives() throws Exception {
     // Given
     // video to encode
     Path inputDirectory = createDirectoryAt(testDirectory.resolve("Gameplay"));
@@ -401,9 +414,10 @@ class AppIntegrationTest {
     createVideoAt(inputDirectory.resolve("vid2.archived.mp4.part"), testVideo);
 
     // When
-    runApp(inputDirectory, inputDirectory, inputDirectory);
+    boolean result = runApp(inputDirectory, inputDirectory, inputDirectory);
 
     // Then
+    assertThat(result).isTrue();
     assertThatTestDirectory()
         .containsExactly(
             // encoding
@@ -416,7 +430,7 @@ class AppIntegrationTest {
   @Order(31)
   void
       singleVideo_encodeAndArchiveToDifferentDirectory_and_deletesIncompleteEncodingsAndArchivesInAllDirectories()
-          throws IOException {
+          throws Exception {
     // Given
     // video to encode
     Path inputDirectory = createDirectoryAt(testDirectory.resolve("Gameplay"));
@@ -437,9 +451,10 @@ class AppIntegrationTest {
     createVideoAt(archiveDirectory.resolve("vid.archived.mp4.part"), testVideo);
 
     // When
-    runApp(inputDirectory, outputDirectory, archiveDirectory);
+    boolean result = runApp(inputDirectory, outputDirectory, archiveDirectory);
 
     // Then
+    assertThat(result).isTrue();
     assertThatTestDirectory()
         .containsExactly(
             // encoding
@@ -450,7 +465,7 @@ class AppIntegrationTest {
 
   @Test
   @Order(40)
-  void singleVideo_and_retainsCompleteEncodingsAndArchives() throws IOException {
+  void singleVideo_and_retainsCompleteEncodingsAndArchives() throws Exception {
     // Given
     // video to encode
     Path inputDirectory = createDirectoryAt(testDirectory.resolve("Gameplay"));
@@ -465,9 +480,10 @@ class AppIntegrationTest {
     createVideoAt(inputDirectory.resolve("recording2.archived.mp4"), testVideo);
 
     // When
-    runApp(inputDirectory, inputDirectory, inputDirectory);
+    boolean result = runApp(inputDirectory, inputDirectory, inputDirectory);
 
     // Then
+    assertThat(result).isTrue();
     assertThatTestDirectory()
         .containsExactly(
             // encoding
@@ -486,7 +502,7 @@ class AppIntegrationTest {
   @Order(41)
   void
       singleVideo_encodeAndArchiveToDifferentDirectory_and_retainsCompleteEncodingsAndArchivesInAllDirectories()
-          throws IOException {
+          throws Exception {
     // Given
     // video to encode
     Path inputDirectory = createDirectoryAt(testDirectory.resolve("Gameplay"));
@@ -507,9 +523,10 @@ class AppIntegrationTest {
     createVideoAt(archiveDirectory.resolve("recording.archived.mp4"), testVideo);
 
     // When
-    runApp(inputDirectory, outputDirectory, archiveDirectory);
+    boolean result = runApp(inputDirectory, outputDirectory, archiveDirectory);
 
     // Then
+    assertThat(result).isTrue();
     assertThatTestDirectory()
         .containsExactly(
             // encoding
@@ -528,7 +545,7 @@ class AppIntegrationTest {
 
   @Test
   @Order(50)
-  void singleVideo_encodingAlreadyExists() throws IOException {
+  void singleVideo_encodingAlreadyExists() throws Exception {
     // Given
     // video to encode
     Path inputDirectory = createDirectoryAt(testDirectory.resolve("Gameplay"));
@@ -538,20 +555,21 @@ class AppIntegrationTest {
     createVideoAt(inputDirectory.resolve("my video.cfr.mp4"), testVideoEncoded);
 
     // When
-    runApp(inputDirectory, inputDirectory, inputDirectory);
+    boolean result = runApp(inputDirectory, inputDirectory, inputDirectory);
 
     // Then
+    assertThat(result).isFalse();
     assertThatTestDirectory()
         .containsExactly(
+            // original
+            new PathAndContents(inputDirectory.resolve("my video.mp4"), testVideo),
             // encoding
-            new PathAndContents(inputDirectory.resolve("my video.cfr.mp4"), testVideoEncoded),
-            // archive
-            new PathAndContents(inputDirectory.resolve("my video.archived.mp4"), testVideo));
+            new PathAndContents(inputDirectory.resolve("my video.cfr.mp4"), testVideoEncoded));
   }
 
   @Test
   @Order(51)
-  void singleVideo_archiveAlreadyExists() throws IOException {
+  void singleVideo_archiveAlreadyExists() throws Exception {
     // Given
     // video to encode
     Path inputDirectory = createDirectoryAt(testDirectory.resolve("Gameplay"));
@@ -561,9 +579,10 @@ class AppIntegrationTest {
     createVideoAt(inputDirectory.resolve("my video.archived.mp4"), testVideo);
 
     // When
-    runApp(inputDirectory, inputDirectory, inputDirectory);
+    boolean result = runApp(inputDirectory, inputDirectory, inputDirectory);
 
     // Then
+    assertThat(result).isTrue();
     assertThatTestDirectory()
         .containsExactly(
             // encoding
@@ -574,7 +593,7 @@ class AppIntegrationTest {
 
   @Test
   @Order(52)
-  void singleVideo_encodingAndArchiveAlreadyExists() throws IOException {
+  void singleVideo_encodingAndArchiveAlreadyExists() throws Exception {
     // Given
     // video to encode
     Path inputDirectory = createDirectoryAt(testDirectory.resolve("Gameplay"));
@@ -587,11 +606,14 @@ class AppIntegrationTest {
     createVideoAt(inputDirectory.resolve("my video.archived.mp4"), testVideo);
 
     // When
-    runApp(inputDirectory, inputDirectory, inputDirectory);
+    boolean result = runApp(inputDirectory, inputDirectory, inputDirectory);
 
     // Then
+    assertThat(result).isFalse();
     assertThatTestDirectory()
         .containsExactly(
+            // original
+            new PathAndContents(inputDirectory.resolve("my video.mp4"), testVideo),
             // encoding
             new PathAndContents(inputDirectory.resolve("my video.cfr.mp4"), testVideoEncoded),
             // archive
@@ -600,7 +622,7 @@ class AppIntegrationTest {
 
   @Test
   @Order(60)
-  void singleVideo_archiveExistsButContentsDifferSoRetainsOriginal() throws IOException {
+  void singleVideo_archiveExistsButContentsDiffer() throws Exception {
     // Given
     // video to encode
     Path inputDirectory = createDirectoryAt(testDirectory.resolve("Gameplay"));
@@ -610,9 +632,10 @@ class AppIntegrationTest {
     createVideoAt(inputDirectory.resolve("my video.archived.mp4"), testVideo2);
 
     // When
-    runApp(inputDirectory, inputDirectory, inputDirectory);
+    boolean result = runApp(inputDirectory, inputDirectory, inputDirectory);
 
     // Then
+    assertThat(result).isFalse();
     assertThatTestDirectory()
         .containsExactly(
             // original
@@ -625,8 +648,8 @@ class AppIntegrationTest {
 
   @Test
   @Order(61)
-  void singleVideo_encodingAlreadyExists_and_archiveExistsButContentsDifferSoRetainsOriginal()
-      throws IOException {
+  void singleVideo_encodingAlreadyExists_and_archiveExistsButContentsDiffer()
+      throws Exception {
     // Given
     // video to encode
     Path inputDirectory = createDirectoryAt(testDirectory.resolve("Gameplay"));
@@ -639,9 +662,10 @@ class AppIntegrationTest {
     createVideoAt(inputDirectory.resolve("my video.archived.mp4"), testVideo2);
 
     // When
-    runApp(inputDirectory, inputDirectory, inputDirectory);
+    boolean result = runApp(inputDirectory, inputDirectory, inputDirectory);
 
     // Then
+    assertThat(result).isFalse();
     assertThatTestDirectory()
         .containsExactly(
             // original
@@ -656,7 +680,7 @@ class AppIntegrationTest {
   @Order(100)
   void
       severalVideos_nestedDirectoryStructure_and_someEncodingsAndArchivesAlreadyExists_and_deletesIncompleteEncodingsAndArchives_and_retainsCompleteEncodingsAndArchives()
-          throws IOException {
+          throws Exception {
     // Given
     // videos to encode
     Path inputDirectory = createDirectoryAt(testDirectory.resolve("Gameplay"));
@@ -695,11 +719,16 @@ class AppIntegrationTest {
         inputDirectory.resolve("Path of Exile/Old builds/Discharge CoC.archived.mp4"), testVideo);
 
     // When
-    runApp(inputDirectory, inputDirectory, inputDirectory);
+    boolean result = runApp(inputDirectory, inputDirectory, inputDirectory);
 
     // Then
+    assertThat(result).isFalse();
     assertThatTestDirectory()
         .containsExactly(
+            // originals
+            new PathAndContents(inputDirectory.resolve("recording2.mp4"), testVideo),
+            new PathAndContents(
+                inputDirectory.resolve("Nested/recording3.mp4"), testVideo),
             // encodings
             new PathAndContents(inputDirectory.resolve("recording1.cfr.mp4"), testVideoEncoded),
             new PathAndContents(inputDirectory.resolve("recording2.cfr.mp4"), testVideoEncoded),
@@ -709,7 +738,6 @@ class AppIntegrationTest {
                 inputDirectory.resolve("Nested1/Nested2/recording4.cfr.mp4"), testVideoEncoded),
             // archives
             new PathAndContents(inputDirectory.resolve("recording1.archived.mp4"), testVideo),
-            new PathAndContents(inputDirectory.resolve("recording2.archived.mp4"), testVideo),
             new PathAndContents(
                 inputDirectory.resolve("Nested/recording3.archived.mp4"), testVideo),
             new PathAndContents(
@@ -731,7 +759,7 @@ class AppIntegrationTest {
   @Order(101)
   void
       severalVideos_nestedDirectoryStructure_encodeAndArchiveToDifferentDirectory_and_someEncodingsAndArchivesAlreadyExists_and_deletesIncompleteEncodingsAndArchivesInAllDirectories_and_retainsCompleteEncodingsAndArchivesInAllDirectories()
-          throws IOException {
+          throws Exception {
     // Given
     // videos to encode
     Path inputDirectory = createDirectoryAt(testDirectory.resolve("Gameplay"));
@@ -773,11 +801,16 @@ class AppIntegrationTest {
     createVideoAt(archiveDirectory.resolve("recording.archived.mp4"), testVideo);
 
     // When
-    runApp(inputDirectory, outputDirectory, archiveDirectory);
+    boolean result = runApp(inputDirectory, outputDirectory, archiveDirectory);
 
     // Then
+    assertThat(result).isFalse();
     assertThatTestDirectory()
         .containsExactly(
+            // originals
+            new PathAndContents(inputDirectory.resolve("recording2.mp4"), testVideo),
+            new PathAndContents(
+                inputDirectory.resolve("Nested/recording3.mp4"), testVideo),
             // encodings
             new PathAndContents(outputDirectory.resolve("recording1.cfr.mp4"), testVideoEncoded),
             new PathAndContents(outputDirectory.resolve("recording2.cfr.mp4"), testVideoEncoded),
@@ -787,7 +820,6 @@ class AppIntegrationTest {
                 outputDirectory.resolve("Nested1/Nested2/recording4.cfr.mp4"), testVideoEncoded),
             // archives
             new PathAndContents(archiveDirectory.resolve("recording1.archived.mp4"), testVideo),
-            new PathAndContents(archiveDirectory.resolve("recording2.archived.mp4"), testVideo),
             new PathAndContents(
                 archiveDirectory.resolve("Nested/recording3.archived.mp4"), testVideo),
             new PathAndContents(
@@ -817,8 +849,10 @@ class AppIntegrationTest {
     return path;
   }
 
-  private void runApp(Path inputDirectory, Path outputDirectory, Path archiveDirectory) {
-    App.main(inputDirectory.toString(), outputDirectory.toString(), archiveDirectory.toString());
+  private boolean runApp(Path inputDirectory, Path outputDirectory, Path archiveDirectory)
+      throws Exception {
+    App app = new App(new VideoEncoder(new HandBrake()), new VideoArchiver());
+    return app.run(inputDirectory, outputDirectory, archiveDirectory);
   }
 
   private IterableSubject.UsingCorrespondence<Path, PathAndContents> assertThatTestDirectory()
