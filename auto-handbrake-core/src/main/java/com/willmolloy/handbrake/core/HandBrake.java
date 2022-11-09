@@ -45,8 +45,8 @@ public class HandBrake {
    */
   public boolean encode(Input input, Output output, Option... options) {
     if (Files.exists(output.value())) {
-      log.warn("Output ({}) already exists", output.value());
-      return true;
+      log.error("Output ({}) already exists. Aborting", output.value());
+      return false;
     }
 
     List<String> command =

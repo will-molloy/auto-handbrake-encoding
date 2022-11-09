@@ -69,13 +69,13 @@ class HandBrakeTest {
   }
 
   @Test
-  void outputAlreadyExistsReturnsEarly() throws IOException {
+  void outputAlreadyExistsReturnsFalse() throws IOException {
     Path input = Path.of("input.mp4");
     Path output = Path.of("output.mp4");
 
     try {
       Files.createFile(output);
-      assertThat(handBrake.encode(Input.of(input), Output.of(output))).isTrue();
+      assertThat(handBrake.encode(Input.of(input), Output.of(output))).isFalse();
       verify(mockCli, never()).execute(anyList(), any());
     } finally {
       Files.delete(output);

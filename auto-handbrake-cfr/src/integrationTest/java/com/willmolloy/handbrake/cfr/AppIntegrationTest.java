@@ -26,6 +26,8 @@ import org.junit.jupiter.api.TestMethodOrder;
  *
  * <p>Requires HandBrakeCLI to be installed.
  *
+ * <p>May require re-encoding the .mp4 file in resources directory.
+ *
  * @author <a href=https://willmolloy.com>Will Molloy</a>
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)

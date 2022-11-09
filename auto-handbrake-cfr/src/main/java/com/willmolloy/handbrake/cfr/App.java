@@ -33,7 +33,7 @@ class App {
     this.videoArchiver = checkNotNull(videoArchiver);
   }
 
-  void run(Path inputDirectory, Path outputDirectory, Path archiveDirectory) throws Exception {
+  boolean run(Path inputDirectory, Path outputDirectory, Path archiveDirectory) throws Exception {
     Stopwatch stopwatch = Stopwatch.createStarted();
     log.info(
         "run(inputDirectory={}, outputDirectory={}, archiveDirectory={}) started",
@@ -48,10 +48,7 @@ class App {
           new UnencodedVideo.Factory(inputDirectory, outputDirectory, archiveDirectory);
       List<UnencodedVideo> unencodedVideos = getUnencodedVideos(inputDirectory, factory);
 
-      if (!encodeAndArchiveVideos(unencodedVideos)) {
-        // TODO aggregate exceptions/errors somehow. Need to change boolean returns.
-        throw new Error("Run failed. Read the logs.");
-      }
+      return encodeAndArchiveVideos(unencodedVideos);
     } finally {
       log.info("run finished - elapsed: {}", stopwatch.elapsed());
     }
@@ -139,7 +136,9 @@ class App {
       VideoArchiver videoArchiver = new VideoArchiver();
       App app = new App(videoEncoder, videoArchiver);
 
-      app.run(inputDirectory, outputDirectory, archiveDirectory);
+      if (!app.run(inputDirectory, outputDirectory, archiveDirectory)) {
+        System.exit(1);
+      }
     } catch (Throwable t) {
       log.fatal("Fatal error", t);
       System.exit(1);
