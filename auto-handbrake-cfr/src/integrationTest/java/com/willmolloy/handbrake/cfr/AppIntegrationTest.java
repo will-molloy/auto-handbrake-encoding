@@ -23,7 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
 /**
- * Contains various scenarios testing {@link App} as a black box. Read the logs to understand each scenario further.
+ * Contains various scenarios testing {@link App} as a black box. Read the logs to understand each
+ * scenario further.
  *
  * <p>Requires HandBrakeCLI to be installed.
  *
@@ -648,8 +649,7 @@ class AppIntegrationTest {
 
   @Test
   @Order(61)
-  void singleVideo_encodingAlreadyExists_and_archiveExistsButContentsDiffer()
-      throws Exception {
+  void singleVideo_encodingAlreadyExists_and_archiveExistsButContentsDiffer() throws Exception {
     // Given
     // video to encode
     Path inputDirectory = createDirectoryAt(testDirectory.resolve("Gameplay"));
@@ -727,8 +727,7 @@ class AppIntegrationTest {
         .containsExactly(
             // originals
             new PathAndContents(inputDirectory.resolve("recording2.mp4"), testVideo),
-            new PathAndContents(
-                inputDirectory.resolve("Nested/recording3.mp4"), testVideo),
+            new PathAndContents(inputDirectory.resolve("Nested/recording3.mp4"), testVideo),
             // encodings
             new PathAndContents(inputDirectory.resolve("recording1.cfr.mp4"), testVideoEncoded),
             new PathAndContents(inputDirectory.resolve("recording2.cfr.mp4"), testVideoEncoded),
@@ -809,8 +808,7 @@ class AppIntegrationTest {
         .containsExactly(
             // originals
             new PathAndContents(inputDirectory.resolve("recording2.mp4"), testVideo),
-            new PathAndContents(
-                inputDirectory.resolve("Nested/recording3.mp4"), testVideo),
+            new PathAndContents(inputDirectory.resolve("Nested/recording3.mp4"), testVideo),
             // encodings
             new PathAndContents(outputDirectory.resolve("recording1.cfr.mp4"), testVideoEncoded),
             new PathAndContents(outputDirectory.resolve("recording2.cfr.mp4"), testVideoEncoded),
