@@ -2,6 +2,7 @@ package com.willmolloy.handbrake.core;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.willmolloy.handbrake.core.options.Input;
 import com.willmolloy.handbrake.core.options.Option;
 import com.willmolloy.handbrake.core.options.Output;
@@ -27,6 +28,7 @@ public class HandBrake {
 
   private final Cli cli;
 
+  @VisibleForTesting
   HandBrake(Cli cli) {
     this.cli = checkNotNull(cli);
   }

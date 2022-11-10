@@ -18,13 +18,13 @@ import org.apache.logging.log4j.Logger;
  *
  * @author <a href=https://willmolloy.com>Will Molloy</a>
  */
-public class VideoEncoder {
+class VideoEncoder {
 
   private static final Logger log = LogManager.getLogger();
 
   private final HandBrake handBrake;
 
-  public VideoEncoder(HandBrake handBrake) {
+  VideoEncoder(HandBrake handBrake) {
     this.handBrake = checkNotNull(handBrake);
   }
 
