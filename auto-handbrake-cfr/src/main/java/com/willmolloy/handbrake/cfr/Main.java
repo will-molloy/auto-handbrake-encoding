@@ -24,7 +24,7 @@ final class Main {
       Path outputDirectory = Path.of(args[1]);
       Path archiveDirectory = Path.of(args[2]);
 
-      App app = new App(new VideoEncoder(new HandBrake()), new VideoArchiver());
+      App app = new App(new VideoEncoder(HandBrake.newInstance()), new VideoArchiver());
 
       if (!app.run(inputDirectory, outputDirectory, archiveDirectory)) {
         System.exit(1);

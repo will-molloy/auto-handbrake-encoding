@@ -849,7 +849,7 @@ class AppIntegrationTest {
 
   private boolean runApp(Path inputDirectory, Path outputDirectory, Path archiveDirectory)
       throws Exception {
-    App app = new App(new VideoEncoder(new HandBrake()), new VideoArchiver());
+    App app = new App(new VideoEncoder(HandBrake.newInstance()), new VideoArchiver());
     return app.run(inputDirectory, outputDirectory, archiveDirectory);
   }
 

@@ -67,7 +67,7 @@ The app requires the following arguments:
 
 ## Project layout
 
-| Module                                       | Description                                                 |
-|----------------------------------------------|-------------------------------------------------------------|
-| [auto-handbrake-core](./auto-handbrake-core) | Core classes required to run HandBrake via Java             |
-| [auto-handbrake-cfr](./auto-handbrake-cfr)   | CFR conversion, [described above](#converting-to-cfr-video) |
+| Module                                       | Description                                                   |
+|----------------------------------------------|---------------------------------------------------------------|
+| [auto-handbrake-core](./auto-handbrake-core) | Core interface and classes required to run HandBrake via Java |
+| [auto-handbrake-cfr](./auto-handbrake-cfr)   | CFR conversion, [described above](#converting-to-cfr-video)   |

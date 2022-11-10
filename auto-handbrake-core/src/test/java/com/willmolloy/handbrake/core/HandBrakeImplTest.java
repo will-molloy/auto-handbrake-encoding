@@ -29,11 +29,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
  * @author <a href=https://willmolloy.com>Will Molloy</a>
  */
 @ExtendWith(MockitoExtension.class)
-class HandBrakeTest {
+class HandBrakeImplTest {
 
   @Mock private Cli mockCli;
 
-  @InjectMocks private HandBrake handBrake;
+  @InjectMocks private HandBrakeImpl handBrake;
 
   @Test
   void successfulEncodingReturnsTrue() {
