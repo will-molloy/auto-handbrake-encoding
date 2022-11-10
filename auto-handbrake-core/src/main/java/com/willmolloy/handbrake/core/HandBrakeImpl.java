@@ -62,7 +62,7 @@ class HandBrakeImpl implements HandBrake {
 
     LOCK.lock();
     try {
-      return cli.execute(command, new HandBrakeLogger(log));
+      return cli.execute(command, new HandBrakeLogger());
     } catch (Exception e) {
       log.error("Error encoding: %s".formatted(input), e);
       return false;
