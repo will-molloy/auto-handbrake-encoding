@@ -5,7 +5,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -69,14 +68,19 @@ class HandBrakeTest {
   }
 
   @Test
-  void outputAlreadyExistsReturnsFalse() throws IOException {
+  void outputAlreadyExistsOverwrites() throws IOException {
     Path input = Path.of("input.mp4");
     Path output = Path.of("output.mp4");
 
+    when(mockCli.execute(anyList(), any())).thenReturn(true);
+
     try {
       Files.createFile(output);
-      assertThat(handBrake.encode(Input.of(input), Output.of(output))).isFalse();
-      verify(mockCli, never()).execute(anyList(), any());
+      assertThat(handBrake.encode(Input.of(input), Output.of(output))).isTrue();
+      verify(mockCli)
+          .execute(
+              eq(List.of("HandBrakeCLI", "--input", "input.mp4", "--output", "output.mp4")),
+              isA(HandBrakeLogger.class));
     } finally {
       Files.delete(output);
     }
