@@ -64,3 +64,10 @@ The app requires the following arguments:
    docker run --rm -v <INPUT_DIR>:/input -v <OUTPUT_DIR>:/output -v <ARCHIVE_DIR>:/archive handbrake
    ```
    - (If you need to mount a network drive, [this stackoverflow answer](https://stackoverflow.com/a/57510166/6122976) worked for me)
+
+## Project layout
+
+| Module                                       | Description                                                 |
+|----------------------------------------------|-------------------------------------------------------------|
+| [auto-handbrake-core](./auto-handbrake-core) | Core classes required to run HandBrake via Java             |
+| [auto-handbrake-cfr](./auto-handbrake-cfr)   | CFR conversion, [described above](#converting-to-cfr-video) |
