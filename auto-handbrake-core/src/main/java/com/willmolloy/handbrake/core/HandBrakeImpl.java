@@ -32,14 +32,6 @@ class HandBrakeImpl implements HandBrake {
     this.cli = checkNotNull(cli);
   }
 
-  /**
-   * Runs HandBrake encoding.
-   *
-   * @param input input file
-   * @param output output file
-   * @param options HandBrake options
-   * @return {@code true} if encoding was successful
-   */
   public boolean encode(Input input, Output output, Option... options) {
     if (Files.exists(output.value())) {
       log.warn("Output ({}) already exists", output.value());
