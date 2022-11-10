@@ -4,7 +4,7 @@ String archiveDirectory = project.getProperties().getOrDefault("archiveDirectory
 
 task run(type: JavaExec) {
   classpath = sourceSets.main.runtimeClasspath
-  main = 'com.willmolloy.handbrake.cfr.App'
+  main = 'com.willmolloy.handbrake.cfr.Main'
   args = [inputDirectory, outputDirectory, archiveDirectory]
 }
 

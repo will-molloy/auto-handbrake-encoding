@@ -1,15 +1,14 @@
 package com.willmolloy.handbrake.cfr;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Stopwatch;
-import com.willmolloy.handbrake.core.HandBrake;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
@@ -33,7 +32,15 @@ class App {
     this.videoArchiver = checkNotNull(videoArchiver);
   }
 
-  void run(Path inputDirectory, Path outputDirectory, Path archiveDirectory) throws Exception {
+  /**
+   * Runs the app.
+   *
+   * @param inputDirectory directory containing unencoded files
+   * @param outputDirectory directory to contain encoded files
+   * @param archiveDirectory directory to contain archived files
+   * @return {@code true} if all encoding and archiving was successful
+   */
+  boolean run(Path inputDirectory, Path outputDirectory, Path archiveDirectory) throws Exception {
     Stopwatch stopwatch = Stopwatch.createStarted();
     log.info(
         "run(inputDirectory={}, outputDirectory={}, archiveDirectory={}) started",
@@ -48,7 +55,7 @@ class App {
           new UnencodedVideo.Factory(inputDirectory, outputDirectory, archiveDirectory);
       List<UnencodedVideo> unencodedVideos = getUnencodedVideos(inputDirectory, factory);
 
-      encodeAndArchiveVideos(unencodedVideos);
+      return encodeAndArchiveVideos(unencodedVideos);
     } finally {
       log.info("run finished - elapsed: {}", stopwatch.elapsed());
     }
@@ -93,10 +100,13 @@ class App {
         // if somebody wants to encode again, they'll need to remove the 'Archived' suffix
         .filter(path -> !UnencodedVideo.isEncodedMp4(path) && !UnencodedVideo.isArchivedMp4(path))
         .map(factory::newUnencodedVideo)
+        .sorted(Comparator.comparing(video -> video.originalPath().toString()))
         .toList();
   }
 
-  private void encodeAndArchiveVideos(List<UnencodedVideo> videos) {
+  private boolean encodeAndArchiveVideos(List<UnencodedVideo> videos) {
+    boolean overallSuccess = true;
+
     log.info("Detected {} video(s) to encode", videos.size());
     int i = 0;
     for (UnencodedVideo video : videos) {
@@ -104,36 +114,22 @@ class App {
     }
 
     i = 0;
-    List<CompletableFuture<?>> archiverFutures = new ArrayList<>();
+    List<CompletableFuture<Boolean>> archiverFutures = new ArrayList<>();
     for (UnencodedVideo video : videos) {
       log.info("Encoding ({}/{}): {}", ++i, videos.size(), video);
       if (videoEncoder.encode(video)) {
         // run archiving async as it can be expensive (e.g. moving to another disk or NAS)
         // then while it's archiving it can encode the next video
         archiverFutures.add(videoArchiver.archiveAsync(video));
+      } else {
+        overallSuccess = false;
       }
     }
 
-    for (CompletableFuture<?> future : archiverFutures) {
-      future.join();
+    for (CompletableFuture<Boolean> future : archiverFutures) {
+      overallSuccess &= future.join();
     }
-  }
 
-  public static void main(String... args) {
-    try {
-      checkArgument(args.length == 3, "Expected 3 args to main method");
-      Path inputDirectory = Path.of(args[0]);
-      Path outputDirectory = Path.of(args[1]);
-      Path archiveDirectory = Path.of(args[2]);
-
-      VideoEncoder videoEncoder = new VideoEncoder(new HandBrake());
-      VideoArchiver videoArchiver = new VideoArchiver();
-      App app = new App(videoEncoder, videoArchiver);
-
-      app.run(inputDirectory, outputDirectory, archiveDirectory);
-    } catch (Throwable t) {
-      log.fatal("Fatal error", t);
-      System.exit(1);
-    }
+    return overallSuccess;
   }
 }

@@ -15,7 +15,7 @@ import org.apache.logging.log4j.Logger;
  *
  * @author <a href=https://willmolloy.com>Will Molloy</a>
  */
-public class FileRenamer {
+class FileRenamer {
 
   private static final Logger log = LogManager.getLogger();
 

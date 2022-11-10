@@ -18,13 +18,13 @@ import org.apache.logging.log4j.Logger;
  *
  * @author <a href=https://willmolloy.com>Will Molloy</a>
  */
-public class VideoEncoder {
+class VideoEncoder {
 
   private static final Logger log = LogManager.getLogger();
 
   private final HandBrake handBrake;
 
-  public VideoEncoder(HandBrake handBrake) {
+  VideoEncoder(HandBrake handBrake) {
     this.handBrake = checkNotNull(handBrake);
   }
 
@@ -37,18 +37,18 @@ public class VideoEncoder {
   public boolean encode(UnencodedVideo video) {
     Stopwatch stopwatch = Stopwatch.createStarted();
     try {
-      log.info("Encoding: {} -> {}", video.originalPath(), video.encodedPath());
+      log.debug("Encoding: {} -> {}", video.originalPath(), video.encodedPath());
 
       if (Files.exists(video.encodedPath())) {
-        log.warn("Encoded file ({}) already exists", video.encodedPath());
-        return true;
+        log.error("Encoded file ({}) already exists. Aborting", video.encodedPath());
+        return false;
       }
 
       Files.createDirectories(checkNotNull(video.encodedPath().getParent()));
 
       // to avoid leaving encoded files in an 'incomplete' state, encode to a temp file in case
       // something goes wrong
-      boolean encodeSuccessful =
+      boolean handBrakeSuccessful =
           handBrake.encode(
               Input.of(video.originalPath()),
               Output.of(video.tempEncodedPath()),
@@ -56,9 +56,9 @@ public class VideoEncoder {
               Encoder.h264(),
               FrameRateControl.constant());
 
-      if (encodeSuccessful) {
+      if (handBrakeSuccessful) {
         Files.move(video.tempEncodedPath(), video.encodedPath());
-        log.info("Encoded: {} - elapsed: {}", video.encodedPath(), stopwatch.elapsed());
+        log.info("Encoded: {}", video.encodedPath());
         return true;
       } else {
         log.error("Error encoding: {}", video);
@@ -67,6 +67,8 @@ public class VideoEncoder {
     } catch (Exception e) {
       log.error("Error encoding: %s".formatted(video), e);
       return false;
+    } finally {
+      log.info("Elapsed: {}", stopwatch.elapsed());
     }
   }
 }

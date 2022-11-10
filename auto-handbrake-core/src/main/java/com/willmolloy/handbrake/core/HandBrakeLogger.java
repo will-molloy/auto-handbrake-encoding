@@ -2,12 +2,14 @@ package com.willmolloy.handbrake.core;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.util.HashSet;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
@@ -35,8 +37,13 @@ class HandBrakeLogger implements Consumer<String> {
 
   private final Logger log;
 
+  @VisibleForTesting
   HandBrakeLogger(Logger log) {
     this.log = checkNotNull(log);
+  }
+
+  HandBrakeLogger() {
+    this(LogManager.getLogger());
   }
 
   @Override

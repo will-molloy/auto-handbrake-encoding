@@ -1,5 +1,6 @@
 package com.willmolloy.handbrake.cfr;
 
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -67,7 +68,7 @@ class VideoEncoderTest {
   }
 
   @Test
-  void createsEncodedFile() throws IOException {
+  void invokesHandBrakeCreatingEncodedFile() throws IOException {
     // Given
     when(mockHandBrake.encode(any(), any(), any()))
         .then(
@@ -81,13 +82,13 @@ class VideoEncoderTest {
                 });
 
     Path unencodedMp4File = Files.copy(testVideo, inputDirectory.resolve("file.mp4"));
-
     UnencodedVideo unencodedVideo = unencodedVideoFactory.newUnencodedVideo(unencodedMp4File);
 
     // When
-    videoEncoder.encode(unencodedVideo);
+    boolean result = videoEncoder.encode(unencodedVideo);
 
     // Then
+    assertThat(result).isTrue();
     verify(mockHandBrake)
         .encode(
             Input.of(unencodedMp4File),
@@ -117,13 +118,13 @@ class VideoEncoderTest {
 
     Files.createDirectories(inputDirectory.resolve("Halo/Campaign"));
     Path unencodedMp4File = Files.copy(testVideo, inputDirectory.resolve("Halo/Campaign/file.mp4"));
-
     UnencodedVideo unencodedVideo = unencodedVideoFactory.newUnencodedVideo(unencodedMp4File);
 
     // When
-    videoEncoder.encode(unencodedVideo);
+    boolean result = videoEncoder.encode(unencodedVideo);
 
     // Then
+    assertThat(result).isTrue();
     verify(mockHandBrake)
         .encode(
             Input.of(unencodedMp4File),
@@ -138,34 +139,50 @@ class VideoEncoderTest {
   }
 
   @Test
-  void retainsOriginalIfEncodingFails() throws IOException {
+  void whenHandBrakeUnsuccessful_retainsUnencodedFile_andReturnsFalse() throws IOException {
     // Given
     when(mockHandBrake.encode(any(), any(), any())).thenReturn(false);
 
     Path unencodedMp4File = Files.copy(testVideo, inputDirectory.resolve("file.mp4"));
-
     UnencodedVideo unencodedVideo = unencodedVideoFactory.newUnencodedVideo(unencodedMp4File);
 
     // When
-    videoEncoder.encode(unencodedVideo);
+    boolean result = videoEncoder.encode(unencodedVideo);
 
     // Then
+    assertThat(result).isFalse();
     assertThatTestDirectory().containsExactly(unencodedMp4File);
   }
 
   @Test
-  void encodedFileAlreadyExistsReturnsEarly() throws IOException {
+  void whenHandBrakeThrowsException_retainsUnencodedFile_andReturnsFalse() throws IOException {
+    // Given
+    when(mockHandBrake.encode(any(), any(), any())).thenThrow(new RuntimeException());
+
+    Path unencodedMp4File = Files.copy(testVideo, inputDirectory.resolve("file.mp4"));
+    UnencodedVideo unencodedVideo = unencodedVideoFactory.newUnencodedVideo(unencodedMp4File);
+
+    // When
+    boolean result = videoEncoder.encode(unencodedVideo);
+
+    // Then
+    assertThat(result).isFalse();
+    assertThatTestDirectory().containsExactly(unencodedMp4File);
+  }
+
+  @Test
+  void whenEncodedFileAlreadyExists_retainsBothFiles_andReturnsFalse() throws IOException {
     // Given
     Files.copy(testVideo, outputDirectory.resolve("file.cfr.mp4"));
 
     Path unencodedMp4File = Files.copy(testVideo, inputDirectory.resolve("file.mp4"));
-
     UnencodedVideo unencodedVideo = unencodedVideoFactory.newUnencodedVideo(unencodedMp4File);
 
     // When
-    videoEncoder.encode(unencodedVideo);
+    boolean result = videoEncoder.encode(unencodedVideo);
 
     // Then
+    assertThat(result).isFalse();
     verify(mockHandBrake, never()).encode(any(), any(), any());
     assertThatTestDirectory()
         .containsExactly(

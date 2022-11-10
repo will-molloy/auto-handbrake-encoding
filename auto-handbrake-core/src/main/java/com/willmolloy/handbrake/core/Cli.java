@@ -29,10 +29,6 @@ class Cli {
     this.processBuilderSupplier = checkNotNull(processBuilderSupplier);
   }
 
-  Cli() {
-    this(ProcessBuilder::new);
-  }
-
   /**
    * Executes the given command.
    *

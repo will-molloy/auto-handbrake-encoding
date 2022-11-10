@@ -25,6 +25,7 @@ Automating HandBrake encoding
       - It works with any framerate
       - It creates quite a large file afterwards, but it's ideal "as an intermediate format for video editing"
       - I recommend deleting the encoded file after using it, and retaining the original archived file
+    - Encoded files are not overwritten, if you want to encode again, delete them first
 3. Archives original videos
     - Archived files are named with the suffix `.archived.mp4`
     - They won't be detected by the program again, if you want to encode again, remove this suffix first
@@ -63,3 +64,10 @@ The app requires the following arguments:
    docker run --rm -v <INPUT_DIR>:/input -v <OUTPUT_DIR>:/output -v <ARCHIVE_DIR>:/archive handbrake
    ```
    - (If you need to mount a network drive, [this stackoverflow answer](https://stackoverflow.com/a/57510166/6122976) worked for me)
+
+## Project layout
+
+| Module                                       | Description                                                   |
+|----------------------------------------------|---------------------------------------------------------------|
+| [auto-handbrake-core](./auto-handbrake-core) | Core interface and classes required to run HandBrake via Java |
+| [auto-handbrake-cfr](./auto-handbrake-cfr)   | CFR conversion, [described above](#converting-to-cfr-video)   |
