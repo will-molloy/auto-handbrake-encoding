@@ -100,7 +100,15 @@ class App {
         // if somebody wants to encode again, they'll need to remove the 'Archived' suffix
         .filter(path -> !UnencodedVideo.isEncodedMp4(path) && !UnencodedVideo.isArchivedMp4(path))
         .map(factory::newUnencodedVideo)
-        .sorted(Comparator.comparing(video -> video.originalPath().toString()))
+        .sorted(
+            Comparator.comparing(
+                video -> {
+                  try {
+                    return Files.getLastModifiedTime(video.originalPath());
+                  } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                  }
+                }))
         .toList();
   }
 
