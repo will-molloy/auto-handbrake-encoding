@@ -14,12 +14,12 @@ import org.junit.jupiter.api.Test;
 class OutputTest {
 
   @Test
-  void testFactoryForwardsPathAndExpectedKey() {
+  void testFactoryForwardsPathAndExpectedHandBrakeCliArgs() {
     Path path = Path.of("123");
 
     Output output = Output.of(path);
 
-    assertThat(output.key()).isEqualTo("--output");
-    assertThat(output.value()).isSameInstanceAs(path);
+    assertThat(output.path()).isSameInstanceAs(path);
+    assertThat(output.handBrakeCliArgs()).containsExactly("--output", path.toString()).inOrder();
   }
 }

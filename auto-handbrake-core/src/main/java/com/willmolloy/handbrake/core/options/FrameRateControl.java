@@ -7,7 +7,7 @@ package com.willmolloy.handbrake.core.options;
  *     Options</a>
  * @author <a href=https://willmolloy.com>Will Molloy</a>
  */
-public sealed interface FrameRateControl extends Option.KeyOnlyOption permits Internals.OptionImpl {
+public sealed interface FrameRateControl extends Option permits Internals.OptionImpl {
 
   /** Constant frame rate. */
   static FrameRateControl constant() {

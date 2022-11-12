@@ -7,8 +7,7 @@ package com.willmolloy.handbrake.core.options;
  *     presets</a>
  * @author <a href=https://willmolloy.com>Will Molloy</a>
  */
-public sealed interface Preset extends Option.KeyValueOption<String>
-    permits Internals.KeyStringValueOptionImpl {
+public sealed interface Preset extends Option permits Internals.OptionImpl {
 
   /** Production Max preset. */
   static Preset productionMax() {
@@ -25,6 +24,6 @@ public sealed interface Preset extends Option.KeyValueOption<String>
   }
 
   private static Preset preset(String value) {
-    return new Internals.KeyStringValueOptionImpl("--preset", value);
+    return new Internals.OptionImpl("--preset", value);
   }
 }

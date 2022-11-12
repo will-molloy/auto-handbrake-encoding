@@ -1,6 +1,6 @@
 package com.willmolloy.handbrake.core.options;
 
-import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 
 import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -16,12 +16,12 @@ class PresetTest {
 
   @ParameterizedTest
   @MethodSource
-  void testFactoriesExpectedKeysAndValues(Preset preset, String key, String value) {
-    assertThat(preset.key()).isEqualTo(key);
-    assertThat(preset.value()).isEqualTo(value);
+  void testFactoriesExpectedHandBrakeCliArgs(
+      Preset preset, String expectedKey, String expectedValue) {
+    assertThat(preset.handBrakeCliArgs()).containsExactly(expectedKey, expectedValue).inOrder();
   }
 
-  static Stream<Arguments> testFactoriesExpectedKeysAndValues() {
+  static Stream<Arguments> testFactoriesExpectedHandBrakeCliArgs() {
     return Stream.of(
         Arguments.of(Preset.productionMax(), "--preset", "Production Max"),
         Arguments.of(Preset.productionStandard(), "--preset", "Production Standard"));

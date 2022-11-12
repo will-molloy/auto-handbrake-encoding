@@ -32,33 +32,14 @@ class HandBrakeImpl implements HandBrake {
     this.cli = checkNotNull(cli);
   }
 
+  @Override
   public boolean encode(Input input, Output output, Option... options) {
-    if (Files.exists(output.value())) {
-      log.warn("Output ({}) already exists", output.value());
+    if (Files.exists(output.path())) {
+      log.warn("Output ({}) already exists", output.path());
     }
 
     List<String> command =
-        Stream.concat(
-                Stream.of(
-                    "HandBrakeCLI",
-                    input.key(),
-                    input.value().toString(),
-                    output.key(),
-                    output.value().toString()),
-                Arrays.stream(options)
-                    .flatMap(
-                        option -> {
-                          // TODO exhaustive switch for sealed type
-                          // TODO record deconstructor - can't since we have interfaces??
-                          if (option instanceof Option.KeyOnlyOption o) {
-                            return Stream.of(o.key());
-                          }
-                          if (option instanceof Option.KeyValueOption<?> o) {
-                            return Stream.of(o.key(), o.value().toString());
-                          }
-                          return Stream.of();
-                        }))
-            .toList();
+        getCommand(Stream.concat(Stream.of(input, output), Arrays.stream(options)));
 
     LOCK.lock();
     try {
@@ -69,5 +50,10 @@ class HandBrakeImpl implements HandBrake {
     } finally {
       LOCK.unlock();
     }
+  }
+
+  private List<String> getCommand(Stream<Option> options) {
+    return Stream.concat(Stream.of("HandBrakeCLI"), options.flatMap(Option::handBrakeCliArgs))
+        .toList();
   }
 }

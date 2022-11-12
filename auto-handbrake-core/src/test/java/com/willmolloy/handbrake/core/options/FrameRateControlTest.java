@@ -1,6 +1,6 @@
 package com.willmolloy.handbrake.core.options;
 
-import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 
 import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -16,11 +16,12 @@ class FrameRateControlTest {
 
   @ParameterizedTest
   @MethodSource
-  void testFactoriesExpectedKeys(FrameRateControl frameRateControl, String value) {
-    assertThat(frameRateControl.key()).isEqualTo(value);
+  void testFactoriesExpectedHandBrakeCliArgs(
+      FrameRateControl frameRateControl, String expectedKey) {
+    assertThat(frameRateControl.handBrakeCliArgs()).containsExactly(expectedKey).inOrder();
   }
 
-  static Stream<Arguments> testFactoriesExpectedKeys() {
+  static Stream<Arguments> testFactoriesExpectedHandBrakeCliArgs() {
     return Stream.of(
         Arguments.of(FrameRateControl.constant(), "--cfr"),
         Arguments.of(FrameRateControl.variable(), "--vfr"),
