@@ -7,8 +7,7 @@ package com.willmolloy.handbrake.core.options;
  *     Options</a>
  * @author <a href=https://willmolloy.com>Will Molloy</a>
  */
-public sealed interface Encoder extends Option.KeyValueOption<String>
-    permits Internals.KeyStringValueOptionImpl {
+public sealed interface Encoder extends Option permits Internals.OptionImpl {
 
   /** H.264 (CPU). */
   static Encoder h264() {
@@ -43,6 +42,6 @@ public sealed interface Encoder extends Option.KeyValueOption<String>
   }
 
   private static Encoder encoder(String value) {
-    return new Internals.KeyStringValueOptionImpl("--encoder", value);
+    return new Internals.OptionImpl("--encoder", value);
   }
 }
