@@ -1,6 +1,6 @@
 package com.willmolloy.handbrake.core.options;
 
-import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 
 import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -16,12 +16,12 @@ class EncoderTest {
 
   @ParameterizedTest
   @MethodSource
-  void testFactoriesExpectedKeysAndValues(Encoder encoder, String key, String value) {
-    assertThat(encoder.key()).isEqualTo(key);
-    assertThat(encoder.value()).isEqualTo(value);
+  void testFactoriesExpectedHandBrakeCliArgs(
+      Encoder encoder, String expectedKey, String expectedValue) {
+    assertThat(encoder.handBrakeCliArgs()).containsExactly(expectedKey, expectedValue).inOrder();
   }
 
-  static Stream<Arguments> testFactoriesExpectedKeysAndValues() {
+  static Stream<Arguments> testFactoriesExpectedHandBrakeCliArgs() {
     return Stream.of(
         Arguments.of(Encoder.h264(), "--encoder", "x264"),
         Arguments.of(Encoder.h265(), "--encoder", "x265"),

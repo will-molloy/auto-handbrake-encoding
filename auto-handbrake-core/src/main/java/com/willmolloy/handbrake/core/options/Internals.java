@@ -1,39 +1,49 @@
 package com.willmolloy.handbrake.core.options;
 
 import java.nio.file.Path;
+import java.util.List;
+import java.util.stream.Stream;
 
 /**
- * This package-private class allows us to hide the record classes and force users to the static
- * factory methods.
+ * Since the interfaces are sealed, we don't want users creating their own {@link Option} class. And
+ * because this class is package-private, it hides the implementations and forces users to the
+ * static factory methods.
  *
  * @author <a href=https://willmolloy.com>Will Molloy</a>
  */
 final class Internals {
 
   /**
-   * Option implementation.
+   * Generic option implementation.
    *
-   * @param key option key
+   * @param optionArgs HandBrakeCLI option args
    */
-  record OptionImpl(String key) implements FrameRateControl {}
+  record OptionImpl(List<String> optionArgs) implements Preset, Encoder, FrameRateControl {
+    OptionImpl(String... optionArgs) {
+      this(List.of(optionArgs));
+    }
+
+    @Override
+    public Stream<String> handBrakeCliArgs() {
+      return optionArgs.stream();
+    }
+  }
 
   /**
-   * Key value option implementation.
+   * Option implementation specific to input/output.
    *
-   * @param key option key
-   * @param value option value
+   * @param key HandBrakeCLI option key
+   * @param path HandBrakeCLI option value (a path)
    */
-  record KeyStringValueOptionImpl(String key, String value) implements Preset, Encoder {}
-
-  /**
-   * Key value option implementation.
-   *
-   * @param key option key
-   * @param value option value
-   */
-  // TODO anyway to reuse a generic KeyValueOptionImpl<T>?
-  //  problem is the interfaces (Input, Preset, etc.) use different generic params
-  record KeyPathValueOptionImpl(String key, Path value) implements Input, Output {}
+  // Input/Output need their own implementation as they expose the Path
+  // could change the HandBrake interface to simply accept Path so this isn't required, but that API
+  // is nicer with a custom interface IMO
+  record InputOutputOptionImpl(String key, Path path) implements Input, Output {
+    @Override
+    public Stream<String> handBrakeCliArgs() {
+      return Stream.of(key, path.toString());
+    }
+  }
 
   private Internals() {}
 }

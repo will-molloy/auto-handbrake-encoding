@@ -76,8 +76,8 @@ class VideoEncoderTest {
                 invocation -> {
                   // bit of an ugly hack...
                   // need to create the temp encoded file as its expected as output from HandBrake
-                  Output handBrakeOutput = invocation.getArgument(1);
-                  Files.createFile(handBrakeOutput.value());
+                  Output output = invocation.getArgument(1);
+                  Files.createFile(output.path());
                   return true;
                 });
 
@@ -111,8 +111,8 @@ class VideoEncoderTest {
                 invocation -> {
                   // bit of an ugly hack...
                   // need to create the temp encoded file as its expected as output from HandBrake
-                  Output handBrakeOutput = invocation.getArgument(1);
-                  Files.createFile(handBrakeOutput.value());
+                  Output output = invocation.getArgument(1);
+                  Files.createFile(output.path());
                   return true;
                 });
 
