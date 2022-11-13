@@ -2,7 +2,8 @@ package com.willmolloy.handbrake.cfr;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Stopwatch;
+import com.willmolloy.handbrake.cfr.util.Async;
+import com.willmolloy.handbrake.cfr.util.Timer;
 import com.willmolloy.handbrake.core.HandBrake;
 import com.willmolloy.handbrake.core.options.Encoder;
 import com.willmolloy.handbrake.core.options.FrameRateControl;
@@ -10,6 +11,7 @@ import com.willmolloy.handbrake.core.options.Input;
 import com.willmolloy.handbrake.core.options.Output;
 import com.willmolloy.handbrake.core.options.Preset;
 import java.nio.file.Files;
+import java.util.concurrent.atomic.AtomicLong;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -21,6 +23,8 @@ import org.apache.logging.log4j.Logger;
 class VideoEncoder {
 
   private static final Logger log = LogManager.getLogger();
+
+  private static final AtomicLong COUNT = new AtomicLong();
 
   private final HandBrake handBrake;
 
@@ -35,7 +39,11 @@ class VideoEncoder {
    * @return {@code true} if encoding was successful
    */
   public boolean encode(UnencodedVideo video) {
-    Stopwatch stopwatch = Stopwatch.createStarted();
+    String threadName = "video-encoder-%d".formatted(COUNT.incrementAndGet());
+    return Async.executeAsync(Timer.time(() -> doEncode(video), log), threadName).join();
+  }
+
+  private boolean doEncode(UnencodedVideo video) {
     try {
       log.debug("Encoding: {} -> {}", video.originalPath(), video.encodedPath());
 
@@ -67,8 +75,6 @@ class VideoEncoder {
     } catch (Exception e) {
       log.error("Error encoding: %s".formatted(video), e);
       return false;
-    } finally {
-      log.info("Elapsed: {}", stopwatch.elapsed());
     }
   }
 }

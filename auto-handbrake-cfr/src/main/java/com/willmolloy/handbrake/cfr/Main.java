@@ -13,7 +13,6 @@ import org.apache.logging.log4j.Logger;
  * @author <a href=https://willmolloy.com>Will Molloy</a>
  */
 final class Main {
-  private Main() {}
 
   private static final Logger log = LogManager.getLogger();
 
@@ -34,4 +33,6 @@ final class Main {
       System.exit(1);
     }
   }
+
+  private Main() {}
 }
