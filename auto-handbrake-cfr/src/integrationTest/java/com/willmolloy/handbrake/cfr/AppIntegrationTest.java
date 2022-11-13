@@ -190,8 +190,7 @@ class AppIntegrationTest {
             new PathAndContents(
                 outputDirectory.resolve("StarCraft II/protoss.cfr.mp4"), testVideoEncoded),
             // archive
-            new PathAndContents(
-                inputDirectory.resolve("StarCraft II/protoss.mp4"), testVideo));
+            new PathAndContents(inputDirectory.resolve("StarCraft II/protoss.mp4"), testVideo));
   }
 
   @Test
@@ -217,8 +216,7 @@ class AppIntegrationTest {
                 testVideoEncoded),
             // archive
             new PathAndContents(
-                archiveDirectory.resolve("Path of Exile/vaal spark templar.mp4"),
-                testVideo));
+                archiveDirectory.resolve("Path of Exile/vaal spark templar.mp4"), testVideo));
   }
 
   @Test
@@ -248,8 +246,7 @@ class AppIntegrationTest {
                 testVideoEncoded),
             // archive
             new PathAndContents(
-                archiveDirectory.resolve(
-                    "Halo Infinite/Legendary Campaign/1st mission.mp4"),
+                archiveDirectory.resolve("Halo Infinite/Legendary Campaign/1st mission.mp4"),
                 testVideo));
   }
 
@@ -281,8 +278,7 @@ class AppIntegrationTest {
             // archives
             new PathAndContents(inputDirectory.resolve("recording1.mp4"), testVideo),
             new PathAndContents(inputDirectory.resolve("recording2.mp4"), testVideo),
-            new PathAndContents(
-                inputDirectory.resolve("Nested/recording3.mp4"), testVideo),
+            new PathAndContents(inputDirectory.resolve("Nested/recording3.mp4"), testVideo),
             new PathAndContents(
                 inputDirectory.resolve("Nested1/Nested2/recording4.mp4"), testVideo));
   }
@@ -317,8 +313,7 @@ class AppIntegrationTest {
             // archives
             new PathAndContents(inputDirectory.resolve("recording1.mp4"), testVideo),
             new PathAndContents(inputDirectory.resolve("recording2.mp4"), testVideo),
-            new PathAndContents(
-                inputDirectory.resolve("Nested/recording3.mp4"), testVideo),
+            new PathAndContents(inputDirectory.resolve("Nested/recording3.mp4"), testVideo),
             new PathAndContents(
                 inputDirectory.resolve("Nested1/Nested2/recording4.mp4"), testVideo));
   }
@@ -353,8 +348,7 @@ class AppIntegrationTest {
             // archives
             new PathAndContents(archiveDirectory.resolve("recording1.mp4"), testVideo),
             new PathAndContents(archiveDirectory.resolve("recording2.mp4"), testVideo),
-            new PathAndContents(
-                archiveDirectory.resolve("Nested/recording3.mp4"), testVideo),
+            new PathAndContents(archiveDirectory.resolve("Nested/recording3.mp4"), testVideo),
             new PathAndContents(
                 archiveDirectory.resolve("Nested1/Nested2/recording4.mp4"), testVideo));
   }
@@ -392,8 +386,7 @@ class AppIntegrationTest {
             // archives
             new PathAndContents(archiveDirectory.resolve("recording1.mp4"), testVideo),
             new PathAndContents(archiveDirectory.resolve("recording2.mp4"), testVideo),
-            new PathAndContents(
-                archiveDirectory.resolve("Nested/recording3.mp4"), testVideo),
+            new PathAndContents(archiveDirectory.resolve("Nested/recording3.mp4"), testVideo),
             new PathAndContents(
                 archiveDirectory.resolve("Nested1/Nested2/recording4.mp4"), testVideo));
   }
@@ -705,8 +698,7 @@ class AppIntegrationTest {
     // incomplete archives
     createVideoAt(inputDirectory.resolve("recording2.mp4.part"), testVideo);
     createVideoAt(
-        inputDirectory.resolve("Nested1/Nested2/Nested3/random video.mp4.part"),
-        testVideo);
+        inputDirectory.resolve("Nested1/Nested2/Nested3/random video.mp4.part"), testVideo);
 
     // unrelated encodings
     createVideoAt(inputDirectory.resolve("Starcraft II/protoss.cfr.mp4"), testVideoEncoded);
@@ -715,8 +707,7 @@ class AppIntegrationTest {
 
     // unrelated archives
     createVideoAt(inputDirectory.resolve("League of Legends/ryze.mp4"), testVideo);
-    createVideoAt(
-        inputDirectory.resolve("Path of Exile/Old builds/Discharge CoC.mp4"), testVideo);
+    createVideoAt(inputDirectory.resolve("Path of Exile/Old builds/Discharge CoC.mp4"), testVideo);
 
     // When
     boolean result = runApp(inputDirectory, inputDirectory, inputDirectory);
@@ -737,8 +728,7 @@ class AppIntegrationTest {
                 inputDirectory.resolve("Nested1/Nested2/recording4.cfr.mp4"), testVideoEncoded),
             // archives
             new PathAndContents(inputDirectory.resolve("recording1.mp4"), testVideo),
-            new PathAndContents(
-                inputDirectory.resolve("Nested/recording3.mp4"), testVideo),
+            new PathAndContents(inputDirectory.resolve("Nested/recording3.mp4"), testVideo),
             new PathAndContents(
                 inputDirectory.resolve("Nested1/Nested2/recording4.mp4"), testVideo),
             // unrelated encodings
@@ -747,11 +737,9 @@ class AppIntegrationTest {
             new PathAndContents(
                 inputDirectory.resolve("Starcraft II/Campaign/terran1.cfr.mp4"), testVideoEncoded),
             // unrelated archives
+            new PathAndContents(inputDirectory.resolve("League of Legends/ryze.mp4"), testVideo),
             new PathAndContents(
-                inputDirectory.resolve("League of Legends/ryze.mp4"), testVideo),
-            new PathAndContents(
-                inputDirectory.resolve("Path of Exile/Old builds/Discharge CoC.mp4"),
-                testVideo));
+                inputDirectory.resolve("Path of Exile/Old builds/Discharge CoC.mp4"), testVideo));
   }
 
   @Test
@@ -818,8 +806,7 @@ class AppIntegrationTest {
                 outputDirectory.resolve("Nested1/Nested2/recording4.cfr.mp4"), testVideoEncoded),
             // archives
             new PathAndContents(archiveDirectory.resolve("recording1.mp4"), testVideo),
-            new PathAndContents(
-                archiveDirectory.resolve("Nested/recording3.mp4"), testVideo),
+            new PathAndContents(archiveDirectory.resolve("Nested/recording3.mp4"), testVideo),
             new PathAndContents(
                 archiveDirectory.resolve("Nested1/Nested2/recording4.mp4"), testVideo),
             // unrelated encodings
