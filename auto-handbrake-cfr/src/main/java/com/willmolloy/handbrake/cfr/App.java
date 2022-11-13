@@ -101,9 +101,8 @@ class App {
     return Files.walk(inputDirectory)
         .filter(Files::isRegularFile)
         .filter(UnencodedVideo::isMp4)
-        // don't include paths that represent encoded or archived videos
-        // if somebody wants to encode again, they'll need to remove the 'Archived' suffix
-        .filter(path -> !UnencodedVideo.isEncodedMp4(path) && !UnencodedVideo.isArchivedMp4(path))
+        // don't include paths that represent already encoded videos
+        .filter(path -> !UnencodedVideo.isEncodedMp4(path))
         .map(factory::newUnencodedVideo)
         .sorted(Comparator.comparing(video -> video.originalPath().toString()))
         .toList();

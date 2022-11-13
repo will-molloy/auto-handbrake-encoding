@@ -63,7 +63,7 @@ class VideoArchiverTest {
 
     // Then
     assertThat(result).isTrue();
-    assertThatTestDirectory().containsExactly(archiveDirectory.resolve("file.archived.mp4"));
+    assertThatTestDirectory().containsExactly(archiveDirectory.resolve("file.mp4"));
   }
 
   @Test
@@ -79,14 +79,13 @@ class VideoArchiverTest {
 
     // Then
     assertThat(result).isTrue();
-    assertThatTestDirectory()
-        .containsExactly(archiveDirectory.resolve("Halo/Campaign/file.archived.mp4"));
+    assertThatTestDirectory().containsExactly(archiveDirectory.resolve("Halo/Campaign/file.mp4"));
   }
 
   @Test
   void whenArchiveFileAlreadyExists_deletesOriginal_andReturnsTrue() throws IOException {
     // Given
-    Files.copy(testVideo, archiveDirectory.resolve("file.archived.mp4"));
+    Files.copy(testVideo, archiveDirectory.resolve("file.mp4"));
 
     Path unencodedMp4File = Files.copy(testVideo, inputDirectory.resolve("file.mp4"));
     UnencodedVideo unencodedVideo = unencodedVideoFactory.newUnencodedVideo(unencodedMp4File);
@@ -96,14 +95,14 @@ class VideoArchiverTest {
 
     // Then
     assertThat(result).isTrue();
-    assertThatTestDirectory().containsExactly(archiveDirectory.resolve("file.archived.mp4"));
+    assertThatTestDirectory().containsExactly(archiveDirectory.resolve("file.mp4"));
   }
 
   @Test
   void whenArchiveFileAlreadyExistsButContentsDiffer_retainsBothFiles_andReturnsFalse()
       throws IOException {
     // Given
-    Files.copy(testVideo2, archiveDirectory.resolve("file.archived.mp4"));
+    Files.copy(testVideo2, archiveDirectory.resolve("file.mp4"));
 
     Path unencodedMp4File = Files.copy(testVideo, inputDirectory.resolve("file.mp4"));
     UnencodedVideo unencodedVideo = unencodedVideoFactory.newUnencodedVideo(unencodedMp4File);
@@ -114,8 +113,7 @@ class VideoArchiverTest {
     // Then
     assertThat(result).isFalse();
     assertThatTestDirectory()
-        .containsExactly(
-            inputDirectory.resolve("file.mp4"), archiveDirectory.resolve("file.archived.mp4"));
+        .containsExactly(inputDirectory.resolve("file.mp4"), archiveDirectory.resolve("file.mp4"));
   }
 
   @Test
