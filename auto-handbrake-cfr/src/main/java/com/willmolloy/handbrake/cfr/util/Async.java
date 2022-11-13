@@ -10,11 +10,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 /**
- * Async helper methods.
+ * Async utility methods.
  *
  * @author <a href=https://willmolloy.com>Will Molloy</a>
  */
-public final class AsyncHelper {
+public final class Async {
 
   /** Runs the provided supplier asynchronously. */
   public static <T> CompletableFuture<T> executeAsync(Supplier<T> supplier, String threadName) {
@@ -25,7 +25,7 @@ public final class AsyncHelper {
     // could use 'new Thread' (with FutureTask), but then you don't get the CompletableFuture API
     try (CloseableExecutorService executor =
         new CloseableExecutorService(
-            Executors.newSingleThreadExecutor(runnable -> new Thread(runnable, threadName)))) {
+            Executors.newSingleThreadExecutor(x -> new Thread(x, threadName)))) {
       return CompletableFuture.supplyAsync(supplier, executor);
     }
   }
@@ -68,5 +68,5 @@ public final class AsyncHelper {
     }
   }
 
-  private AsyncHelper() {}
+  private Async() {}
 }

@@ -2,8 +2,8 @@ package com.willmolloy.handbrake.cfr;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Stopwatch;
-import com.willmolloy.handbrake.cfr.util.AsyncHelper;
+import com.willmolloy.handbrake.cfr.util.Async;
+import com.willmolloy.handbrake.cfr.util.Timer;
 import com.willmolloy.handbrake.core.HandBrake;
 import com.willmolloy.handbrake.core.options.Encoder;
 import com.willmolloy.handbrake.core.options.FrameRateControl;
@@ -40,45 +40,41 @@ class VideoEncoder {
    */
   public boolean encode(UnencodedVideo video) {
     String threadName = "video-encoder-%d".formatted(COUNT.incrementAndGet());
-    return AsyncHelper.executeAsync(
-            () -> {
-              Stopwatch stopwatch = Stopwatch.createStarted();
-              try {
-                log.debug("Encoding: {} -> {}", video.originalPath(), video.encodedPath());
+    return Async.executeAsync(Timer.time(() -> doEncode(video), log), threadName).join();
+  }
 
-                if (Files.exists(video.encodedPath())) {
-                  log.error("Encoded file ({}) already exists. Aborting", video.encodedPath());
-                  return false;
-                }
+  private boolean doEncode(UnencodedVideo video) {
+    try {
+      log.debug("Encoding: {} -> {}", video.originalPath(), video.encodedPath());
 
-                Files.createDirectories(checkNotNull(video.encodedPath().getParent()));
+      if (Files.exists(video.encodedPath())) {
+        log.error("Encoded file ({}) already exists. Aborting", video.encodedPath());
+        return false;
+      }
 
-                // to avoid leaving encoded files in an 'incomplete' state, encode to a temp file in
-                // case something goes wrong
-                boolean handBrakeSuccessful =
-                    handBrake.encode(
-                        Input.of(video.originalPath()),
-                        Output.of(video.tempEncodedPath()),
-                        Preset.productionStandard(),
-                        Encoder.h264(),
-                        FrameRateControl.constant());
+      Files.createDirectories(checkNotNull(video.encodedPath().getParent()));
 
-                if (handBrakeSuccessful) {
-                  Files.move(video.tempEncodedPath(), video.encodedPath());
-                  log.info("Encoded: {}", video.encodedPath());
-                  return true;
-                } else {
-                  log.error("Error encoding: {}", video);
-                  return false;
-                }
-              } catch (Exception e) {
-                log.error("Error encoding: %s".formatted(video), e);
-                return false;
-              } finally {
-                log.info("Elapsed: {}", stopwatch.elapsed());
-              }
-            },
-            threadName)
-        .join();
+      // to avoid leaving encoded files in an 'incomplete' state, encode to a temp file in case
+      // something goes wrong
+      boolean handBrakeSuccessful =
+          handBrake.encode(
+              Input.of(video.originalPath()),
+              Output.of(video.tempEncodedPath()),
+              Preset.productionStandard(),
+              Encoder.h264(),
+              FrameRateControl.constant());
+
+      if (handBrakeSuccessful) {
+        Files.move(video.tempEncodedPath(), video.encodedPath());
+        log.info("Encoded: {}", video.encodedPath());
+        return true;
+      } else {
+        log.error("Error encoding: {}", video);
+        return false;
+      }
+    } catch (Exception e) {
+      log.error("Error encoding: %s".formatted(video), e);
+      return false;
+    }
   }
 }
