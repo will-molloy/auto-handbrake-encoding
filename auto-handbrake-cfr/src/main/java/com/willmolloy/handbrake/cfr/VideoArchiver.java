@@ -46,7 +46,7 @@ class VideoArchiver {
           return true;
         } else {
           log.error(
-              "Archive file ({}) already exists but contents differ. Aborting",
+              "Archive file ({}) already exists but contents differ. Skipping archive process",
               video.archivedPath());
           return false;
         }
