@@ -3,8 +3,10 @@ package com.willmolloy.handbrake.cfr;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Stopwatch;
+import com.willmolloy.handbrake.cfr.util.AsyncHelper;
 import java.nio.file.Files;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicLong;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -17,6 +19,8 @@ class VideoArchiver {
 
   private static final Logger log = LogManager.getLogger();
 
+  private static final AtomicLong COUNT = new AtomicLong();
+
   /**
    * Archives the given video.
    *
@@ -24,7 +28,8 @@ class VideoArchiver {
    * @return {@code true} if archiving was successful
    */
   public CompletableFuture<Boolean> archiveAsync(UnencodedVideo video) {
-    return CompletableFuture.supplyAsync(
+    String threadName = "video-archiver-%d".formatted(COUNT.incrementAndGet());
+    return AsyncHelper.executeAsync(
         () -> {
           Stopwatch stopwatch = Stopwatch.createStarted();
           try {
@@ -62,6 +67,7 @@ class VideoArchiver {
           } finally {
             log.info("Elapsed: {}", stopwatch.elapsed());
           }
-        });
+        },
+        threadName);
   }
 }
