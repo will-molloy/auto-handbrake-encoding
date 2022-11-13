@@ -27,8 +27,6 @@ Automating HandBrake encoding
       - I recommend deleting the encoded file after using it, and retaining the original archived file
     - Encoded files are not overwritten, if you want to encode again, delete them first
 3. Archives original videos
-    - Archived files are named with the suffix `.archived.mp4`
-    - They won't be detected by the program again, if you want to encode again, remove this suffix first
 
 #### Usage:
 
