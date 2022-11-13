@@ -126,6 +126,22 @@ class VideoArchiverTest {
     assertThat(result).isFalse();
   }
 
+  @Test
+  void whenInputDirectoryIsArchiveDirectory_retainsOriginal_andReturnsTrue() throws IOException {
+    // Given
+    Path unencodedMp4File = Files.copy(testVideo, inputDirectory.resolve("file.mp4"));
+    UnencodedVideo.Factory unencodedVideoFactory =
+        new UnencodedVideo.Factory(inputDirectory, inputDirectory, inputDirectory);
+    UnencodedVideo unencodedVideo = unencodedVideoFactory.newUnencodedVideo(unencodedMp4File);
+
+    // When
+    boolean result = videoArchiver.archiveAsync(unencodedVideo).join();
+
+    // Then
+    assertThat(result).isTrue();
+    assertThatTestDirectory().containsExactly(inputDirectory.resolve("file.mp4"));
+  }
+
   private StreamSubject assertThatTestDirectory() throws IOException {
     return assertThat(Files.walk(testDirectory).filter(Files::isRegularFile));
   }
