@@ -2,7 +2,9 @@ package com.willmolloy.handbrake.cfr;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import org.junit.jupiter.api.Test;
+import java.nio.file.Path;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ArgumentsSource;
 
 /**
  * Encoding several videos.
@@ -11,105 +13,19 @@ import org.junit.jupiter.api.Test;
  */
 class SeveralVideosNestedDirectoryStructureTest extends BaseIntegrationTest {
 
-  @Test
-  void severalVideos_nestedDirectoryStructure() throws Exception {
+  @ParameterizedTest
+  @ArgumentsSource(EncodeAndArchiveToSameDirectory.class)
+  @ArgumentsSource(EncodeToDifferentDirectory.class)
+  @ArgumentsSource(ArchiveToDifferentDirectory.class)
+  @ArgumentsSource(EncodeAndArchiveToDifferentDirectory.class)
+  void canEncodeSeveralVideos_and_maintainNestedDirectoryStructures(
+      Path inputDirectory, Path outputDirectory, Path archiveDirectory) throws Exception {
     // Given
     // videos to encode
-    createVideoAt(inputDirectory.resolve("recording1.mp4"), unencodedVideo);
-    createVideoAt(inputDirectory.resolve("recording2.mp4"), unencodedVideo);
-    createVideoAt(inputDirectory.resolve("Nested/recording3.mp4"), unencodedVideo);
-    createVideoAt(inputDirectory.resolve("Nested1/Nested2/recording4.mp4"), unencodedVideo);
-
-    // When
-    boolean result = runApp(inputDirectory, inputDirectory, inputDirectory);
-
-    // Then
-    assertThat(result).isTrue();
-    assertThatTestDirectory()
-        .containsExactly(
-            // encodings
-            pathAndContents(inputDirectory.resolve("recording1.cfr.mp4"), encodedVideo),
-            pathAndContents(inputDirectory.resolve("recording2.cfr.mp4"), encodedVideo),
-            pathAndContents(inputDirectory.resolve("Nested/recording3.cfr.mp4"), encodedVideo),
-            pathAndContents(
-                inputDirectory.resolve("Nested1/Nested2/recording4.cfr.mp4"), encodedVideo),
-            // archives
-            pathAndContents(inputDirectory.resolve("recording1.mp4"), unencodedVideo),
-            pathAndContents(inputDirectory.resolve("recording2.mp4"), unencodedVideo),
-            pathAndContents(inputDirectory.resolve("Nested/recording3.mp4"), unencodedVideo),
-            pathAndContents(
-                inputDirectory.resolve("Nested1/Nested2/recording4.mp4"), unencodedVideo));
-  }
-
-  @Test
-  void severalVideos_nestedDirectoryStructure_encodeToDifferentDirectory() throws Exception {
-    // Given
-    // videos to encode
-    createVideoAt(inputDirectory.resolve("recording1.mp4"), unencodedVideo);
-    createVideoAt(inputDirectory.resolve("recording2.mp4"), unencodedVideo);
-    createVideoAt(inputDirectory.resolve("Nested/recording3.mp4"), unencodedVideo);
-    createVideoAt(inputDirectory.resolve("Nested1/Nested2/recording4.mp4"), unencodedVideo);
-
-    // When
-    boolean result = runApp(inputDirectory, outputDirectory, inputDirectory);
-
-    // Then
-    assertThat(result).isTrue();
-    assertThatTestDirectory()
-        .containsExactly(
-            // encodings
-            pathAndContents(outputDirectory.resolve("recording1.cfr.mp4"), encodedVideo),
-            pathAndContents(outputDirectory.resolve("recording2.cfr.mp4"), encodedVideo),
-            pathAndContents(outputDirectory.resolve("Nested/recording3.cfr.mp4"), encodedVideo),
-            pathAndContents(
-                outputDirectory.resolve("Nested1/Nested2/recording4.cfr.mp4"), encodedVideo),
-            // archives
-            pathAndContents(inputDirectory.resolve("recording1.mp4"), unencodedVideo),
-            pathAndContents(inputDirectory.resolve("recording2.mp4"), unencodedVideo),
-            pathAndContents(inputDirectory.resolve("Nested/recording3.mp4"), unencodedVideo),
-            pathAndContents(
-                inputDirectory.resolve("Nested1/Nested2/recording4.mp4"), unencodedVideo));
-  }
-
-  @Test
-  void severalVideos_nestedDirectoryStructure_archiveToDifferentDirectory() throws Exception {
-    // Given
-    // videos to encode
-    createVideoAt(inputDirectory.resolve("recording1.mp4"), unencodedVideo);
-    createVideoAt(inputDirectory.resolve("recording2.mp4"), unencodedVideo);
-    createVideoAt(inputDirectory.resolve("Nested/recording3.mp4"), unencodedVideo);
-    createVideoAt(inputDirectory.resolve("Nested1/Nested2/recording4.mp4"), unencodedVideo);
-
-    // When
-    boolean result = runApp(inputDirectory, inputDirectory, archiveDirectory);
-
-    // Then
-    assertThat(result).isTrue();
-    assertThatTestDirectory()
-        .containsExactly(
-            // encodings
-            pathAndContents(inputDirectory.resolve("recording1.cfr.mp4"), encodedVideo),
-            pathAndContents(inputDirectory.resolve("recording2.cfr.mp4"), encodedVideo),
-            pathAndContents(inputDirectory.resolve("Nested/recording3.cfr.mp4"), encodedVideo),
-            pathAndContents(
-                inputDirectory.resolve("Nested1/Nested2/recording4.cfr.mp4"), encodedVideo),
-            // archives
-            pathAndContents(archiveDirectory.resolve("recording1.mp4"), unencodedVideo),
-            pathAndContents(archiveDirectory.resolve("recording2.mp4"), unencodedVideo),
-            pathAndContents(archiveDirectory.resolve("Nested/recording3.mp4"), unencodedVideo),
-            pathAndContents(
-                archiveDirectory.resolve("Nested1/Nested2/recording4.mp4"), unencodedVideo));
-  }
-
-  @Test
-  void severalVideos_nestedDirectoryStructure_encodeAndArchiveToDifferentDirectory()
-      throws Exception {
-    // Given
-    // videos to encode
-    createVideoAt(inputDirectory.resolve("recording1.mp4"), unencodedVideo);
-    createVideoAt(inputDirectory.resolve("recording2.mp4"), unencodedVideo);
-    createVideoAt(inputDirectory.resolve("Nested/recording3.mp4"), unencodedVideo);
-    createVideoAt(inputDirectory.resolve("Nested1/Nested2/recording4.mp4"), unencodedVideo);
+    createVideoAt(inputDirectory.resolve("recording1.mp4"), unencodedVideo1);
+    createVideoAt(inputDirectory.resolve("recording2.mp4"), unencodedVideo2);
+    createVideoAt(inputDirectory.resolve("Nested/recording3.mp4"), unencodedVideo1);
+    createVideoAt(inputDirectory.resolve("Nested1/Nested2/recording4.mp4"), unencodedVideo2);
 
     // When
     boolean result = runApp(inputDirectory, outputDirectory, archiveDirectory);
@@ -119,16 +35,16 @@ class SeveralVideosNestedDirectoryStructureTest extends BaseIntegrationTest {
     assertThatTestDirectory()
         .containsExactly(
             // encodings
-            pathAndContents(outputDirectory.resolve("recording1.cfr.mp4"), encodedVideo),
-            pathAndContents(outputDirectory.resolve("recording2.cfr.mp4"), encodedVideo),
-            pathAndContents(outputDirectory.resolve("Nested/recording3.cfr.mp4"), encodedVideo),
+            pathAndContents(outputDirectory.resolve("recording1.cfr.mp4"), encodedVideo1),
+            pathAndContents(outputDirectory.resolve("recording2.cfr.mp4"), encodedVideo2),
+            pathAndContents(outputDirectory.resolve("Nested/recording3.cfr.mp4"), encodedVideo1),
             pathAndContents(
-                outputDirectory.resolve("Nested1/Nested2/recording4.cfr.mp4"), encodedVideo),
+                outputDirectory.resolve("Nested1/Nested2/recording4.cfr.mp4"), encodedVideo2),
             // archives
-            pathAndContents(archiveDirectory.resolve("recording1.mp4"), unencodedVideo),
-            pathAndContents(archiveDirectory.resolve("recording2.mp4"), unencodedVideo),
-            pathAndContents(archiveDirectory.resolve("Nested/recording3.mp4"), unencodedVideo),
+            pathAndContents(archiveDirectory.resolve("recording1.mp4"), unencodedVideo1),
+            pathAndContents(archiveDirectory.resolve("recording2.mp4"), unencodedVideo2),
+            pathAndContents(archiveDirectory.resolve("Nested/recording3.mp4"), unencodedVideo1),
             pathAndContents(
-                archiveDirectory.resolve("Nested1/Nested2/recording4.mp4"), unencodedVideo));
+                archiveDirectory.resolve("Nested1/Nested2/recording4.mp4"), unencodedVideo2));
   }
 }

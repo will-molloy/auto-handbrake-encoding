@@ -33,12 +33,13 @@ jobs:
         if: matrix.os == 'macos-latest'
         run: brew install handbrake
 
-      # Need to generate encoded file for the integration tests on the GitHub Actions agent.
-      # Can't simply use the one stored in git, guessing different hardware, OS, etc. results in
+      # Need to generate encoded files for the integration tests on the GitHub Actions agent.
+      # Can't simply use the ones stored in git, guessing different hardware, OS, etc. results in
       # slightly different output.
       - name: Generate test data
         run: |
           HandBrakeCLI --preset "Production Standard" -i auto-handbrake-cfr/src/integrationTest/resources/Big_Buck_Bunny_360_10s_1MB.mp4 -o auto-handbrake-cfr/src/integrationTest/resources/Big_Buck_Bunny_360_10s_1MB.cfr.mp4
+          HandBrakeCLI --preset "Production Standard" -i auto-handbrake-cfr/src/integrationTest/resources/Big_Buck_Bunny_360_10s_2MB.mp4 -o auto-handbrake-cfr/src/integrationTest/resources/Big_Buck_Bunny_360_10s_2MB.cfr.mp4
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew

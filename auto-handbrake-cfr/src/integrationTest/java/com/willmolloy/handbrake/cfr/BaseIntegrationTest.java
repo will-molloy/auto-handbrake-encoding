@@ -14,51 +14,53 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.ArgumentsProvider;
 
 /**
- * Various scenarios testing {@link App} as a black box. Read the logs to understand each scenario
- * further.
+ * Various scenarios testing {@link App} as a black box.
  *
  * <p>Requires HandBrakeCLI to be installed.
  *
- * <p>May require re-encoding the .cfr.mp4 file in resources directory.
+ * <p>May require re-encoding the encoded files in resources directory.
  *
  * @author <a href=https://willmolloy.com>Will Molloy</a>
  */
 abstract class BaseIntegrationTest {
 
-  protected Path testDirectory;
-  protected Path inputDirectory;
-  protected Path outputDirectory;
-  protected Path archiveDirectory;
-  protected Path unencodedVideo;
-  protected Path encodedVideo;
-  protected Path unencodedVideo2;
+  private static Path testParentDirectory;
+  protected static Path unencodedVideo1;
+  protected static Path encodedVideo1;
+  protected static Path unencodedVideo2;
+  protected static Path encodedVideo2;
 
-  @BeforeEach
-  void setUp() throws Exception {
-    testDirectory = Path.of(this.getClass().getSimpleName());
-    inputDirectory = createDirectoryAt(testDirectory.resolve("Gameplay"));
-    outputDirectory = createDirectoryAt(testDirectory.resolve("Gameplay Encoded"));
-    archiveDirectory = createDirectoryAt(testDirectory.resolve("Gameplay Archive"));
-    unencodedVideo = Path.of(Resources.getResource("Big_Buck_Bunny_360_10s_1MB.mp4").toURI());
-    encodedVideo = Path.of(Resources.getResource("Big_Buck_Bunny_360_10s_1MB.cfr.mp4").toURI());
+  @BeforeAll
+  static void setUp() throws Exception {
+    testParentDirectory = Path.of("Test");
+    unencodedVideo1 = Path.of(Resources.getResource("Big_Buck_Bunny_360_10s_1MB.mp4").toURI());
+    encodedVideo1 = Path.of(Resources.getResource("Big_Buck_Bunny_360_10s_1MB.cfr.mp4").toURI());
     unencodedVideo2 = Path.of(Resources.getResource("Big_Buck_Bunny_360_10s_2MB.mp4").toURI());
+    encodedVideo2 = Path.of(Resources.getResource("Big_Buck_Bunny_360_10s_2MB.cfr.mp4").toURI());
   }
 
   @AfterEach
   void tearDown() throws IOException {
-    FileUtils.deleteDirectory(testDirectory.toFile());
-    FileUtils.deleteDirectory(inputDirectory.toFile());
-    FileUtils.deleteDirectory(outputDirectory.toFile());
-    FileUtils.deleteDirectory(archiveDirectory.toFile());
+    FileUtils.deleteDirectory(testParentDirectory.toFile());
+  }
+
+  protected static boolean runApp(
+      Path inputDirectory, Path outputDirectory, Path archiveDirectory) {
+    App app = new App(new VideoEncoder(HandBrake.newInstance()), new VideoArchiver());
+    return app.run(inputDirectory, outputDirectory, archiveDirectory);
   }
 
   @CanIgnoreReturnValue
-  private Path createDirectoryAt(Path path) throws IOException {
+  private static Path createDirectoryAt(Path path) throws IOException {
     // not returning result of Files.createDirectories - it's absolute rather than relative, which
     // breaks the tests
     Files.createDirectories(path);
@@ -66,35 +68,30 @@ abstract class BaseIntegrationTest {
   }
 
   @CanIgnoreReturnValue
-  protected Path createVideoAt(Path path, Path videoToCopy) throws IOException {
+  protected static Path createVideoAt(Path path, Path videoToCopy) throws IOException {
     Files.createDirectories(checkNotNull(path.getParent()));
     Files.copy(videoToCopy, path);
     return path;
   }
 
-  protected boolean runApp(Path inputDirectory, Path outputDirectory, Path archiveDirectory) {
-    App app = new App(new VideoEncoder(HandBrake.newInstance()), new VideoArchiver());
-    return app.run(inputDirectory, outputDirectory, archiveDirectory);
-  }
-
-  protected IterableSubject.UsingCorrespondence<Path, PathAndContents> assertThatTestDirectory()
-      throws IOException {
-    return assertThat(Files.walk(testDirectory).filter(Files::isRegularFile).toList())
+  protected static IterableSubject.UsingCorrespondence<Path, PathAndContents>
+      assertThatTestDirectory() throws IOException {
+    return assertThat(Files.walk(testParentDirectory).filter(Files::isRegularFile).toList())
         .comparingElementsUsing(PathAndContents.EQUIVALENCE);
   }
 
-  protected PathAndContents pathAndContents(Path path, Path contents) {
+  protected static PathAndContents pathAndContents(Path path, Path contents) {
     return new PathAndContents(path, contents);
   }
 
   /**
    * Represents path and path contents separately.
    *
-   * <p>Useful so we can compare them separately and avoid creating files. E.g. we can say "this
-   * file should exist with this path and contents matching this other file".
+   * <p>Useful so we can compare them separately. E.g. we can say "this file should exist with this
+   * path and contents matching this other file".
    *
    * @param path path to compare
-   * @param contents path contents to compare
+   * @param contents path whose contents to compare
    */
   protected record PathAndContents(Path path, Path contents) {
     private static final Correspondence<Path, PathAndContents> EQUIVALENCE =
@@ -138,6 +135,46 @@ abstract class BaseIntegrationTest {
       } catch (IOException e) {
         throw new UncheckedIOException(e);
       }
+    }
+  }
+
+  /** Encode and archive to the same directory (i.e. {@code inputDirectory}). */
+  protected static class EncodeAndArchiveToSameDirectory implements ArgumentsProvider {
+    @Override
+    public Stream<? extends Arguments> provideArguments(ExtensionContext context) throws Exception {
+      Path inputDirectory = createDirectoryAt(testParentDirectory.resolve("Gameplay"));
+      return Stream.of(Arguments.of(inputDirectory, inputDirectory, inputDirectory));
+    }
+  }
+
+  /** Encode to a different directory. */
+  protected static class EncodeToDifferentDirectory implements ArgumentsProvider {
+    @Override
+    public Stream<? extends Arguments> provideArguments(ExtensionContext context) throws Exception {
+      Path inputDirectory = createDirectoryAt(testParentDirectory.resolve("Gameplay"));
+      Path outputDirectory = createDirectoryAt(testParentDirectory.resolve("Gameplay Encoded"));
+      return Stream.of(Arguments.of(inputDirectory, outputDirectory, inputDirectory));
+    }
+  }
+
+  /** Archive to a different directory. */
+  protected static class ArchiveToDifferentDirectory implements ArgumentsProvider {
+    @Override
+    public Stream<? extends Arguments> provideArguments(ExtensionContext context) throws Exception {
+      Path inputDirectory = createDirectoryAt(testParentDirectory.resolve("Gameplay"));
+      Path archiveDirectory = createDirectoryAt(testParentDirectory.resolve("Gameplay Archive"));
+      return Stream.of(Arguments.of(inputDirectory, inputDirectory, archiveDirectory));
+    }
+  }
+
+  /** Encode and archive to a different directory. */
+  protected static class EncodeAndArchiveToDifferentDirectory implements ArgumentsProvider {
+    @Override
+    public Stream<? extends Arguments> provideArguments(ExtensionContext context) throws Exception {
+      Path inputDirectory = createDirectoryAt(testParentDirectory.resolve("Gameplay"));
+      Path outputDirectory = createDirectoryAt(testParentDirectory.resolve("Gameplay Encoded"));
+      Path archiveDirectory = createDirectoryAt(testParentDirectory.resolve("Gameplay Archive"));
+      return Stream.of(Arguments.of(inputDirectory, outputDirectory, archiveDirectory));
     }
   }
 }

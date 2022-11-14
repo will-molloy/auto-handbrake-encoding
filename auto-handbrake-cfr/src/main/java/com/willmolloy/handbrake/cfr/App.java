@@ -46,6 +46,7 @@ class App {
         inputDirectory,
         outputDirectory,
         archiveDirectory);
+    logBreak();
 
     return Timer.time(
             () -> {
@@ -93,6 +94,7 @@ class App {
         log.warn("Deleting ({}/{}): {}", ++i, tempFiles.size(), file);
         Files.deleteIfExists(file);
       }
+      logBreak();
     }
   }
 
@@ -116,6 +118,7 @@ class App {
     for (UnencodedVideo video : videos) {
       log.info("Detected ({}/{}): {}", ++i, videos.size(), video);
     }
+    logBreak();
 
     i = 0;
     List<CompletableFuture<Boolean>> archiverFutures = new ArrayList<>();
@@ -130,10 +133,12 @@ class App {
       }
     }
 
-    for (CompletableFuture<Boolean> future : archiverFutures) {
-      overallSuccess &= future.join();
-    }
+    return archiverFutures.stream()
+        .map(CompletableFuture::join)
+        .reduce(overallSuccess, Boolean::logicalAnd);
+  }
 
-    return overallSuccess;
+  private static void logBreak() {
+    log.info("===================================================================================");
   }
 }
