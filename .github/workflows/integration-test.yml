@@ -38,7 +38,7 @@ jobs:
       # slightly different output.
       - name: Generate test data
         run: |
-          HandBrakeCLI --preset "Production Standard" -i auto-handbrake-cfr/src/integrationTest/resources/Big_Buck_Bunny_360_10s_1MB.mp4 -o auto-handbrake-cfr/src/integrationTest/resources/Big_Buck_Bunny_360_10s_1MB_encoded.mp4
+          HandBrakeCLI --preset "Production Standard" -i auto-handbrake-cfr/src/integrationTest/resources/Big_Buck_Bunny_360_10s_1MB.mp4 -o auto-handbrake-cfr/src/integrationTest/resources/Big_Buck_Bunny_360_10s_1MB.cfr.mp4
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
