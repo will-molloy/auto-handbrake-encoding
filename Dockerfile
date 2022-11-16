@@ -8,8 +8,8 @@ RUN apk update \
     && apk upgrade --available \
     && sync
 
-# Install OpenJDK 17
-RUN apk --no-cache add openjdk17 --repository=https://dl-cdn.alpinelinux.org/alpine/latest-stable/community
+# Install OpenJDK 19
+RUN apk --no-cache add openjdk19 --repository=https://dl-cdn.alpinelinux.org/alpine/latest-stable/community
 
 COPY . /app
 WORKDIR /app
