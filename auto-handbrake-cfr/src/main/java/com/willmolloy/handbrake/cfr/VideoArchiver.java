@@ -36,7 +36,7 @@ class VideoArchiver {
     try {
       log.debug("Archiving: {} -> {}", video.originalPath(), video.archivedPath());
 
-      if (video.originalPath().equals(video.archivedPath())){
+      if (video.originalPath().equals(video.archivedPath())) {
         log.info("Archived: {}", video.originalPath());
         return true;
       }

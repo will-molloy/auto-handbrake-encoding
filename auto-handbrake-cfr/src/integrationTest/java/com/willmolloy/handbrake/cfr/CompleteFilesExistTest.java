@@ -95,9 +95,8 @@ class CompleteFilesExistTest extends BaseIntegrationTest {
   @ParameterizedTest
   @ArgumentsSource(ArchiveToDifferentDirectory.class)
   @ArgumentsSource(EncodeAndArchiveToDifferentDirectory.class)
-  void
-      when_encodingAlreadyExists_and_archiveAlreadyExists_skipsEncoding_and_retainsOriginalAndArchive(
-          Path inputDirectory, Path outputDirectory, Path archiveDirectory) throws Exception {
+  void when_encodingAlreadyExists_and_archiveAlreadyExists_skipsEncodingAndArchiving(
+      Path inputDirectory, Path outputDirectory, Path archiveDirectory) throws Exception {
     // Given
     // video to encode
     createVideoAt(inputDirectory.resolve("my video.mp4"), unencodedVideo1);
@@ -119,16 +118,15 @@ class CompleteFilesExistTest extends BaseIntegrationTest {
             pathAndContents(inputDirectory.resolve("my video.mp4"), unencodedVideo1),
             // encoding (not overwritten)
             pathAndContents(outputDirectory.resolve("my video.cfr.mp4"), encodedVideo2),
-            // archive
+            // archive (not overwritten - but it doesn't matter, same contents)
             pathAndContents(archiveDirectory.resolve("my video.mp4"), unencodedVideo1));
   }
 
   @ParameterizedTest
   @ArgumentsSource(ArchiveToDifferentDirectory.class)
   @ArgumentsSource(EncodeAndArchiveToDifferentDirectory.class)
-  void
-      when_encodingAlreadyExists_and_archiveExistsButContentsDiffer_skipsEncoding_and_retainsOriginalAndArchive(
-          Path inputDirectory, Path outputDirectory, Path archiveDirectory) throws Exception {
+  void when_encodingAlreadyExists_and_archiveExistsButContentsDiffer_skipsEncodingAndArchiving(
+      Path inputDirectory, Path outputDirectory, Path archiveDirectory) throws Exception {
     // Given
     // video to encode
     createVideoAt(inputDirectory.resolve("my video.mp4"), unencodedVideo1);
