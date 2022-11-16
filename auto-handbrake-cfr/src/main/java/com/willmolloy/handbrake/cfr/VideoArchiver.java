@@ -36,19 +36,22 @@ class VideoArchiver {
     try {
       log.debug("Archiving: {} -> {}", video.originalPath(), video.archivedPath());
 
+      if (video.originalPath().equals(video.archivedPath())) {
+        log.info("Archived: {}", video.originalPath());
+        return true;
+      }
+
       if (Files.exists(video.archivedPath())) {
-        if (Files.mismatch(video.originalPath(), video.archivedPath()) == -1) {
-          log.warn("Archive file ({}) already exists", video.archivedPath());
-          if (!video.originalPath().equals(video.archivedPath())) {
-            log.info("Deleting: {}", video.originalPath());
-            Files.delete(video.originalPath());
-          }
-          return true;
-        } else {
+        if (Files.mismatch(video.originalPath(), video.archivedPath()) != -1) {
           log.error(
-              "Archive file ({}) already exists but contents differ. Aborting",
+              "Archive file ({}) already exists but contents differ. Skipping archive process",
               video.archivedPath());
           return false;
+        } else {
+          log.warn("Archive file ({}) already exists", video.archivedPath());
+          log.info("Deleting: {}", video.originalPath());
+          Files.delete(video.originalPath());
+          return true;
         }
       }
 

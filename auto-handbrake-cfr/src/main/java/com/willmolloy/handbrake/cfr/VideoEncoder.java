@@ -48,7 +48,7 @@ class VideoEncoder {
       log.debug("Encoding: {} -> {}", video.originalPath(), video.encodedPath());
 
       if (Files.exists(video.encodedPath())) {
-        log.error("Encoded file ({}) already exists. Aborting", video.encodedPath());
+        log.error("Encoded file ({}) already exists. Skipping encode process", video.encodedPath());
         return false;
       }
 

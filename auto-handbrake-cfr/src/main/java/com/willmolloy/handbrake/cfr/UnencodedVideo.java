@@ -62,8 +62,7 @@ final class UnencodedVideo {
   private static final String MP4_SUFFIX = ".mp4";
   private static final String ENCODED_SUFFIX = ".cfr.mp4";
   private static final String TEMP_ENCODED_SUFFIX = ".cfr.mp4.part";
-  private static final String ARCHIVED_SUFFIX = ".archived.mp4";
-  private static final String TEMP_ARCHIVED_SUFFIX = ".archived.mp4.part";
+  private static final String TEMP_ARCHIVED_SUFFIX = ".mp4.part";
 
   public static boolean isMp4(Path path) {
     return fileName(path).endsWith(MP4_SUFFIX);
@@ -75,10 +74,6 @@ final class UnencodedVideo {
 
   public static boolean isTempEncodedMp4(Path path) {
     return fileName(path).endsWith(TEMP_ENCODED_SUFFIX);
-  }
-
-  public static boolean isArchivedMp4(Path path) {
-    return fileName(path).endsWith(ARCHIVED_SUFFIX);
   }
 
   public static boolean isTempArchivedMp4(Path path) {
@@ -132,9 +127,6 @@ final class UnencodedVideo {
           !isEncodedMp4(videoPath), "videoPath (%s) represents an encoded .mp4 file", videoPath);
 
       checkArgument(
-          !isArchivedMp4(videoPath), "videoPath (%s) represents an archived .mp4 file", videoPath);
-
-      checkArgument(
           videoPath.startsWith(inputDirectory),
           "videoPath (%s) is not a child of inputDirectory (%s)",
           videoPath,
@@ -142,15 +134,21 @@ final class UnencodedVideo {
 
       return new UnencodedVideo(
           videoPath,
-          newPath(videoPath, ENCODED_SUFFIX, outputDirectory),
-          newPath(videoPath, TEMP_ENCODED_SUFFIX, outputDirectory),
-          newPath(videoPath, ARCHIVED_SUFFIX, archiveDirectory),
-          newPath(videoPath, TEMP_ARCHIVED_SUFFIX, archiveDirectory));
+          newDirectory(newSuffix(videoPath, ENCODED_SUFFIX), outputDirectory),
+          newDirectory(newSuffix(videoPath, TEMP_ENCODED_SUFFIX), outputDirectory),
+          newDirectory(videoPath, archiveDirectory),
+          newDirectory(newSuffix(videoPath, TEMP_ARCHIVED_SUFFIX), archiveDirectory));
     }
 
-    private Path newPath(Path videoPath, String newSuffix, Path newDirectory) {
+    private Path newDirectory(Path videoPath, Path newDirectory) {
+      return newDirectory
+          .resolve(inputDirectory.relativize(videoPath))
+          .resolveSibling(fileName(videoPath));
+    }
+
+    private Path newSuffix(Path videoPath, String newSuffix) {
       String newFileName = fileName(videoPath).replace(MP4_SUFFIX, newSuffix);
-      return newDirectory.resolve(inputDirectory.relativize(videoPath)).resolveSibling(newFileName);
+      return videoPath.resolveSibling(newFileName);
     }
   }
 }

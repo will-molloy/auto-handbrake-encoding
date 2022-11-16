@@ -46,6 +46,7 @@ class App {
         inputDirectory,
         outputDirectory,
         archiveDirectory);
+    logBreak();
 
     return Timer.time(
             () -> {
@@ -93,6 +94,7 @@ class App {
         log.warn("Deleting ({}/{}): {}", ++i, tempFiles.size(), file);
         Files.deleteIfExists(file);
       }
+      logBreak();
     }
   }
 
@@ -101,9 +103,8 @@ class App {
     return Files.walk(inputDirectory)
         .filter(Files::isRegularFile)
         .filter(UnencodedVideo::isMp4)
-        // don't include paths that represent encoded or archived videos
-        // if somebody wants to encode again, they'll need to remove the 'Archived' suffix
-        .filter(path -> !UnencodedVideo.isEncodedMp4(path) && !UnencodedVideo.isArchivedMp4(path))
+        // don't include paths that represent already encoded videos
+        .filter(path -> !UnencodedVideo.isEncodedMp4(path))
         .map(factory::newUnencodedVideo)
         .sorted(Comparator.comparing(video -> video.originalPath().toString()))
         .toList();
@@ -117,6 +118,7 @@ class App {
     for (UnencodedVideo video : videos) {
       log.info("Detected ({}/{}): {}", ++i, videos.size(), video);
     }
+    logBreak();
 
     i = 0;
     List<CompletableFuture<Boolean>> archiverFutures = new ArrayList<>();
@@ -131,10 +133,12 @@ class App {
       }
     }
 
-    for (CompletableFuture<Boolean> future : archiverFutures) {
-      overallSuccess &= future.join();
-    }
+    return archiverFutures.stream()
+        .map(CompletableFuture::join)
+        .reduce(overallSuccess, Boolean::logicalAnd);
+  }
 
-    return overallSuccess;
+  private static void logBreak() {
+    log.info("-----------------------------------------------------------------------------------");
   }
 }
