@@ -117,16 +117,6 @@ class VideoArchiverTest {
   }
 
   @Test
-  void exceptionCaughtReturnsFalse() {
-    // When
-    // null input forces NPE
-    boolean result = videoArchiver.archiveAsync(null).join();
-
-    // Then
-    assertThat(result).isFalse();
-  }
-
-  @Test
   void whenInputDirectoryIsArchiveDirectory_retainsOriginal_andReturnsTrue() throws IOException {
     // Given
     Path unencodedMp4File = Files.copy(testVideo, inputDirectory.resolve("file.mp4"));
@@ -140,6 +130,16 @@ class VideoArchiverTest {
     // Then
     assertThat(result).isTrue();
     assertThatTestDirectory().containsExactly(inputDirectory.resolve("file.mp4"));
+  }
+
+  @Test
+  void exceptionCaughtReturnsFalse() {
+    // When
+    // null input forces NPE
+    boolean result = videoArchiver.archiveAsync(null).join();
+
+    // Then
+    assertThat(result).isFalse();
   }
 
   private StreamSubject assertThatTestDirectory() throws IOException {

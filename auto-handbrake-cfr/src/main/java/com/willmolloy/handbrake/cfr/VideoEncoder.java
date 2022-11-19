@@ -11,6 +11,7 @@ import com.willmolloy.handbrake.core.options.Input;
 import com.willmolloy.handbrake.core.options.Output;
 import com.willmolloy.handbrake.core.options.Preset;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.concurrent.atomic.AtomicLong;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -48,8 +49,8 @@ class VideoEncoder {
       log.debug("Encoding: {} -> {}", video.originalPath(), video.encodedPath());
 
       if (Files.exists(video.encodedPath())) {
-        log.error("Encoded file ({}) already exists. Skipping encode process", video.encodedPath());
-        return false;
+        // if the encoded file already exists, re-encode anyway. Will compare contents afterwards.
+        log.warn("Encoded file ({}) already exists", video.encodedPath());
       }
 
       Files.createDirectories(checkNotNull(video.encodedPath().getParent()));
@@ -65,8 +66,14 @@ class VideoEncoder {
               FrameRateControl.constant());
 
       if (handBrakeSuccessful) {
-        Files.move(video.tempEncodedPath(), video.encodedPath());
-        log.info("Encoded: {}", video.encodedPath());
+        if (Files.exists(video.encodedPath())
+            && Files.mismatch(video.encodedPath(), video.tempEncodedPath()) != -1) {
+          log.error("Existing encoded file contents differ. Aborting encode process");
+          return false;
+        }
+        Files.move(
+            video.tempEncodedPath(), video.encodedPath(), StandardCopyOption.REPLACE_EXISTING);
+        log.info("Successfully encoded: {}", video.encodedPath());
         return true;
       } else {
         log.error("Error encoding: {}", video);
