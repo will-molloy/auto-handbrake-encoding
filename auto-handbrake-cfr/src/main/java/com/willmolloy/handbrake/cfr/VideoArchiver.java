@@ -44,7 +44,7 @@ class VideoArchiver {
       if (Files.exists(video.archivedPath())) {
         if (Files.mismatch(video.originalPath(), video.archivedPath()) != -1) {
           log.error(
-              "Archive file ({}) already exists but contents differ. Aborting archive process",
+              "Archive file ({}) already exists but contents differ. Skipping archive process",
               video.archivedPath());
           return false;
         } else {

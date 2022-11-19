@@ -3,6 +3,7 @@ package com.willmolloy.handbrake.cfr;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.willmolloy.handbrake.cfr.util.Async;
+import com.willmolloy.handbrake.cfr.util.Files2;
 import com.willmolloy.handbrake.cfr.util.Timer;
 import com.willmolloy.handbrake.core.HandBrake;
 import com.willmolloy.handbrake.core.options.Encoder;
@@ -67,7 +68,7 @@ class VideoEncoder {
 
       if (handBrakeSuccessful) {
         if (Files.exists(video.encodedPath())
-            && Files.mismatch(video.encodedPath(), video.tempEncodedPath()) != -1) {
+            && !Files2.contentsSimilar(video.encodedPath(), video.tempEncodedPath())) {
           log.error("Existing encoded file contents differ. Aborting encode process");
           return false;
         }

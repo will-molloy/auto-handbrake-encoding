@@ -82,13 +82,7 @@ class VideoEncoderTest {
 
     // Then
     assertThat(result).isTrue();
-    verify(mockHandBrake)
-        .encode(
-            Input.of(unencodedVideo.originalPath()),
-            Output.of(unencodedVideo.tempEncodedPath()),
-            Preset.productionStandard(),
-            Encoder.h264(),
-            FrameRateControl.constant());
+    verifyHandBrakeCalled(unencodedVideo);
     assertThatTestDirectory()
         .containsExactly(unencodedVideo.originalPath(), unencodedVideo.encodedPath());
   }
@@ -109,13 +103,7 @@ class VideoEncoderTest {
 
     // Then
     assertThat(result).isTrue();
-    verify(mockHandBrake)
-        .encode(
-            Input.of(unencodedVideo.originalPath()),
-            Output.of(outputDirectory.resolve("Halo/Campaign/file.cfr.mp4.part")),
-            Preset.productionStandard(),
-            Encoder.h264(),
-            FrameRateControl.constant());
+    verifyHandBrakeCalled(unencodedVideo);
     assertThatTestDirectory()
         .containsExactly(unencodedVideo.originalPath(), unencodedVideo.encodedPath());
   }
@@ -134,6 +122,7 @@ class VideoEncoderTest {
 
     // Then
     assertThat(result).isFalse();
+    verifyHandBrakeCalled(unencodedVideo);
     assertThatTestDirectory()
         .containsExactly(unencodedVideo.originalPath(), unencodedVideo.tempEncodedPath());
   }
@@ -152,6 +141,7 @@ class VideoEncoderTest {
 
     // Then
     assertThat(result).isFalse();
+    verifyHandBrakeCalled(unencodedVideo);
     assertThatTestDirectory().containsExactly(unencodedVideo.originalPath());
   }
 
@@ -171,13 +161,7 @@ class VideoEncoderTest {
 
     // Then
     assertThat(result).isTrue();
-    verify(mockHandBrake)
-        .encode(
-            Input.of(unencodedVideo.originalPath()),
-            Output.of(unencodedVideo.tempEncodedPath()),
-            Preset.productionStandard(),
-            Encoder.h264(),
-            FrameRateControl.constant());
+    verifyHandBrakeCalled(unencodedVideo);
     assertThatTestDirectory()
         .containsExactly(unencodedVideo.originalPath(), unencodedVideo.encodedPath());
   }
@@ -199,22 +183,12 @@ class VideoEncoderTest {
 
     // Then
     assertThat(result).isFalse();
-    verify(mockHandBrake)
-        .encode(
-            Input.of(unencodedVideo.originalPath()),
-            Output.of(unencodedVideo.tempEncodedPath()),
-            Preset.productionStandard(),
-            Encoder.h264(),
-            FrameRateControl.constant());
+    verifyHandBrakeCalled(unencodedVideo);
     assertThatTestDirectory()
         .containsExactly(
             unencodedVideo.originalPath(),
             unencodedVideo.tempEncodedPath(),
             unencodedVideo.encodedPath());
-  }
-
-  private StreamSubject assertThatTestDirectory() throws IOException {
-    return assertThat(Files.walk(testDirectory).filter(Files::isRegularFile));
   }
 
   private void whenHandBrakeReturns(boolean result) {
@@ -229,5 +203,19 @@ class VideoEncoderTest {
                   Files.copy(originalPath, tempEncodedPath);
                   return result;
                 });
+  }
+
+  private void verifyHandBrakeCalled(UnencodedVideo unencodedVideo) {
+    verify(mockHandBrake)
+        .encode(
+            Input.of(unencodedVideo.originalPath()),
+            Output.of(unencodedVideo.tempEncodedPath()),
+            Preset.productionStandard(),
+            Encoder.h264(),
+            FrameRateControl.constant());
+  }
+
+  private StreamSubject assertThatTestDirectory() throws IOException {
+    return assertThat(Files.walk(testDirectory).filter(Files::isRegularFile));
   }
 }

@@ -7,13 +7,11 @@ import com.google.common.io.Resources;
 import com.google.common.truth.Correspondence;
 import com.google.common.truth.IterableSubject;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.willmolloy.handbrake.cfr.util.Files2;
 import com.willmolloy.handbrake.core.HandBrake;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
@@ -33,6 +31,7 @@ import org.junit.jupiter.params.provider.ArgumentsProvider;
  */
 abstract class BaseIntegrationTest {
 
+  protected static App app;
   private static Path testParentDirectory;
   protected static Path unencodedVideo1;
   protected static Path encodedVideo1;
@@ -41,6 +40,7 @@ abstract class BaseIntegrationTest {
 
   @BeforeAll
   static void setUp() throws Exception {
+    app = new App(new VideoEncoder(HandBrake.newInstance()), new VideoArchiver());
     testParentDirectory = Path.of("Test");
     unencodedVideo1 = Path.of(Resources.getResource("Big_Buck_Bunny_360_10s_1MB.mp4").toURI());
     encodedVideo1 = Path.of(Resources.getResource("Big_Buck_Bunny_360_10s_1MB.cfr.mp4").toURI());
@@ -51,12 +51,6 @@ abstract class BaseIntegrationTest {
   @AfterEach
   void tearDown() throws IOException {
     FileUtils.deleteDirectory(testParentDirectory.toFile());
-  }
-
-  protected static boolean runApp(
-      Path inputDirectory, Path outputDirectory, Path archiveDirectory) {
-    App app = new App(new VideoEncoder(HandBrake.newInstance()), new VideoArchiver());
-    return app.run(inputDirectory, outputDirectory, archiveDirectory);
   }
 
   @CanIgnoreReturnValue
@@ -98,43 +92,18 @@ abstract class BaseIntegrationTest {
         Correspondence.from(PathAndContents::recordsEquivalent, "is equivalent to")
             .formattingDiffsUsing(PathAndContents::formatRecordDiff);
 
-    private static final double PERCENT_MISMATCH_TOLERANCE = 0.01;
-
     private static boolean recordsEquivalent(Path actual, PathAndContents expected) {
-      return actual.equals(expected.path)
-          && percentMismatch(actual, expected.contents) < PERCENT_MISMATCH_TOLERANCE;
+      return actual.equals(expected.path) && Files2.contentsSimilar(actual, expected.contents());
     }
 
     private static String formatRecordDiff(Path actual, PathAndContents expected) {
       if (!actual.equals(expected.path)) {
         return "paths not equal";
       }
-      double percentMismatch = percentMismatch(actual, expected.contents);
-      if (percentMismatch >= PERCENT_MISMATCH_TOLERANCE) {
-        return "contents not similar, percentMismatch=%s%%".formatted(percentMismatch * 100);
+      if (!Files2.contentsSimilar(actual, expected.contents())) {
+        return "contents not similar";
       }
       throw new AssertionError("Unreachable");
-    }
-
-    // HandBrake is not deterministic (encoding doesn't always produce the exact same output) so
-    // need a method to test file contents are similar.
-    private static double percentMismatch(Path path1, Path path2) {
-      try {
-        byte[] bytes1 = Files.readAllBytes(path1);
-        byte[] bytes2 = Files.readAllBytes(path2);
-        // pad arrays to same length
-        byte[] paddedBytes1 = Arrays.copyOf(bytes1, Math.max(bytes1.length, bytes2.length));
-        byte[] paddedBytes2 = Arrays.copyOf(bytes2, Math.max(bytes1.length, bytes2.length));
-
-        long mismatchCount =
-            IntStream.range(0, paddedBytes1.length)
-                .filter(i -> paddedBytes1[i] != paddedBytes2[i])
-                .count();
-
-        return (double) mismatchCount / paddedBytes1.length;
-      } catch (IOException e) {
-        throw new UncheckedIOException(e);
-      }
     }
   }
 
