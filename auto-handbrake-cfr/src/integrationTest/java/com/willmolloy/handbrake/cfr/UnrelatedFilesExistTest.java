@@ -30,7 +30,7 @@ class UnrelatedFilesExistTest extends BaseIntegrationTest {
     createVideoAt(archiveDirectory.resolve("document.txt"), encodedVideo2);
 
     // When
-    boolean result = runApp(inputDirectory, outputDirectory, archiveDirectory);
+    boolean result = app.run(inputDirectory, outputDirectory, archiveDirectory);
 
     // Then
     assertThat(result).isTrue();
@@ -68,11 +68,10 @@ class UnrelatedFilesExistTest extends BaseIntegrationTest {
     createVideoAt(archiveDirectory.resolve("recording3.mp4"), unencodedVideo1);
 
     // When
-    boolean result = runApp(inputDirectory, outputDirectory, archiveDirectory);
+    boolean result = app.run(inputDirectory, outputDirectory, archiveDirectory);
 
     // Then
-    // fails when input=archive since it would've tried to encode the archived files
-    assertThat(result).isEqualTo(!inputDirectory.equals(archiveDirectory));
+    assertThat(result).isTrue();
     assertThatTestDirectory()
         .containsExactly(
             // encoding

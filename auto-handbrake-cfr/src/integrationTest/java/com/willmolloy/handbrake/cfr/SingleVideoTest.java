@@ -25,7 +25,7 @@ class SingleVideoTest extends BaseIntegrationTest {
     createVideoAt(inputDirectory.resolve("my video.mp4"), unencodedVideo1);
 
     // When
-    boolean result = runApp(inputDirectory, outputDirectory, archiveDirectory);
+    boolean result = app.run(inputDirectory, outputDirectory, archiveDirectory);
 
     // Then
     assertThat(result).isTrue();
