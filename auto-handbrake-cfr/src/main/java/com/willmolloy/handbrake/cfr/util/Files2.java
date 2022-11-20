@@ -1,11 +1,10 @@
 package com.willmolloy.handbrake.cfr.util;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.stream.IntStream;
 
 /**
  * File utility methods. (Extension to {@link Files}.)
@@ -27,23 +26,41 @@ public final class Files2 {
   // HandBrake is not deterministic (encoding doesn't always produce the exact same output) so need
   // a method to test file contents are similar when comparing encoded files.
   public static boolean contentsSimilar(Path path1, Path path2) {
-    return percentMismatch(path1, path2) < 0.01;
-  }
-
-  private static double percentMismatch(Path path1, Path path2) {
     try {
-      byte[] bytes1 = Files.readAllBytes(path1);
-      byte[] bytes2 = Files.readAllBytes(path2);
-      // pad arrays to same length
-      byte[] paddedBytes1 = Arrays.copyOf(bytes1, Math.max(bytes1.length, bytes2.length));
-      byte[] paddedBytes2 = Arrays.copyOf(bytes2, Math.max(bytes1.length, bytes2.length));
+      if (Files.isSameFile(path1, path2)) {
+        return true;
+      }
 
-      long mismatchCount =
-          IntStream.range(0, paddedBytes1.length)
-              .filter(i -> paddedBytes1[i] != paddedBytes2[i])
-              .count();
+      double tolerance = 0.01;
+      // take size of the largest file, effectively pads the smaller file with 0s
+      long size = Math.max(Files.size(path1), Files.size(path2));
+      long allowedMismatchBytes = (long) (tolerance * size);
+      long mismatchCount = 0;
 
-      return (double) mismatchCount / paddedBytes1.length;
+      // adapted from Files.mismatch
+      int bufferSize = 8192;
+      byte[] buffer1 = new byte[bufferSize];
+      byte[] buffer2 = new byte[bufferSize];
+
+      try (InputStream in1 = Files.newInputStream(path1);
+          InputStream in2 = Files.newInputStream(path2)) {
+
+        for (long totalRead = 0; totalRead < size; totalRead += bufferSize) {
+          in1.readNBytes(buffer1, 0, bufferSize);
+          in2.readNBytes(buffer2, 0, bufferSize);
+
+          for (int i = 0; i < bufferSize; i++) {
+            if (buffer1[i] != buffer2[i]) {
+              mismatchCount++;
+              if (mismatchCount > allowedMismatchBytes) {
+                return false;
+              }
+            }
+          }
+        }
+
+        return true;
+      }
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }

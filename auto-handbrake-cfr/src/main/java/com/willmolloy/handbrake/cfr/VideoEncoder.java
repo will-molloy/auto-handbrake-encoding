@@ -50,7 +50,6 @@ class VideoEncoder {
       log.debug("Encoding: {} -> {}", video.originalPath(), video.encodedPath());
 
       if (Files.exists(video.encodedPath())) {
-        // if the encoded file already exists, re-encode anyway. Will compare contents afterwards.
         log.warn("Encoded file ({}) already exists", video.encodedPath());
       }
 
@@ -74,7 +73,7 @@ class VideoEncoder {
         }
         Files.move(
             video.tempEncodedPath(), video.encodedPath(), StandardCopyOption.REPLACE_EXISTING);
-        log.info("Successfully encoded: {}", video.encodedPath());
+        log.info("Encoded: {}", video.encodedPath());
         return true;
       } else {
         log.error("Error encoding: {}", video);

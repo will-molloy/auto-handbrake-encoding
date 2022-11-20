@@ -63,7 +63,7 @@ class VideoArchiver {
       Files.move(video.originalPath(), video.tempArchivedPath());
       Files.move(video.tempArchivedPath(), video.archivedPath());
 
-      log.info("Successfully archived: {}", video.archivedPath());
+      log.info("Archived: {}", video.archivedPath());
       return true;
     } catch (Exception e) {
       log.error("Error archiving: %s".formatted(video), e);
