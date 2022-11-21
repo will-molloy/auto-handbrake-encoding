@@ -2,7 +2,7 @@ package com.willmolloy.handbrake.cfr;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.willmolloy.handbrake.cfr.util.Timer;
+import com.google.common.base.Stopwatch;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -40,7 +40,7 @@ class App {
    * @param archiveDirectory directory to contain archived files
    * @return {@code true} if all encoding and archiving was successful
    */
-  boolean run(Path inputDirectory, Path outputDirectory, Path archiveDirectory) {
+  boolean run(Path inputDirectory, Path outputDirectory, Path archiveDirectory) throws IOException {
     log.info(
         "run(inputDirectory={}, outputDirectory={}, archiveDirectory={}) started",
         inputDirectory,
@@ -48,23 +48,18 @@ class App {
         archiveDirectory);
     logBreak();
 
-    return Timer.time(
-            () -> {
-              try {
-                deleteIncompleteEncodingsAndArchives(
-                    inputDirectory, outputDirectory, archiveDirectory);
+    Stopwatch stopwatch = Stopwatch.createStarted();
+    try {
+      deleteIncompleteEncodingsAndArchives(inputDirectory, outputDirectory, archiveDirectory);
 
-                UnencodedVideo.Factory factory =
-                    new UnencodedVideo.Factory(inputDirectory, outputDirectory, archiveDirectory);
-                List<UnencodedVideo> unencodedVideos = getUnencodedVideos(inputDirectory, factory);
+      UnencodedVideo.Factory factory =
+          new UnencodedVideo.Factory(inputDirectory, outputDirectory, archiveDirectory);
+      List<UnencodedVideo> unencodedVideos = getUnencodedVideos(inputDirectory, factory);
 
-                return encodeAndArchiveVideos(unencodedVideos);
-              } catch (IOException e) {
-                throw new UncheckedIOException(e);
-              }
-            },
-            log)
-        .get();
+      return encodeAndArchiveVideos(unencodedVideos);
+    } finally {
+      log.info("Elapsed: {}", stopwatch.elapsed());
+    }
   }
 
   private void deleteIncompleteEncodingsAndArchives(
@@ -125,8 +120,6 @@ class App {
     for (UnencodedVideo video : videos) {
       log.info("Encoding ({}/{}): {}", ++i, videos.size(), video);
       if (videoEncoder.encode(video)) {
-        // run archiving async as it can be expensive (e.g. moving to another disk or NAS)
-        // then while it's archiving it can encode the next video
         archiverFutures.add(videoArchiver.archiveAsync(video));
       } else {
         overallSuccess = false;

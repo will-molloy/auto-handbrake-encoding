@@ -41,6 +41,10 @@ class HandBrakeImpl implements HandBrake {
     List<String> command =
         getCommand(Stream.concat(Stream.of(input, output), Arrays.stream(options)));
 
+    // TODO currently limit to a single instance of HandBrake (since HandBrake is already
+    //  multi-threaded)
+    //  may be worth running multiple encodes in parallel?
+    //  https://github.com/HandBrake/HandBrake/issues/1445
     LOCK.lock();
     try {
       return cli.execute(command, new HandBrakeLogger());
