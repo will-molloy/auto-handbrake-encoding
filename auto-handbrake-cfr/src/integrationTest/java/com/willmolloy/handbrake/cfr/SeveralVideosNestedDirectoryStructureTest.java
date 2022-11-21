@@ -28,7 +28,7 @@ class SeveralVideosNestedDirectoryStructureTest extends BaseIntegrationTest {
     createVideoAt(inputDirectory.resolve("Nested1/Nested2/recording4.mp4"), unencodedVideo2);
 
     // When
-    boolean result = runApp(inputDirectory, outputDirectory, archiveDirectory);
+    boolean result = app.run(inputDirectory, outputDirectory, archiveDirectory);
 
     // Then
     assertThat(result).isTrue();

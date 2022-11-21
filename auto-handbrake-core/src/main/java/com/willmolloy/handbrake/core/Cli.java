@@ -2,6 +2,7 @@ package com.willmolloy.handbrake.core;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.util.concurrent.MoreExecutors;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -77,6 +78,7 @@ class Cli {
           BufferedReader bufferedReader =
               new BufferedReader(new InputStreamReader(inputStream, Charset.defaultCharset()));
           bufferedReader.lines().forEach(consumer);
-        });
+        },
+        MoreExecutors.directExecutor());
   }
 }
