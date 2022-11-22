@@ -12,9 +12,7 @@ import com.willmolloy.handbrake.core.options.Output;
 import com.willmolloy.handbrake.core.options.Preset;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -27,13 +25,28 @@ class VideoEncoder {
 
   private static final Logger log = LogManager.getLogger();
 
-  private final Executor executor =
-      Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("video-encoder-", 1).factory());
+  private static final int MAX_CONCURRENT_ENCODES = 1;
+
+  private final Semaphore semaphore = new Semaphore(MAX_CONCURRENT_ENCODES);
 
   private final HandBrake handBrake;
 
   VideoEncoder(HandBrake handBrake) {
     this.handBrake = checkNotNull(handBrake);
+  }
+
+  /**
+   * Acquires the instance to ensure within concurrent encode limit.
+   *
+   * <p>Must call before {@link #encode}.
+   */
+  // TODO ugly external synchronisation... how to deal with this??
+  public void acquire() {
+    try {
+      semaphore.acquire();
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+    }
   }
 
   /**
@@ -43,14 +56,10 @@ class VideoEncoder {
    * @return {@code true} if encoding was successful
    */
   public boolean encode(UnencodedVideo video) {
-    return CompletableFuture.supplyAsync(() -> doEncode(video), executor).join();
-  }
+    // TODO ensure acquired() first somehow - need lock rather than semaphore??
 
-  private boolean doEncode(UnencodedVideo video) {
     Stopwatch stopwatch = Stopwatch.createStarted();
     try {
-      log.debug("Encoding: {} -> {}", video.originalPath(), video.encodedPath());
-
       if (Files.exists(video.encodedPath())) {
         log.warn("Encoded file ({}) already exists", video.encodedPath());
       }
@@ -66,10 +75,12 @@ class VideoEncoder {
               Preset.productionStandard(),
               Encoder.h264(),
               FrameRateControl.constant());
+      // TODO what if exception is thrown? Would not release
+      semaphore.release();
 
       if (handBrakeSuccessful) {
         if (Files.exists(video.encodedPath())) {
-          log.info("Verifying encoded file contents");
+          log.info("Verifying existing encoded file contents");
           if (!Files2.contentsSimilar(video.encodedPath(), video.tempEncodedPath())) {
             log.error("Existing encoded file contents differ. Aborting encode process");
             return false;

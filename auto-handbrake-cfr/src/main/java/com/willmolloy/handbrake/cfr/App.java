@@ -7,8 +7,13 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -111,14 +116,34 @@ class App {
     }
     logBreak();
 
-    boolean overallSuccess = true;
-    i = 0;
-    for (UnencodedVideo video : videos) {
-      log.info("Encoding ({}/{}): {}", ++i, videos.size(), video);
-      overallSuccess &= videoEncoder.encode(video) && videoArchiver.archive(video);
-    }
+    try (ExecutorService executor =
+        Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("job-", 1).factory())) {
+      List<CompletableFuture<Boolean>> futures = new ArrayList<>();
+      AtomicInteger jobCount = new AtomicInteger();
 
-    return overallSuccess;
+      for (UnencodedVideo video : videos) {
+        try {
+          // small sleep to cover race in unit tests (since mock returns instantly)
+          Thread.sleep(100);
+        } catch (InterruptedException e) {
+          Thread.currentThread().interrupt();
+        }
+        // acquire now (outside the async code) so the videos are encoded in order
+        // additionally want the 'Encoding ...' log displayed before the encoding actually begins
+        // (rather than logging them all at the start)
+        videoEncoder.acquire();
+        CompletableFuture<Boolean> future =
+            CompletableFuture.supplyAsync(
+                () -> {
+                  log.info(
+                      "Encoding ({}/{}): {}", jobCount.incrementAndGet(), videos.size(), video);
+                  return videoEncoder.encode(video) && videoArchiver.archive(video);
+                },
+                executor);
+        futures.add(future);
+      }
+      return futures.stream().map(CompletableFuture::join).reduce(Boolean::logicalAnd).orElse(true);
+    }
   }
 
   private static void logBreak() {

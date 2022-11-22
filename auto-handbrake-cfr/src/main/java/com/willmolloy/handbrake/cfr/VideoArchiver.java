@@ -4,9 +4,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Stopwatch;
 import java.nio.file.Files;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -19,9 +16,6 @@ class VideoArchiver {
 
   private static final Logger log = LogManager.getLogger();
 
-  private final Executor executor =
-      Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("video-archiver-", 1).factory());
-
   /**
    * Archives the given video.
    *
@@ -29,20 +23,15 @@ class VideoArchiver {
    * @return {@code true} if archiving was successful
    */
   public boolean archive(UnencodedVideo video) {
-    return CompletableFuture.supplyAsync(() -> doArchive(video), executor).join();
-  }
-
-  private boolean doArchive(UnencodedVideo video) {
     Stopwatch stopwatch = Stopwatch.createStarted();
     try {
-      log.debug("Archiving: {} -> {}", video.originalPath(), video.archivedPath());
-
       if (video.originalPath().equals(video.archivedPath())) {
         log.info("Archived: {}", video.originalPath());
         return true;
       }
 
       if (Files.exists(video.archivedPath())) {
+        log.info("Verifying existing archived file contents");
         if (Files.mismatch(video.originalPath(), video.archivedPath()) != -1) {
           log.error(
               "Archive file ({}) already exists but contents differ. Skipping archive process",
