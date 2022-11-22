@@ -15,11 +15,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2.4.0
 
-      - name: Setup Java 17
+      - name: Setup Java 19
         uses: actions/setup-java@v3.6.0
         with:
           distribution: adopt
-          java-version: 17
+          java-version: 19
 
       - name: Setup HandBrake (Linux)
         if: matrix.os == 'ubuntu-latest'

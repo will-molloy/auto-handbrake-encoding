@@ -2,11 +2,11 @@ package com.willmolloy.handbrake.cfr;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.willmolloy.handbrake.cfr.util.Async;
-import com.willmolloy.handbrake.cfr.util.Timer;
+import com.google.common.base.Stopwatch;
 import java.nio.file.Files;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -19,7 +19,8 @@ class VideoArchiver {
 
   private static final Logger log = LogManager.getLogger();
 
-  private static final AtomicLong COUNT = new AtomicLong();
+  private final Executor executor =
+      Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("video-archiver-", 0).factory());
 
   /**
    * Archives the given video.
@@ -28,11 +29,13 @@ class VideoArchiver {
    * @return {@code true} if archiving was successful
    */
   public CompletableFuture<Boolean> archiveAsync(UnencodedVideo video) {
-    String threadName = "video-archiver-%d".formatted(COUNT.incrementAndGet());
-    return Async.executeAsync(Timer.time(() -> doArchive(video), log), threadName);
+    // run archive async as it's IO bound and can be expensive (e.g. moving to another disk or NAS)
+    // then while it's archiving it can start encoding the next video
+    return CompletableFuture.supplyAsync(() -> doArchive(video), executor);
   }
 
   private boolean doArchive(UnencodedVideo video) {
+    Stopwatch stopwatch = Stopwatch.createStarted();
     try {
       log.debug("Archiving: {} -> {}", video.originalPath(), video.archivedPath());
 
@@ -68,6 +71,8 @@ class VideoArchiver {
     } catch (Exception e) {
       log.error("Error archiving: %s".formatted(video), e);
       return false;
+    } finally {
+      log.info("Elapsed: {}", stopwatch.elapsed());
     }
   }
 }
