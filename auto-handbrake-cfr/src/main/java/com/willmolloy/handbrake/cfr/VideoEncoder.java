@@ -28,7 +28,7 @@ class VideoEncoder {
   private static final Logger log = LogManager.getLogger();
 
   private final Executor executor =
-      Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("video-encoder-", 0).factory());
+      Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("video-encoder-", 1).factory());
 
   private final HandBrake handBrake;
 

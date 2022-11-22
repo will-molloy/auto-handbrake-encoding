@@ -20,7 +20,7 @@ class VideoArchiver {
   private static final Logger log = LogManager.getLogger();
 
   private final Executor executor =
-      Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("video-archiver-", 0).factory());
+      Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("video-archiver-", 1).factory());
 
   /**
    * Archives the given video.
