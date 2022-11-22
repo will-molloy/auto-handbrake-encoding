@@ -5,6 +5,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.willmolloy.handbrake.core.options.Input;
 import com.willmolloy.handbrake.core.options.Option;
 import com.willmolloy.handbrake.core.options.Output;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.io.File;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
@@ -41,10 +43,8 @@ class HandBrakeImpl implements HandBrake {
     List<String> command =
         getCommand(Stream.concat(Stream.of(input, output), Arrays.stream(options)));
 
-    // TODO currently limit to a single instance of HandBrake (since HandBrake is already
-    //  multi-threaded)
-    //  may be worth running multiple encodes in parallel?
-    //  https://github.com/HandBrake/HandBrake/issues/1445
+    // TODO currently limit to a single instance of HandBrake (since HandBrake is already multi
+    //  threaded) may be worth running multiple encodes in parallel?
     LOCK.lock();
     try {
       return cli.execute(command, new HandBrakeLogger());
@@ -57,7 +57,15 @@ class HandBrakeImpl implements HandBrake {
   }
 
   private List<String> getCommand(Stream<Option> options) {
-    return Stream.concat(Stream.of("HandBrakeCLI"), options.flatMap(Option::handBrakeCliArgs))
+    return Stream.concat(
+            // TODO ugly hack... can't seem to install HandBrake in docker with HandBrakeCLI on path
+            Stream.of(isRunningInsideDocker() ? "/HandBrake/build/HandBrakeCLI" : "HandBrakeCLI"),
+            options.flatMap(Option::handBrakeCliArgs))
         .toList();
+  }
+
+  @SuppressFBWarnings("DMI_HARDCODED_ABSOLUTE_FILENAME")
+  private static boolean isRunningInsideDocker() {
+    return new File("/.dockerenv").exists();
   }
 }

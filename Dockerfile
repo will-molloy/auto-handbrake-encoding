@@ -1,20 +1,60 @@
-# Use HandBrake base image (Alpine Linux)
-# Installing it otherwise (i.e. on Java base image) is a pain
-FROM jlesage/handbrake:latest
+FROM amazoncorretto:19-alpine3.14
 
-# Update packages
-RUN apk update \
-    && apk add --upgrade apk-tools \
-    && apk upgrade --available \
-    && sync
-
-# Install OpenJDK 19
-RUN apk --no-cache add openjdk19 --repository=https://dl-cdn.alpinelinux.org/alpine/latest-stable/community
+# Compile HandBrake
+# credit: https://github.com/txstate-etc/mediaflo-encoder/blob/77bda38311f97903bd11d4fe10a0c516e8d8d145/worker/Dockerfile
+# TODO multistage build didn't work (after copying HandBrakeCLI, it complained about missing files)
+RUN \
+    apk add \
+        # build tools.
+        autoconf \
+        automake \
+        build-base \
+        bzip2-dev \
+        cmake \
+        coreutils \
+        diffutils \
+        file \
+        git \
+        harfbuzz-dev \
+        jansson-dev \
+        lame-dev \
+        libass-dev \
+        libjpeg-turbo-dev \
+        libsamplerate-dev \
+        libtheora-dev \
+        libtool \
+        libxml2-dev \
+        libva-dev \
+        libvorbis-dev \
+        libvpx-dev \
+        linux-headers \
+        m4 \
+        meson \
+        nasm \
+        ninja \
+        numactl-dev \
+        opus-dev \
+        patch \
+        python3 \
+        speex-dev \
+        tar \
+        x264-dev \
+        xz-dev \
+        yasm \
+        && \
+    # Download source
+    git clone https://github.com/HandBrake/HandBrake && \
+    cd HandBrake && \
+    git checkout $(git describe --tags $(git rev-list --tags --max-count=1)) && \
+    ./configure --disable-gtk \
+                --enable-fdk-aac \
+                --launch-jobs=$(nproc) \
+                --launch
 
 COPY . /app
 WORKDIR /app
 
-RUN ./gradlew clean build
+RUN ./gradlew clean build --no-daemon --refresh-dependencies
 
 VOLUME /input
 VOLUME /output
