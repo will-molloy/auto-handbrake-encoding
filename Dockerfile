@@ -54,7 +54,7 @@ RUN \
 COPY . /app
 WORKDIR /app
 
-RUN ./gradlew clean build --no-daemon --refresh-dependencies
+RUN ./gradlew clean assemble --no-daemon --refresh-dependencies
 
 VOLUME /input
 VOLUME /output
