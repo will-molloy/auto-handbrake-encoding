@@ -59,7 +59,7 @@ class VideoArchiverTest {
     UnencodedVideo unencodedVideo = unencodedVideoFactory.newUnencodedVideo(unencodedMp4File);
 
     // When
-    boolean result = videoArchiver.archiveAsync(unencodedVideo).join();
+    boolean result = videoArchiver.archive(unencodedVideo);
 
     // Then
     assertThat(result).isTrue();
@@ -75,7 +75,7 @@ class VideoArchiverTest {
     UnencodedVideo unencodedVideo = unencodedVideoFactory.newUnencodedVideo(unencodedMp4File);
 
     // When
-    boolean result = videoArchiver.archiveAsync(unencodedVideo).join();
+    boolean result = videoArchiver.archive(unencodedVideo);
 
     // Then
     assertThat(result).isTrue();
@@ -91,7 +91,7 @@ class VideoArchiverTest {
     UnencodedVideo unencodedVideo = unencodedVideoFactory.newUnencodedVideo(unencodedMp4File);
 
     // When
-    boolean result = videoArchiver.archiveAsync(unencodedVideo).join();
+    boolean result = videoArchiver.archive(unencodedVideo);
 
     // Then
     assertThat(result).isTrue();
@@ -108,7 +108,7 @@ class VideoArchiverTest {
     UnencodedVideo unencodedVideo = unencodedVideoFactory.newUnencodedVideo(unencodedMp4File);
 
     // When
-    boolean result = videoArchiver.archiveAsync(unencodedVideo).join();
+    boolean result = videoArchiver.archive(unencodedVideo);
 
     // Then
     assertThat(result).isFalse();
@@ -125,7 +125,7 @@ class VideoArchiverTest {
     UnencodedVideo unencodedVideo = unencodedVideoFactory.newUnencodedVideo(unencodedMp4File);
 
     // When
-    boolean result = videoArchiver.archiveAsync(unencodedVideo).join();
+    boolean result = videoArchiver.archive(unencodedVideo);
 
     // Then
     assertThat(result).isTrue();
@@ -136,7 +136,7 @@ class VideoArchiverTest {
   void exceptionCaughtReturnsFalse() {
     // When
     // null input forces NPE
-    boolean result = videoArchiver.archiveAsync(null).join();
+    boolean result = videoArchiver.archive(null);
 
     // Then
     assertThat(result).isFalse();

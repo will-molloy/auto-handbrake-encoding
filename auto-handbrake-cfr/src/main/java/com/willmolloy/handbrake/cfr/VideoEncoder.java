@@ -43,9 +43,6 @@ class VideoEncoder {
    * @return {@code true} if encoding was successful
    */
   public boolean encode(UnencodedVideo video) {
-    // atm running encode on another thread purely to make the logs easier to follow (could set up
-    // structured logging?)
-    // TODO parts of the encode process would benefit from async - e.g. verifying temp file contents
     return CompletableFuture.supplyAsync(() -> doEncode(video), executor).join();
   }
 

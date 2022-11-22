@@ -14,7 +14,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
@@ -70,7 +69,7 @@ class AppTest {
   void encodesVideoFilesAndArchivesOriginals() throws Exception {
     // Given
     when(mockVideoEncoder.encode(any())).thenReturn(true);
-    when(mockVideoArchiver.archiveAsync(any())).thenReturn(CompletableFuture.completedFuture(true));
+    when(mockVideoArchiver.archive(any())).thenReturn(true);
 
     Files.createDirectories(inputDirectory.resolve("NestedFolder"));
     Files.copy(testVideo, inputDirectory.resolve("NestedFolder/video1.mp4"));
@@ -96,17 +95,17 @@ class AppTest {
         .encode(
             argThat(video -> video.originalPath().equals(inputDirectory.resolve("video3.mp4"))));
     verify(mockVideoArchiver)
-        .archiveAsync(
+        .archive(
             argThat(
                 video ->
                     video
                         .originalPath()
                         .equals(inputDirectory.resolve("NestedFolder/video1.mp4"))));
     verify(mockVideoArchiver)
-        .archiveAsync(
+        .archive(
             argThat(video -> video.originalPath().equals(inputDirectory.resolve("video2.mp4"))));
     verify(mockVideoArchiver)
-        .archiveAsync(
+        .archive(
             argThat(video -> video.originalPath().equals(inputDirectory.resolve("video3.mp4"))));
   }
 
@@ -121,7 +120,7 @@ class AppTest {
     // Given
     when(mockVideoEncoder.encode(any()))
         .thenReturn(firstEncodingSuccessful, secondEncodingSuccessful, thirdEncodingSuccessful);
-    when(mockVideoArchiver.archiveAsync(any())).thenReturn(CompletableFuture.completedFuture(true));
+    when(mockVideoArchiver.archive(any())).thenReturn(true);
 
     Files.createDirectories(inputDirectory.resolve("NestedFolder"));
     Files.copy(testVideo, inputDirectory.resolve("NestedFolder/video1.mp4"));
@@ -147,17 +146,17 @@ class AppTest {
         .encode(
             argThat(video -> video.originalPath().equals(inputDirectory.resolve("video3.mp4"))));
     verify(mockVideoArchiver, times(firstEncodingSuccessful ? 1 : 0))
-        .archiveAsync(
+        .archive(
             argThat(
                 video ->
                     video
                         .originalPath()
                         .equals(inputDirectory.resolve("NestedFolder/video1.mp4"))));
     verify(mockVideoArchiver, times(secondEncodingSuccessful ? 1 : 0))
-        .archiveAsync(
+        .archive(
             argThat(video -> video.originalPath().equals(inputDirectory.resolve("video2.mp4"))));
     verify(mockVideoArchiver, times(thirdEncodingSuccessful ? 1 : 0))
-        .archiveAsync(
+        .archive(
             argThat(video -> video.originalPath().equals(inputDirectory.resolve("video3.mp4"))));
   }
 
@@ -177,11 +176,8 @@ class AppTest {
       throws Exception {
     // Given
     when(mockVideoEncoder.encode(any())).thenReturn(true);
-    when(mockVideoArchiver.archiveAsync(any()))
-        .thenReturn(
-            CompletableFuture.completedFuture(firstArchingSuccessful),
-            CompletableFuture.completedFuture(secondArchivingSuccessful),
-            CompletableFuture.completedFuture(thirdArchivingSuccessful));
+    when(mockVideoArchiver.archive(any()))
+        .thenReturn(firstArchingSuccessful, secondArchivingSuccessful, thirdArchivingSuccessful);
 
     Files.createDirectories(inputDirectory.resolve("NestedFolder"));
     Files.copy(testVideo, inputDirectory.resolve("NestedFolder/video1.mp4"));
@@ -207,17 +203,17 @@ class AppTest {
         .encode(
             argThat(video -> video.originalPath().equals(inputDirectory.resolve("video3.mp4"))));
     verify(mockVideoArchiver)
-        .archiveAsync(
+        .archive(
             argThat(
                 video ->
                     video
                         .originalPath()
                         .equals(inputDirectory.resolve("NestedFolder/video1.mp4"))));
     verify(mockVideoArchiver)
-        .archiveAsync(
+        .archive(
             argThat(video -> video.originalPath().equals(inputDirectory.resolve("video2.mp4"))));
     verify(mockVideoArchiver)
-        .archiveAsync(
+        .archive(
             argThat(video -> video.originalPath().equals(inputDirectory.resolve("video3.mp4"))));
   }
 

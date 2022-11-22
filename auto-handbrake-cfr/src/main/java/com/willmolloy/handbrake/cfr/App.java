@@ -7,10 +7,8 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -106,8 +104,6 @@ class App {
   }
 
   private boolean encodeAndArchiveVideos(List<UnencodedVideo> videos) {
-    boolean overallSuccess = true;
-
     log.info("Detected {} video(s) to encode", videos.size());
     int i = 0;
     for (UnencodedVideo video : videos) {
@@ -115,20 +111,14 @@ class App {
     }
     logBreak();
 
+    boolean overallSuccess = true;
     i = 0;
-    List<CompletableFuture<Boolean>> archiverFutures = new ArrayList<>();
     for (UnencodedVideo video : videos) {
       log.info("Encoding ({}/{}): {}", ++i, videos.size(), video);
-      if (videoEncoder.encode(video)) {
-        archiverFutures.add(videoArchiver.archiveAsync(video));
-      } else {
-        overallSuccess = false;
-      }
+      overallSuccess &= videoEncoder.encode(video) && videoArchiver.archive(video);
     }
 
-    return archiverFutures.stream()
-        .map(CompletableFuture::join)
-        .reduce(overallSuccess, Boolean::logicalAnd);
+    return overallSuccess;
   }
 
   private static void logBreak() {

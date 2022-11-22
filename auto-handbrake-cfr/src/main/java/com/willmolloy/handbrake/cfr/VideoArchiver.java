@@ -28,10 +28,8 @@ class VideoArchiver {
    * @param video video to archive
    * @return {@code true} if archiving was successful
    */
-  public CompletableFuture<Boolean> archiveAsync(UnencodedVideo video) {
-    // run archive async as it's IO bound and can be expensive (e.g. moving to another disk or NAS)
-    // then while it's archiving it can start encoding the next video
-    return CompletableFuture.supplyAsync(() -> doArchive(video), executor);
+  public boolean archive(UnencodedVideo video) {
+    return CompletableFuture.supplyAsync(() -> doArchive(video), executor).join();
   }
 
   private boolean doArchive(UnencodedVideo video) {
