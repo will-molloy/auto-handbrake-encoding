@@ -13,7 +13,7 @@ jobs:
         os: [ ubuntu-latest ]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v3.1.0
 
       - name: Build Dockerfile
         run: docker build -t handbrake .
