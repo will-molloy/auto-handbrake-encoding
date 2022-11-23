@@ -78,22 +78,23 @@ class VideoEncoder {
       // TODO what if exception is thrown? Would not release
       semaphore.release();
 
-      if (handBrakeSuccessful) {
-        if (Files.exists(video.encodedPath())) {
-          log.info("Verifying existing encoded file contents");
-          if (!Files2.contentsSimilar(video.encodedPath(), video.tempEncodedPath())) {
-            log.error("Existing encoded file contents differ. Aborting encode process");
-            return false;
-          }
-        }
-        Files.move(
-            video.tempEncodedPath(), video.encodedPath(), StandardCopyOption.REPLACE_EXISTING);
-        log.info("Encoded: {}", video.encodedPath());
-        return true;
-      } else {
+      if (!handBrakeSuccessful) {
         log.error("Error encoding: {}", video);
         return false;
       }
+
+      if (Files.exists(video.encodedPath())) {
+        log.info("Verifying existing encoded file contents");
+        if (!Files2.contentsSimilar(video.encodedPath(), video.tempEncodedPath())) {
+          log.error("Existing encoded file contents differ. Aborting encode process");
+          return false;
+        }
+      }
+
+      Files.move(video.tempEncodedPath(), video.encodedPath(), StandardCopyOption.REPLACE_EXISTING);
+
+      log.info("Encoded: {}", video.encodedPath());
+      return true;
     } catch (Exception e) {
       log.error("Error encoding: %s".formatted(video), e);
       return false;

@@ -124,6 +124,7 @@ class App {
       for (UnencodedVideo video : videos) {
         try {
           // small sleep to cover race in unit tests (since mock returns instantly)
+          // small sleep to "ensure" videos encoded in order
           Thread.sleep(100);
         } catch (InterruptedException e) {
           Thread.currentThread().interrupt();
@@ -131,6 +132,7 @@ class App {
         // acquire now (outside the async code) so the videos are encoded in order
         // additionally want the 'Encoding ...' log displayed before the encoding actually begins
         // (rather than logging them all at the start)
+        // TODO can acquire before that log??
         videoEncoder.acquire();
         CompletableFuture<Boolean> future =
             CompletableFuture.supplyAsync(
