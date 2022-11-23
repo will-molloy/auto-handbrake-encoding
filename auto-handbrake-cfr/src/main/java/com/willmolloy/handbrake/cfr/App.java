@@ -122,24 +122,16 @@ class App {
       AtomicInteger jobCount = new AtomicInteger();
 
       for (UnencodedVideo video : videos) {
-        try {
-          // small sleep to cover race in unit tests (since mock returns instantly)
-          Thread.sleep(100);
-        } catch (InterruptedException e) {
-          Thread.currentThread().interrupt();
-        }
-        // acquire now (outside the async code) so the videos are encoded in order
-        // additionally want the 'Encoding ...' log displayed before the encoding actually begins
-        // (rather than logging them all at the start)
-        videoEncoder.acquire();
+        log.info("Encoding ({}/{}): {}", jobCount.incrementAndGet(), videos.size(), video);
+
         CompletableFuture<Boolean> future =
-            CompletableFuture.supplyAsync(
-                () -> {
-                  log.info(
-                      "Encoding ({}/{}): {}", jobCount.incrementAndGet(), videos.size(), video);
-                  return videoEncoder.encode(video) && videoArchiver.archive(video);
-                },
-                executor);
+            videoEncoder
+                .encodeAsync(video, executor)
+                .thenCompose(
+                    b ->
+                        b
+                            ? videoArchiver.archiveAsync(video, executor)
+                            : CompletableFuture.completedStage(false));
         futures.add(future);
       }
       return futures.stream().map(CompletableFuture::join).reduce(Boolean::logicalAnd).orElse(true);

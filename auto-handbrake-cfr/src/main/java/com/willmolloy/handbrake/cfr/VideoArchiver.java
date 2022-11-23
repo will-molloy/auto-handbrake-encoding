@@ -4,6 +4,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Stopwatch;
 import java.nio.file.Files;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -15,6 +18,10 @@ import org.apache.logging.log4j.Logger;
 class VideoArchiver {
 
   private static final Logger log = LogManager.getLogger();
+
+  public CompletableFuture<Boolean> archiveAsync(UnencodedVideo video, Executor executor) {
+    return CompletableFuture.supplyAsync(() -> archive(video), executor);
+  }
 
   /**
    * Archives the given video.
