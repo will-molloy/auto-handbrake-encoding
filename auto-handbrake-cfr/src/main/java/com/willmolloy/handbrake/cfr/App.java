@@ -10,9 +10,11 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
@@ -121,13 +123,30 @@ class App {
       List<CompletableFuture<Boolean>> futures = new ArrayList<>();
       AtomicInteger jobCount = new AtomicInteger();
 
-      for (UnencodedVideo video : videos) {
+      var q = new SynchronousQueue<UnencodedVideo>(true);
+      CompletableFuture.runAsync(() -> {
+        for (UnencodedVideo video : videos) {
+          try {
+            q.put(video);
+          } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+          }
+        }
+      });
+
+      for (int ignore = 0; ignore < videos.size(); ignore++){
         CompletableFuture<Boolean> future =
             CompletableFuture.supplyAsync(
                 () -> {
-                  log.info(
-                      "Encoding ({}/{}): {}", jobCount.incrementAndGet(), videos.size(), video);
-                  return videoEncoder.encode(video) && videoArchiver.archive(video);
+                  try {
+                    UnencodedVideo video = q.take();
+                    log.info(
+                        "Encoding ({}/{}): {}", jobCount.incrementAndGet(), videos.size(), video);
+                    return videoEncoder.encode(video) && videoArchiver.archive(video);
+                  } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    return false;
+                  }
                 },
                 executor);
         futures.add(future);
