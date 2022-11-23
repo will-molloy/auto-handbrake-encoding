@@ -2,7 +2,6 @@ package com.willmolloy.handbrake.cfr;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -79,7 +78,6 @@ class VideoEncoderTest {
             Files.copy(testVideo, inputDirectory.resolve("file.mp4")));
 
     // When
-    videoEncoder.acquire();
     boolean result = videoEncoder.encode(unencodedVideo);
 
     // Then
@@ -101,7 +99,6 @@ class VideoEncoderTest {
             Files.copy(testVideo, inputDirectory.resolve("Halo/Campaign/file.mp4")));
 
     // When
-    videoEncoder.acquire();
     boolean result = videoEncoder.encode(unencodedVideo);
 
     // Then
@@ -121,7 +118,6 @@ class VideoEncoderTest {
             Files.copy(testVideo, inputDirectory.resolve("file.mp4")));
 
     // When
-    videoEncoder.acquire();
     boolean result = videoEncoder.encode(unencodedVideo);
 
     // Then
@@ -141,7 +137,6 @@ class VideoEncoderTest {
             Files.copy(testVideo, inputDirectory.resolve("file.mp4")));
 
     // When
-    videoEncoder.acquire();
     boolean result = videoEncoder.encode(unencodedVideo);
 
     // Then
@@ -162,7 +157,6 @@ class VideoEncoderTest {
             Files.copy(testVideo, inputDirectory.resolve("file.mp4")));
 
     // When
-    videoEncoder.acquire();
     boolean result = videoEncoder.encode(unencodedVideo);
 
     // Then
@@ -185,7 +179,6 @@ class VideoEncoderTest {
             Files.copy(testVideo, inputDirectory.resolve("file.mp4")));
 
     // When
-    videoEncoder.acquire();
     boolean result = videoEncoder.encode(unencodedVideo);
 
     // Then
@@ -196,16 +189,6 @@ class VideoEncoderTest {
             unencodedVideo.originalPath(),
             unencodedVideo.tempEncodedPath(),
             unencodedVideo.encodedPath());
-  }
-
-  @Test
-  void whenNotAcquired_throwsException() {
-    // When
-    IllegalArgumentException thrown =
-        assertThrows(IllegalArgumentException.class, () -> videoEncoder.encode(null));
-
-    // Then
-    assertThat(thrown).hasMessageThat().isEqualTo("Not acquired");
   }
 
   private void whenHandBrakeReturns(boolean result) {

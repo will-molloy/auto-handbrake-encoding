@@ -1,6 +1,5 @@
 package com.willmolloy.handbrake.cfr;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Stopwatch;
@@ -34,11 +33,6 @@ class VideoEncoder {
     this.handBrake = checkNotNull(handBrake);
   }
 
-  /** Acquires the instance. Must call before {@link #encode}. */
-  public void acquire() {
-    lock.lock();
-  }
-
   /**
    * Encodes the given video.
    *
@@ -46,8 +40,7 @@ class VideoEncoder {
    * @return {@code true} if encoding was successful
    */
   public boolean encode(UnencodedVideo video) {
-    checkArgument(lock.isHeldByCurrentThread(), "Not acquired");
-
+    acquire();
     Stopwatch stopwatch = Stopwatch.createStarted();
     try {
       if (Files.exists(video.encodedPath())) {
@@ -92,6 +85,10 @@ class VideoEncoder {
       release();
       log.info("Elapsed: {}", stopwatch.elapsed());
     }
+  }
+
+  private void acquire() {
+    lock.lock();
   }
 
   private void release() {
