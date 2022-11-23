@@ -1,5 +1,6 @@
 package com.willmolloy.handbrake.cfr;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Stopwatch;
@@ -12,7 +13,7 @@ import com.willmolloy.handbrake.core.options.Output;
 import com.willmolloy.handbrake.core.options.Preset;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.ReentrantLock;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -25,9 +26,7 @@ class VideoEncoder {
 
   private static final Logger log = LogManager.getLogger();
 
-  private static final int MAX_CONCURRENT_ENCODES = 1;
-
-  private final Semaphore semaphore = new Semaphore(MAX_CONCURRENT_ENCODES);
+  private final ReentrantLock lock = new ReentrantLock();
 
   private final HandBrake handBrake;
 
@@ -35,18 +34,9 @@ class VideoEncoder {
     this.handBrake = checkNotNull(handBrake);
   }
 
-  /**
-   * Acquires the instance to ensure within concurrent encode limit.
-   *
-   * <p>Must call before {@link #encode}.
-   */
-  // TODO ugly external synchronisation... how to deal with this??
+  /** Acquires the instance. Must call before {@link #encode}. */
   public void acquire() {
-    try {
-      semaphore.acquire();
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-    }
+    lock.lock();
   }
 
   /**
@@ -56,7 +46,7 @@ class VideoEncoder {
    * @return {@code true} if encoding was successful
    */
   public boolean encode(UnencodedVideo video) {
-    // TODO ensure acquired() first somehow - need lock rather than semaphore??
+    checkArgument(lock.isHeldByCurrentThread(), "Not acquired");
 
     Stopwatch stopwatch = Stopwatch.createStarted();
     try {
@@ -75,8 +65,7 @@ class VideoEncoder {
               Preset.productionStandard(),
               Encoder.h264(),
               FrameRateControl.constant());
-      // TODO what if exception is thrown? Would not release
-      semaphore.release();
+      release();
 
       if (!handBrakeSuccessful) {
         log.error("Error encoding: {}", video);
@@ -99,7 +88,15 @@ class VideoEncoder {
       log.error("Error encoding: %s".formatted(video), e);
       return false;
     } finally {
+      // ensure unlocked (i.e. if method returns exceptionally)
+      release();
       log.info("Elapsed: {}", stopwatch.elapsed());
+    }
+  }
+
+  private void release() {
+    if (lock.isHeldByCurrentThread()) {
+      lock.unlock();
     }
   }
 }

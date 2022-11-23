@@ -8,6 +8,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.ContiguousSet;
 import com.google.common.io.Resources;
 import com.google.common.truth.StreamSubject;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -23,8 +24,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
@@ -241,6 +244,35 @@ class AppTest {
     // Then
     assertThat(result).isTrue();
     assertThatTestDirectory().isEmpty();
+  }
+
+  @Test
+  void encodesInOrder() throws Exception {
+    // Given
+    when(mockVideoEncoder.encode(any())).thenReturn(true);
+    when(mockVideoArchiver.archive(any())).thenReturn(true);
+
+    for (int i : ContiguousSet.closed(1, 100)) {
+      Files.copy(testVideo, inputDirectory.resolve("video%03d.mp4".formatted(i)));
+    }
+
+    // When
+    boolean result = app.run(inputDirectory, outputDirectory, archiveDirectory);
+
+    // Then
+    assertThat(result).isTrue();
+
+    InOrder inOrder = Mockito.inOrder(mockVideoEncoder);
+    for (int i : ContiguousSet.closed(1, 100)) {
+      inOrder
+          .verify(mockVideoEncoder)
+          .encode(
+              argThat(
+                  video ->
+                      video
+                          .originalPath()
+                          .equals(inputDirectory.resolve("video%03d.mp4".formatted(i)))));
+    }
   }
 
   private StreamSubject assertThatTestDirectory() throws IOException {

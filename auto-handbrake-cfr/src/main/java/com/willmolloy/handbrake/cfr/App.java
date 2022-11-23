@@ -123,26 +123,29 @@ class App {
 
       for (UnencodedVideo video : videos) {
         try {
-          // small sleep to cover race in unit tests (since mock returns instantly)
-          // small sleep to "ensure" videos encoded in order
-          Thread.sleep(100);
+          // small sleep to block the main thread so videos are encoded in order
+          // TODO why does this work exactly? add comment once understanding completely...
+          // without sleep threads pile up so nondeterministic which one gets the lock next
+          // but with the sleep this still happens? Difference is they call acquire in order.
+          // But the lock still isn't guaranteed to release in order... TODO need fair lock?
+          Thread.sleep(1);
         } catch (InterruptedException e) {
           Thread.currentThread().interrupt();
         }
-        // acquire now (outside the async code) so the videos are encoded in order
-        // additionally want the 'Encoding ...' log displayed before the encoding actually begins
-        // (rather than logging them all at the start)
-        // TODO can acquire before that log??
-        videoEncoder.acquire();
-        CompletableFuture<Boolean> future =
-            CompletableFuture.supplyAsync(
-                () -> {
-                  log.info(
-                      "Encoding ({}/{}): {}", jobCount.incrementAndGet(), videos.size(), video);
-                  return videoEncoder.encode(video) && videoArchiver.archive(video);
-                },
-                executor);
-        futures.add(future);
+
+        // TODO (attempting to) ensure threads acquire in order
+        synchronized (this) {
+          CompletableFuture<Boolean> future =
+              CompletableFuture.supplyAsync(
+                  () -> {
+                    videoEncoder.acquire();
+                    log.info(
+                        "Encoding ({}/{}): {}", jobCount.incrementAndGet(), videos.size(), video);
+                    return videoEncoder.encode(video) && videoArchiver.archive(video);
+                  },
+                  executor);
+          futures.add(future);
+        }
       }
       return futures.stream().map(CompletableFuture::join).reduce(Boolean::logicalAnd).orElse(true);
     }
