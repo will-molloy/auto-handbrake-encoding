@@ -25,7 +25,7 @@ class VideoEncoder {
 
   private static final Logger log = LogManager.getLogger();
 
-  private final ReentrantLock lock = new ReentrantLock(true);
+  private final ReentrantLock lock = new ReentrantLock();
 
   private final HandBrake handBrake;
 
