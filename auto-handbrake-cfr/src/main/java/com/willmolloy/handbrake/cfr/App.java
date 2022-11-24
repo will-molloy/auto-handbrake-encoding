@@ -1,6 +1,7 @@
 package com.willmolloy.handbrake.cfr;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ContiguousSet.closedOpen;
 
 import com.google.common.base.Stopwatch;
 import java.io.IOException;
@@ -19,6 +20,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
+import com.google.common.collect.ContiguousSet;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -92,10 +94,9 @@ class App {
 
     if (!tempFiles.isEmpty()) {
       log.warn("Detected {} incomplete encoding(s)/archives(s)", tempFiles.size());
-      int i = 0;
-      for (Path file : tempFiles) {
-        log.warn("Deleting ({}/{}): {}", ++i, tempFiles.size(), file);
-        Files.deleteIfExists(file);
+      for (int i : closedOpen(0, tempFiles.size())) {
+        log.warn("Deleting ({}/{}): {}", i+1, tempFiles.size(), tempFiles.get(i));
+        Files.deleteIfExists(tempFiles.get(i));
       }
       logBreak();
     }
@@ -115,38 +116,35 @@ class App {
 
   private boolean encodeAndArchiveVideos(List<UnencodedVideo> videos) {
     log.info("Detected {} video(s) to encode", videos.size());
-    for (int i = 0; i < videos.size(); i++) {
+    for (int i : closedOpen(0, videos.size())) {
       log.info("Detected ({}/{}): {}", i+1, videos.size(), videos.get(i));
     }
     logBreak();
 
       List<Thread> threads = new ArrayList<>();
       List<CountDownLatch> latches = new ArrayList<>();
-    for (int i = 0; i < videos.size(); i++) {
+    for (int i : closedOpen(0, videos.size())) {
       latches.add(new CountDownLatch(i));
     }
 
-      for (int i = 0; i < videos.size(); i++) {
+    for (int i : closedOpen(0, videos.size())) {
         UnencodedVideo video = videos.get(i);
         CountDownLatch latch = latches.get(i);
 
-        int finalI = i;
         Thread thread = Thread.ofVirtual().name("job-", i + 1).unstarted(() -> {
           try {
             latch.await();
 
             videoEncoder.acquire();
 
-            for (CountDownLatch nextLatch : latches.subList(finalI + 1, latches.size())) {
+            for (CountDownLatch nextLatch : latches.subList(i + 1, latches.size())) {
               nextLatch.countDown();
             }
 
             log.info(
-                "Encoding ({}/{}): {}", finalI + 1, videos.size(), video);
+                "Encoding ({}/{}): {}", i + 1, videos.size(), video);
             videoEncoder.encode(video);
             videoArchiver.archive(video);
-
-
 
           } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
