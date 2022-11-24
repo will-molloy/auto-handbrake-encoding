@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -27,7 +28,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
@@ -262,7 +262,7 @@ class AppTest {
     // Then
     assertThat(result).isTrue();
 
-    InOrder inOrder = Mockito.inOrder(mockVideoEncoder);
+    InOrder inOrder = inOrder(mockVideoEncoder);
     for (int i : ContiguousSet.closed(1, 100)) {
       inOrder
           .verify(mockVideoEncoder)

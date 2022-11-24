@@ -26,7 +26,7 @@ class VideoArchiver {
     Stopwatch stopwatch = Stopwatch.createStarted();
     try {
       // simulate lag
-      //      Thread.sleep(10_000);
+      Thread.sleep(1_000);
       if (video.originalPath().equals(video.archivedPath())) {
         log.info("Archived: {}", video.originalPath());
         return true;

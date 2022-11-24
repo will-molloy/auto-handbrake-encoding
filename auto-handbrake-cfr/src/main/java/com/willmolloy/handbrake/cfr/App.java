@@ -133,19 +133,16 @@ class App {
           Thread.currentThread().interrupt();
         }
 
-        // TODO (attempting to) ensure threads acquire in order
-        synchronized (this) {
-          CompletableFuture<Boolean> future =
-              CompletableFuture.supplyAsync(
-                  () -> {
-                    videoEncoder.acquire();
-                    log.info(
-                        "Encoding ({}/{}): {}", jobCount.incrementAndGet(), videos.size(), video);
-                    return videoEncoder.encode(video) && videoArchiver.archive(video);
-                  },
-                  executor);
-          futures.add(future);
-        }
+        CompletableFuture<Boolean> future =
+            CompletableFuture.supplyAsync(
+                () -> {
+                  videoEncoder.acquire();
+                  log.info(
+                      "Encoding ({}/{}): {}", jobCount.incrementAndGet(), videos.size(), video);
+                  return videoEncoder.encode(video) && videoArchiver.archive(video);
+                },
+                executor);
+        futures.add(future);
       }
       return futures.stream().map(CompletableFuture::join).reduce(Boolean::logicalAnd).orElse(true);
     }

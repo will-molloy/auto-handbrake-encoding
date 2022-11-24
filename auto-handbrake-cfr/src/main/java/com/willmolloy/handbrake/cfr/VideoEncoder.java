@@ -11,6 +11,7 @@ import com.willmolloy.handbrake.core.options.FrameRateControl;
 import com.willmolloy.handbrake.core.options.Input;
 import com.willmolloy.handbrake.core.options.Output;
 import com.willmolloy.handbrake.core.options.Preset;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.concurrent.locks.ReentrantLock;
@@ -65,7 +66,12 @@ class VideoEncoder {
               Preset.productionStandard(),
               Encoder.h264(),
               FrameRateControl.constant());
+      // simulate lag
+      Thread.sleep(1_000);
       release();
+
+      // simulate lag
+      Thread.sleep(1_000);
 
       if (!handBrakeSuccessful) {
         log.error("Error encoding: {}", video);
@@ -84,7 +90,7 @@ class VideoEncoder {
 
       log.info("Encoded: {}", video.encodedPath());
       return true;
-    } catch (Exception e) {
+    } catch (InterruptedException | IOException | RuntimeException e) {
       log.error("Error encoding: %s".formatted(video), e);
       return false;
     } finally {
