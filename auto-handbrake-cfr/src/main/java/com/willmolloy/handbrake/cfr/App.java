@@ -1,7 +1,7 @@
 package com.willmolloy.handbrake.cfr;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.ContiguousSet.closedOpen;
+import static java.util.stream.IntStream.range;
 
 import com.google.common.base.Stopwatch;
 import java.io.IOException;
@@ -87,7 +87,7 @@ class App {
 
     if (!tempFiles.isEmpty()) {
       log.warn("Detected {} incomplete encoding(s)/archives(s)", tempFiles.size());
-      for (int i : closedOpen(0, tempFiles.size())) {
+      for (int i : range(0, tempFiles.size()).toArray()) {
         log.warn("Deleting ({}/{}): {}", i + 1, tempFiles.size(), tempFiles.get(i));
         Files.deleteIfExists(tempFiles.get(i));
       }
@@ -109,18 +109,18 @@ class App {
 
   private boolean encodeAndArchiveVideos(List<UnencodedVideo> videos) {
     log.info("Detected {} video(s) to encode", videos.size());
-    for (int i : closedOpen(0, videos.size())) {
+    for (int i : range(0, videos.size()).toArray()) {
       log.info("Detected ({}/{}): {}", i + 1, videos.size(), videos.get(i));
     }
     logBreak();
 
     List<CountDownLatch> latches = new ArrayList<>();
-    for (int i : closedOpen(0, videos.size())) {
+    for (int i : range(0, videos.size()).toArray()) {
       latches.add(new CountDownLatch(i));
     }
 
     List<Supplier<Boolean>> suppliers = new ArrayList<>();
-    for (int i : closedOpen(0, videos.size())) {
+    for (int i : range(0, videos.size()).toArray()) {
       UnencodedVideo video = videos.get(i);
       CountDownLatch latch = latches.get(i);
 
@@ -148,7 +148,7 @@ class App {
 
     Boolean[] results = new Boolean[videos.size()];
     List<Thread> threads = new ArrayList<>();
-    for (int i : closedOpen(0, videos.size())) {
+    for (int i : range(0, videos.size()).toArray()) {
       Supplier<Boolean> supplier = suppliers.get(i);
       Thread thread =
           Thread.ofVirtual()
