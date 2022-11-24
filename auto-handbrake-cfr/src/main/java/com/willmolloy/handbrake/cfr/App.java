@@ -9,19 +9,12 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.CyclicBarrier;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
-
-import com.google.common.collect.ContiguousSet;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -95,7 +88,7 @@ class App {
     if (!tempFiles.isEmpty()) {
       log.warn("Detected {} incomplete encoding(s)/archives(s)", tempFiles.size());
       for (int i : closedOpen(0, tempFiles.size())) {
-        log.warn("Deleting ({}/{}): {}", i+1, tempFiles.size(), tempFiles.get(i));
+        log.warn("Deleting ({}/{}): {}", i + 1, tempFiles.size(), tempFiles.get(i));
         Files.deleteIfExists(tempFiles.get(i));
       }
       logBreak();
@@ -117,41 +110,56 @@ class App {
   private boolean encodeAndArchiveVideos(List<UnencodedVideo> videos) {
     log.info("Detected {} video(s) to encode", videos.size());
     for (int i : closedOpen(0, videos.size())) {
-      log.info("Detected ({}/{}): {}", i+1, videos.size(), videos.get(i));
+      log.info("Detected ({}/{}): {}", i + 1, videos.size(), videos.get(i));
     }
     logBreak();
 
-      List<Thread> threads = new ArrayList<>();
-      List<CountDownLatch> latches = new ArrayList<>();
+    List<CountDownLatch> latches = new ArrayList<>();
     for (int i : closedOpen(0, videos.size())) {
       latches.add(new CountDownLatch(i));
     }
 
+    List<Supplier<Boolean>> suppliers = new ArrayList<>();
     for (int i : closedOpen(0, videos.size())) {
-        UnencodedVideo video = videos.get(i);
-        CountDownLatch latch = latches.get(i);
+      UnencodedVideo video = videos.get(i);
+      CountDownLatch latch = latches.get(i);
 
-        Thread thread = Thread.ofVirtual().name("job-", i + 1).unstarted(() -> {
-          try {
-            latch.await();
+      Supplier<Boolean> supplier =
+          () -> {
+            try {
+              latch.await();
 
-            videoEncoder.acquire();
+              videoEncoder.acquire();
 
-            for (CountDownLatch nextLatch : latches.subList(i + 1, latches.size())) {
-              nextLatch.countDown();
+              for (CountDownLatch nextLatch : latches.subList(i + 1, latches.size())) {
+                nextLatch.countDown();
+              }
+
+              log.info("Encoding ({}/{}): {}", i + 1, videos.size(), video);
+              return videoEncoder.encode(video) && videoArchiver.archive(video);
+            } catch (InterruptedException e) {
+              Thread.currentThread().interrupt();
+              return false;
             }
+          };
 
-            log.info(
-                "Encoding ({}/{}): {}", i + 1, videos.size(), video);
-            videoEncoder.encode(video);
-            videoArchiver.archive(video);
+      suppliers.add(supplier);
+    }
 
-          } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-          }
-        });
-        threads.add(thread);
-      }
+    Boolean[] results = new Boolean[videos.size()];
+    List<Thread> threads = new ArrayList<>();
+    for (int i : closedOpen(0, videos.size())) {
+      Supplier<Boolean> supplier = suppliers.get(i);
+      Thread thread =
+          Thread.ofVirtual()
+              .name("job-", i + 1)
+              .unstarted(
+                  () -> {
+                    Boolean result = supplier.get();
+                    results[i] = result;
+                  });
+      threads.add(thread);
+    }
 
     threads.forEach(Thread::start);
 
@@ -163,7 +171,7 @@ class App {
       }
     }
 
-    return true;
+    return Arrays.stream(results).reduce(true, Boolean::logicalAnd);
   }
 
   private static void logBreak() {

@@ -38,16 +38,13 @@ class SeveralVideosNestedDirectoryStructureTest extends BaseIntegrationTest {
             pathAndContents(
                 outputDirectory.resolve("Nested1/Nested2/recording1.cfr.mp4"), encodedVideo2),
             pathAndContents(outputDirectory.resolve("Nested/recording2.cfr.mp4"), encodedVideo1),
-
             pathAndContents(outputDirectory.resolve("recording3.cfr.mp4"), encodedVideo1),
             pathAndContents(outputDirectory.resolve("recording4.cfr.mp4"), encodedVideo2),
-
             // archives
             pathAndContents(
                 archiveDirectory.resolve("Nested1/Nested2/recording1.mp4"), unencodedVideo2),
             pathAndContents(archiveDirectory.resolve("Nested/recording2.mp4"), unencodedVideo1),
             pathAndContents(archiveDirectory.resolve("recording3.mp4"), unencodedVideo1),
-            pathAndContents(archiveDirectory.resolve("recording4.mp4"), unencodedVideo2)
-           );
+            pathAndContents(archiveDirectory.resolve("recording4.mp4"), unencodedVideo2));
   }
 }
