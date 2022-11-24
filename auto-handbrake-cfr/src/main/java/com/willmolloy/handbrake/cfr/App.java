@@ -116,7 +116,11 @@ class App {
 
     List<CountDownLatch> latches = new ArrayList<>();
     for (int i : range(0, videos.size()).toArray()) {
-      latches.add(new CountDownLatch(i));
+      if (i == 0) {
+        latches.add(new CountDownLatch(0));
+      } else {
+        latches.add(new CountDownLatch(1));
+      }
     }
 
     List<Supplier<Boolean>> suppliers = new ArrayList<>();
@@ -131,7 +135,8 @@ class App {
 
               videoEncoder.acquire();
 
-              for (CountDownLatch nextLatch : latches.subList(i + 1, latches.size())) {
+              if (i < latches.size() - 1) {
+                CountDownLatch nextLatch = latches.get(i + 1);
                 nextLatch.countDown();
               }
 
