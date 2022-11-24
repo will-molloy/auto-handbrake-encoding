@@ -122,21 +122,11 @@ class App {
       AtomicInteger jobCount = new AtomicInteger();
 
       for (UnencodedVideo video : videos) {
-        try {
-          // small sleep to block the main thread so videos are encoded in order
-          // TODO why does this work exactly? add comment once understanding completely...
-          // without sleep threads pile up so nondeterministic which one gets the lock next
-          // but with the sleep this still happens? Difference is they call acquire in order.
-          // But the lock still isn't guaranteed to release in order... TODO need fair lock?
-          Thread.sleep(1);
-        } catch (InterruptedException e) {
-          Thread.currentThread().interrupt();
-        }
-
         CompletableFuture<Boolean> future =
             CompletableFuture.supplyAsync(
                 () -> {
-                  videoEncoder.acquire();
+                    videoEncoder.acquire();
+
                   log.info(
                       "Encoding ({}/{}): {}", jobCount.incrementAndGet(), videos.size(), video);
                   return videoEncoder.encode(video) && videoArchiver.archive(video);

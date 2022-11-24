@@ -27,7 +27,7 @@ class VideoEncoder {
 
   private static final Logger log = LogManager.getLogger();
 
-  private final ReentrantLock lock = new ReentrantLock();
+  private final ReentrantLock lock = new ReentrantLock(true);
 
   private final HandBrake handBrake;
 
@@ -37,6 +37,7 @@ class VideoEncoder {
 
   /** Acquires the instance. Must call before {@link #encode}. */
   public void acquire() {
+    log.info("acquire()");
     lock.lock();
   }
 
@@ -68,15 +69,16 @@ class VideoEncoder {
               FrameRateControl.constant());
       // simulate lag
       Thread.sleep(1_000);
-      release();
 
-      // simulate lag
-      Thread.sleep(1_000);
+      release();
 
       if (!handBrakeSuccessful) {
         log.error("Error encoding: {}", video);
         return false;
       }
+
+      // simulate lag
+      Thread.sleep(1_000);
 
       if (Files.exists(video.encodedPath())) {
         log.info("Verifying existing encoded file contents");
@@ -101,6 +103,7 @@ class VideoEncoder {
   }
 
   private void release() {
+    log.info("release()");
     if (lock.isHeldByCurrentThread()) {
       lock.unlock();
     }
