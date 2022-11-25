@@ -25,8 +25,6 @@ class VideoArchiver {
   public boolean archive(UnencodedVideo video) {
     Stopwatch stopwatch = Stopwatch.createStarted();
     try {
-      // simulate lag
-      Thread.sleep(1_000);
       if (video.originalPath().equals(video.archivedPath())) {
         log.info("Archived: {}", video.originalPath());
         return true;

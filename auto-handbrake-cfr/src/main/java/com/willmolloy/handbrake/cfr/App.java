@@ -2,6 +2,7 @@ package com.willmolloy.handbrake.cfr;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.stream.IntStream.range;
+import static java.util.stream.IntStream.rangeClosed;
 
 import com.google.common.base.Stopwatch;
 import java.io.IOException;
@@ -13,7 +14,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -115,7 +115,7 @@ class App {
     logBreak();
 
     List<CountDownLatch> latches = new ArrayList<>();
-    for (int i : range(0, videos.size()).toArray()) {
+    for (int i : rangeClosed(0, videos.size()).toArray()) {
       if (i == 0) {
         latches.add(new CountDownLatch(0));
       } else {
@@ -123,50 +123,30 @@ class App {
       }
     }
 
-    List<Supplier<Boolean>> suppliers = new ArrayList<>();
+    Boolean[] results = new Boolean[videos.size()];
+    List<Thread> threads = new ArrayList<>();
+
     for (int i : range(0, videos.size()).toArray()) {
       UnencodedVideo video = videos.get(i);
       CountDownLatch latch = latches.get(i);
+      CountDownLatch nextLatch = latches.get(i + 1);
 
-      Supplier<Boolean> supplier =
-          () -> {
-            try {
-              latch.await();
-
-              videoEncoder.acquire();
-
-              if (i < latches.size() - 1) {
-                CountDownLatch nextLatch = latches.get(i + 1);
-                nextLatch.countDown();
-              }
-
-              log.info("Encoding ({}/{}): {}", i + 1, videos.size(), video);
-              return videoEncoder.encode(video) && videoArchiver.archive(video);
-            } catch (InterruptedException e) {
-              Thread.currentThread().interrupt();
-              return false;
-            }
-          };
-
-      suppliers.add(supplier);
-    }
-
-    Boolean[] results = new Boolean[videos.size()];
-    List<Thread> threads = new ArrayList<>();
-    for (int i : range(0, videos.size()).toArray()) {
-      Supplier<Boolean> supplier = suppliers.get(i);
       Thread thread =
           Thread.ofVirtual()
               .name("job-", i + 1)
-              .unstarted(
+              .start(
                   () -> {
-                    Boolean result = supplier.get();
-                    results[i] = result;
+                    try {
+                      latch.await();
+                      log.info("Encoding ({}/{}): {}", i + 1, videos.size(), video);
+                      results[i] =
+                          videoEncoder.encode(video, nextLatch) && videoArchiver.archive(video);
+                    } catch (InterruptedException e) {
+                      Thread.currentThread().interrupt();
+                    }
                   });
       threads.add(thread);
     }
-
-    threads.forEach(Thread::start);
 
     for (Thread thread : threads) {
       try {

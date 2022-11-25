@@ -1,6 +1,5 @@
 package com.willmolloy.handbrake.cfr;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Stopwatch;
@@ -11,10 +10,9 @@ import com.willmolloy.handbrake.core.options.FrameRateControl;
 import com.willmolloy.handbrake.core.options.Input;
 import com.willmolloy.handbrake.core.options.Output;
 import com.willmolloy.handbrake.core.options.Preset;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.CountDownLatch;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -27,29 +25,21 @@ class VideoEncoder {
 
   private static final Logger log = LogManager.getLogger();
 
-  private final ReentrantLock lock = new ReentrantLock(true);
-
   private final HandBrake handBrake;
 
   VideoEncoder(HandBrake handBrake) {
     this.handBrake = checkNotNull(handBrake);
   }
 
-  /** Acquires the instance. Must call before {@link #encode}. */
-  public void acquire() {
-    log.info("acquire()");
-    lock.lock();
-  }
-
   /**
    * Encodes the given video.
    *
    * @param video video to encode
+   * @param next latch to count down to start the next encode
    * @return {@code true} if encoding was successful
    */
-  public boolean encode(UnencodedVideo video) {
-    checkArgument(lock.isHeldByCurrentThread(), "Not acquired");
-
+  // TODO latch param is super hacky...
+  public boolean encode(UnencodedVideo video, CountDownLatch next) {
     Stopwatch stopwatch = Stopwatch.createStarted();
     try {
       if (Files.exists(video.encodedPath())) {
@@ -67,18 +57,13 @@ class VideoEncoder {
               Preset.productionStandard(),
               Encoder.h264(),
               FrameRateControl.constant());
-      // simulate lag
-      Thread.sleep(1_000);
 
-      release();
+      next.countDown();
 
       if (!handBrakeSuccessful) {
         log.error("Error encoding: {}", video);
         return false;
       }
-
-      // simulate lag
-      Thread.sleep(1_000);
 
       if (Files.exists(video.encodedPath())) {
         log.info("Verifying existing encoded file contents");
@@ -92,20 +77,13 @@ class VideoEncoder {
 
       log.info("Encoded: {}", video.encodedPath());
       return true;
-    } catch (InterruptedException | IOException | RuntimeException e) {
+    } catch (Exception e) {
       log.error("Error encoding: %s".formatted(video), e);
       return false;
     } finally {
       // ensure unlocked (i.e. if method returns exceptionally)
-      release();
+      next.countDown();
       log.info("Elapsed: {}", stopwatch.elapsed());
-    }
-  }
-
-  private void release() {
-    log.info("release()");
-    if (lock.isHeldByCurrentThread()) {
-      lock.unlock();
     }
   }
 }
