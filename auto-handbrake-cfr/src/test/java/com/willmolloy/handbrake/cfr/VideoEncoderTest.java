@@ -2,8 +2,8 @@ package com.willmolloy.handbrake.cfr;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -18,7 +18,6 @@ import com.willmolloy.handbrake.core.options.Preset;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.concurrent.CountDownLatch;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,8 +46,6 @@ class VideoEncoderTest {
 
   @Mock private HandBrake mockHandBrake;
   @InjectMocks private VideoEncoder videoEncoder;
-
-  @Mock private CountDownLatch next;
 
   @BeforeEach
   void setUp() throws Exception {
@@ -82,14 +79,14 @@ class VideoEncoderTest {
             Files.copy(testVideo, inputDirectory.resolve("file.mp4")));
 
     // When
-    boolean result = videoEncoder.encode(unencodedVideo, next);
+    videoEncoder.acquire();
+    boolean result = videoEncoder.encode(unencodedVideo);
 
     // Then
     assertThat(result).isTrue();
     verifyHandBrakeCalled(unencodedVideo);
     assertThatTestDirectory()
         .containsExactly(unencodedVideo.originalPath(), unencodedVideo.encodedPath());
-    verify(next, atLeastOnce()).countDown();
   }
 
   @Test
@@ -104,14 +101,14 @@ class VideoEncoderTest {
             Files.copy(testVideo, inputDirectory.resolve("Halo/Campaign/file.mp4")));
 
     // When
-    boolean result = videoEncoder.encode(unencodedVideo, next);
+    videoEncoder.acquire();
+    boolean result = videoEncoder.encode(unencodedVideo);
 
     // Then
     assertThat(result).isTrue();
     verifyHandBrakeCalled(unencodedVideo);
     assertThatTestDirectory()
         .containsExactly(unencodedVideo.originalPath(), unencodedVideo.encodedPath());
-    verify(next, atLeastOnce()).countDown();
   }
 
   @Test
@@ -124,14 +121,14 @@ class VideoEncoderTest {
             Files.copy(testVideo, inputDirectory.resolve("file.mp4")));
 
     // When
-    boolean result = videoEncoder.encode(unencodedVideo, next);
+    videoEncoder.acquire();
+    boolean result = videoEncoder.encode(unencodedVideo);
 
     // Then
     assertThat(result).isFalse();
     verifyHandBrakeCalled(unencodedVideo);
     assertThatTestDirectory()
         .containsExactly(unencodedVideo.originalPath(), unencodedVideo.tempEncodedPath());
-    verify(next, atLeastOnce()).countDown();
   }
 
   @Test
@@ -144,13 +141,13 @@ class VideoEncoderTest {
             Files.copy(testVideo, inputDirectory.resolve("file.mp4")));
 
     // When
-    boolean result = videoEncoder.encode(unencodedVideo, next);
+    videoEncoder.acquire();
+    boolean result = videoEncoder.encode(unencodedVideo);
 
     // Then
     assertThat(result).isFalse();
     verifyHandBrakeCalled(unencodedVideo);
     assertThatTestDirectory().containsExactly(unencodedVideo.originalPath());
-    verify(next, atLeastOnce()).countDown();
   }
 
   @Test
@@ -165,14 +162,14 @@ class VideoEncoderTest {
             Files.copy(testVideo, inputDirectory.resolve("file.mp4")));
 
     // When
-    boolean result = videoEncoder.encode(unencodedVideo, next);
+    videoEncoder.acquire();
+    boolean result = videoEncoder.encode(unencodedVideo);
 
     // Then
     assertThat(result).isTrue();
     verifyHandBrakeCalled(unencodedVideo);
     assertThatTestDirectory()
         .containsExactly(unencodedVideo.originalPath(), unencodedVideo.encodedPath());
-    verify(next, atLeastOnce()).countDown();
   }
 
   @Test
@@ -188,7 +185,8 @@ class VideoEncoderTest {
             Files.copy(testVideo, inputDirectory.resolve("file.mp4")));
 
     // When
-    boolean result = videoEncoder.encode(unencodedVideo, next);
+    videoEncoder.acquire();
+    boolean result = videoEncoder.encode(unencodedVideo);
 
     // Then
     assertThat(result).isFalse();
@@ -198,7 +196,16 @@ class VideoEncoderTest {
             unencodedVideo.originalPath(),
             unencodedVideo.tempEncodedPath(),
             unencodedVideo.encodedPath());
-    verify(next, atLeastOnce()).countDown();
+  }
+
+  @Test
+  void whenNotAcquired_throwsException() {
+    // When
+    IllegalStateException thrown =
+        assertThrows(IllegalStateException.class, () -> videoEncoder.encode(null));
+
+    // Then
+    assertThat(thrown).hasMessageThat().isEqualTo("Not acquired");
   }
 
   private void whenHandBrakeReturns(boolean result) {

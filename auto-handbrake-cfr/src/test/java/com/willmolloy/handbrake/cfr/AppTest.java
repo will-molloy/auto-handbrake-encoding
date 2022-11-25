@@ -5,7 +5,6 @@ import static com.google.common.truth.Truth8.assertThat;
 import static java.util.stream.IntStream.rangeClosed;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -17,7 +16,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.concurrent.CountDownLatch;
 import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
@@ -30,9 +28,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.stubbing.Answer;
 
 /**
  * AppTest.
@@ -75,7 +71,7 @@ class AppTest {
   @Test
   void encodesVideoFilesAndArchivesOriginals() throws Exception {
     // Given
-    whenVideoEncoderReturns(true);
+    when(mockVideoEncoder.encode(any())).thenReturn(true);
     when(mockVideoArchiver.archive(any())).thenReturn(true);
 
     Files.createDirectories(inputDirectory.resolve("NestedFolder"));
@@ -92,16 +88,15 @@ class AppTest {
         .encode(
             argThat(
                 video ->
-                    video.originalPath().equals(inputDirectory.resolve("NestedFolder/video1.mp4"))),
-            isA(CountDownLatch.class));
+                    video
+                        .originalPath()
+                        .equals(inputDirectory.resolve("NestedFolder/video1.mp4"))));
     verify(mockVideoEncoder)
         .encode(
-            argThat(video -> video.originalPath().equals(inputDirectory.resolve("video2.mp4"))),
-            isA(CountDownLatch.class));
+            argThat(video -> video.originalPath().equals(inputDirectory.resolve("video2.mp4"))));
     verify(mockVideoEncoder)
         .encode(
-            argThat(video -> video.originalPath().equals(inputDirectory.resolve("video3.mp4"))),
-            isA(CountDownLatch.class));
+            argThat(video -> video.originalPath().equals(inputDirectory.resolve("video3.mp4"))));
     verify(mockVideoArchiver)
         .archive(
             argThat(
@@ -126,8 +121,8 @@ class AppTest {
           boolean thirdEncodingSuccessful)
           throws Exception {
     // Given
-    whenVideoEncoderReturns(
-        firstEncodingSuccessful, secondEncodingSuccessful, thirdEncodingSuccessful);
+    when(mockVideoEncoder.encode(any()))
+        .thenReturn(firstEncodingSuccessful, secondEncodingSuccessful, thirdEncodingSuccessful);
     when(mockVideoArchiver.archive(any())).thenReturn(true);
 
     Files.createDirectories(inputDirectory.resolve("NestedFolder"));
@@ -144,16 +139,15 @@ class AppTest {
         .encode(
             argThat(
                 video ->
-                    video.originalPath().equals(inputDirectory.resolve("NestedFolder/video1.mp4"))),
-            isA(CountDownLatch.class));
+                    video
+                        .originalPath()
+                        .equals(inputDirectory.resolve("NestedFolder/video1.mp4"))));
     verify(mockVideoEncoder)
         .encode(
-            argThat(video -> video.originalPath().equals(inputDirectory.resolve("video2.mp4"))),
-            isA(CountDownLatch.class));
+            argThat(video -> video.originalPath().equals(inputDirectory.resolve("video2.mp4"))));
     verify(mockVideoEncoder)
         .encode(
-            argThat(video -> video.originalPath().equals(inputDirectory.resolve("video3.mp4"))),
-            isA(CountDownLatch.class));
+            argThat(video -> video.originalPath().equals(inputDirectory.resolve("video3.mp4"))));
     verify(mockVideoArchiver, times(firstEncodingSuccessful ? 1 : 0))
         .archive(
             argThat(
@@ -184,7 +178,7 @@ class AppTest {
       boolean thirdArchivingSuccessful)
       throws Exception {
     // Given
-    whenVideoEncoderReturns(true);
+    when(mockVideoEncoder.encode(any())).thenReturn(true);
     when(mockVideoArchiver.archive(any()))
         .thenReturn(firstArchingSuccessful, secondArchivingSuccessful, thirdArchivingSuccessful);
 
@@ -202,16 +196,15 @@ class AppTest {
         .encode(
             argThat(
                 video ->
-                    video.originalPath().equals(inputDirectory.resolve("NestedFolder/video1.mp4"))),
-            isA(CountDownLatch.class));
+                    video
+                        .originalPath()
+                        .equals(inputDirectory.resolve("NestedFolder/video1.mp4"))));
     verify(mockVideoEncoder)
         .encode(
-            argThat(video -> video.originalPath().equals(inputDirectory.resolve("video2.mp4"))),
-            isA(CountDownLatch.class));
+            argThat(video -> video.originalPath().equals(inputDirectory.resolve("video2.mp4"))));
     verify(mockVideoEncoder)
         .encode(
-            argThat(video -> video.originalPath().equals(inputDirectory.resolve("video3.mp4"))),
-            isA(CountDownLatch.class));
+            argThat(video -> video.originalPath().equals(inputDirectory.resolve("video3.mp4"))));
     verify(mockVideoArchiver)
         .archive(
             argThat(
@@ -256,7 +249,7 @@ class AppTest {
   @Test
   void encodesInOrder() throws Exception {
     // Given
-    whenVideoEncoderReturns(true);
+    when(mockVideoEncoder.encode(any())).thenReturn(true);
     when(mockVideoArchiver.archive(any())).thenReturn(true);
 
     for (int i : rangeClosed(1, 100).toArray()) {
@@ -278,28 +271,8 @@ class AppTest {
                   video ->
                       video
                           .originalPath()
-                          .equals(inputDirectory.resolve("video%03d.mp4".formatted(i)))),
-              isA(CountDownLatch.class));
+                          .equals(inputDirectory.resolve("video%03d.mp4".formatted(i)))));
     }
-  }
-
-  private void whenVideoEncoderReturns(boolean... results) {
-    when(mockVideoEncoder.encode(any(), any()))
-        .then(
-            new Answer<Boolean>() {
-              int i;
-
-              @Override
-              public Boolean answer(InvocationOnMock invocation) {
-                // start next
-                CountDownLatch next = invocation.getArgument(1, CountDownLatch.class);
-                next.countDown();
-
-                boolean result = results[i];
-                i = (i + 1) % results.length;
-                return result;
-              }
-            });
   }
 
   private StreamSubject assertThatTestDirectory() throws IOException {

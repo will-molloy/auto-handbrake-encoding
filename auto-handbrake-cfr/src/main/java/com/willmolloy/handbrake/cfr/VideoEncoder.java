@@ -1,6 +1,7 @@
 package com.willmolloy.handbrake.cfr;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.base.Stopwatch;
 import com.willmolloy.handbrake.cfr.util.Files2;
@@ -12,7 +13,7 @@ import com.willmolloy.handbrake.core.options.Output;
 import com.willmolloy.handbrake.core.options.Preset;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.locks.ReentrantLock;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -25,21 +26,28 @@ class VideoEncoder {
 
   private static final Logger log = LogManager.getLogger();
 
+  private final ReentrantLock lock = new ReentrantLock();
+
   private final HandBrake handBrake;
 
   VideoEncoder(HandBrake handBrake) {
     this.handBrake = checkNotNull(handBrake);
   }
 
+  /** Acquires the instance. Must call before {@link #encode}. */
+  public void acquire() {
+    lock.lock();
+  }
+
   /**
    * Encodes the given video.
    *
    * @param video video to encode
-   * @param next latch to count down to start the next encode
    * @return {@code true} if encoding was successful
    */
-  // TODO latch param is super hacky...
-  public boolean encode(UnencodedVideo video, CountDownLatch next) {
+  public boolean encode(UnencodedVideo video) {
+    checkState(lock.isHeldByCurrentThread(), "Not acquired");
+
     Stopwatch stopwatch = Stopwatch.createStarted();
     try {
       if (Files.exists(video.encodedPath())) {
@@ -58,7 +66,7 @@ class VideoEncoder {
               Encoder.h264(),
               FrameRateControl.constant());
 
-      next.countDown();
+      release();
 
       if (!handBrakeSuccessful) {
         log.error("Error encoding: {}", video);
@@ -82,8 +90,14 @@ class VideoEncoder {
       return false;
     } finally {
       // ensure unlocked (i.e. if method returns exceptionally)
-      next.countDown();
+      release();
       log.info("Elapsed: {}", stopwatch.elapsed());
+    }
+  }
+
+  private void release() {
+    if (lock.isHeldByCurrentThread()) {
+      lock.unlock();
     }
   }
 }
