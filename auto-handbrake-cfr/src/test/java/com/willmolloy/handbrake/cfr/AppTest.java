@@ -11,7 +11,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.io.Resources;
-import com.google.common.truth.StreamSubject;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -221,32 +220,6 @@ class AppTest {
   }
 
   @Test
-  void deletesIncompleteEncodings() throws Exception {
-    // Given
-    Files.copy(testVideo, outputDirectory.resolve("video1.cfr.mp4.part"));
-
-    // When
-    boolean result = app.run(inputDirectory, outputDirectory, archiveDirectory);
-
-    // Then
-    assertThat(result).isTrue();
-    assertThatTestDirectory().isEmpty();
-  }
-
-  @Test
-  void deletesIncompleteArchives() throws Exception {
-    // Given
-    Files.copy(testVideo, archiveDirectory.resolve("video1.archived.mp4.part"));
-
-    // When
-    boolean result = app.run(inputDirectory, outputDirectory, archiveDirectory);
-
-    // Then
-    assertThat(result).isTrue();
-    assertThatTestDirectory().isEmpty();
-  }
-
-  @Test
   void encodesInOrder() throws Exception {
     // Given
     when(mockVideoEncoder.encode(any())).thenReturn(true);
@@ -273,9 +246,5 @@ class AppTest {
                           .originalPath()
                           .equals(inputDirectory.resolve("video%03d.mp4".formatted(i)))));
     }
-  }
-
-  private StreamSubject assertThatTestDirectory() throws IOException {
-    return assertThat(Files.walk(testDirectory).filter(Files::isRegularFile));
   }
 }
