@@ -33,11 +33,6 @@ final class UnencodedVideo {
     this.tempArchivedPath = tempArchivedPath;
   }
 
-  @Override
-  public String toString() {
-    return originalPath.toString();
-  }
-
   Path originalPath() {
     return originalPath;
   }
@@ -56,6 +51,11 @@ final class UnencodedVideo {
 
   Path tempArchivedPath() {
     return tempArchivedPath;
+  }
+
+  @Override
+  public String toString() {
+    return originalPath.toString();
   }
 
   // TODO videos don't have to be .mp4
