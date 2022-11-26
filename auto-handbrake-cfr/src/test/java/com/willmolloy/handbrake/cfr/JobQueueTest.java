@@ -70,8 +70,7 @@ class JobQueueTest {
   @Test
   void encodesVideoFilesAndArchivesOriginals() throws Exception {
     // Given
-    Lock lock = new ReentrantLock();
-    whenVideoEncoderAcquired(lock);
+    Lock lock = whenVideoEncoderAcquired();
     whenVideoEncoderReturns(lock, true);
     when(mockVideoArchiver.archive(any())).thenReturn(true);
 
@@ -103,8 +102,7 @@ class JobQueueTest {
           boolean thirdEncodingSuccessful)
           throws Exception {
     // Given
-    Lock lock = new ReentrantLock();
-    whenVideoEncoderAcquired(lock);
+    Lock lock = whenVideoEncoderAcquired();
     whenVideoEncoderReturns(
         lock, firstEncodingSuccessful, secondEncodingSuccessful, thirdEncodingSuccessful);
     when(mockVideoArchiver.archive(any())).thenReturn(true);
@@ -145,8 +143,7 @@ class JobQueueTest {
       boolean thirdArchivingSuccessful)
       throws Exception {
     // Given
-    Lock lock = new ReentrantLock();
-    whenVideoEncoderAcquired(lock);
+    Lock lock = whenVideoEncoderAcquired();
     whenVideoEncoderReturns(lock, true);
     when(mockVideoArchiver.archive(any()))
         .thenReturn(firstArchingSuccessful, secondArchivingSuccessful, thirdArchivingSuccessful);
@@ -173,8 +170,7 @@ class JobQueueTest {
   @Test
   void encodesInOrder() {
     // Given
-    Lock lock = new ReentrantLock();
-    whenVideoEncoderAcquired(lock);
+    Lock lock = whenVideoEncoderAcquired();
     whenVideoEncoderReturns(lock, true);
     when(mockVideoArchiver.archive(any())).thenReturn(true);
 
@@ -197,10 +193,10 @@ class JobQueueTest {
     }
   }
 
-  // simulate the locking behaviour of VideoEncoder
-  // TODO kinda ugly (leaky abstraction), but best tradeoff?
-
-  private void whenVideoEncoderAcquired(Lock lock) {
+  private Lock whenVideoEncoderAcquired() {
+    // simulate the locking behaviour of VideoEncoder
+    // TODO kinda ugly (leaky abstraction), but best tradeoff?
+    Lock lock = new ReentrantLock();
     doAnswer(
             invocation -> {
               lock.lock();
@@ -208,6 +204,7 @@ class JobQueueTest {
             })
         .when(mockVideoEncoder)
         .acquire();
+    return lock;
   }
 
   private void whenVideoEncoderReturns(Lock lock, boolean... results) {

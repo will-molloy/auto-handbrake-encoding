@@ -28,7 +28,7 @@ class CompleteFilesExistTest extends BaseIntegrationTest {
     createVideoAt(outputDirectory.resolve("my video.cfr.mp4"), encodedVideo1);
 
     // When
-    boolean result = app.run(inputDirectory, outputDirectory, archiveDirectory);
+    boolean result = runApp(inputDirectory, outputDirectory, archiveDirectory);
 
     // Then
     assertThat(result).isTrue();
@@ -55,7 +55,7 @@ class CompleteFilesExistTest extends BaseIntegrationTest {
     createVideoAt(outputDirectory.resolve("my video.cfr.mp4"), encodedVideo2);
 
     // When
-    boolean result = app.run(inputDirectory, outputDirectory, archiveDirectory);
+    boolean result = runApp(inputDirectory, outputDirectory, archiveDirectory);
 
     // Then
     assertThat(result).isFalse();
@@ -82,7 +82,7 @@ class CompleteFilesExistTest extends BaseIntegrationTest {
     createVideoAt(archiveDirectory.resolve("my video.mp4"), unencodedVideo1);
 
     // When
-    boolean result = app.run(inputDirectory, outputDirectory, archiveDirectory);
+    boolean result = runApp(inputDirectory, outputDirectory, archiveDirectory);
 
     // Then
     assertThat(result).isTrue();
@@ -107,7 +107,7 @@ class CompleteFilesExistTest extends BaseIntegrationTest {
     createVideoAt(archiveDirectory.resolve("my video.mp4"), unencodedVideo2);
 
     // When
-    boolean result = app.run(inputDirectory, outputDirectory, archiveDirectory);
+    boolean result = runApp(inputDirectory, outputDirectory, archiveDirectory);
 
     // Then
     assertThat(result).isFalse();
@@ -138,7 +138,7 @@ class CompleteFilesExistTest extends BaseIntegrationTest {
     createVideoAt(archiveDirectory.resolve("my video.mp4"), unencodedVideo1);
 
     // When
-    boolean result = app.run(inputDirectory, outputDirectory, archiveDirectory);
+    boolean result = runApp(inputDirectory, outputDirectory, archiveDirectory);
 
     // Then
     assertThat(result).isTrue();
@@ -166,7 +166,7 @@ class CompleteFilesExistTest extends BaseIntegrationTest {
     createVideoAt(archiveDirectory.resolve("my video.mp4"), unencodedVideo1);
 
     // When
-    boolean result = app.run(inputDirectory, outputDirectory, archiveDirectory);
+    boolean result = runApp(inputDirectory, outputDirectory, archiveDirectory);
 
     // Then
     assertThat(result).isFalse();
@@ -199,7 +199,7 @@ class CompleteFilesExistTest extends BaseIntegrationTest {
     createVideoAt(archiveDirectory.resolve("my video.mp4"), unencodedVideo2);
 
     // When
-    boolean result = app.run(inputDirectory, outputDirectory, archiveDirectory);
+    boolean result = runApp(inputDirectory, outputDirectory, archiveDirectory);
 
     // Then
     assertThat(result).isFalse();
@@ -230,7 +230,7 @@ class CompleteFilesExistTest extends BaseIntegrationTest {
     createVideoAt(archiveDirectory.resolve("my video.mp4"), unencodedVideo2);
 
     // When
-    boolean result = app.run(inputDirectory, outputDirectory, archiveDirectory);
+    boolean result = runApp(inputDirectory, outputDirectory, archiveDirectory);
 
     // Then
     assertThat(result).isFalse();

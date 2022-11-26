@@ -35,7 +35,7 @@ class IncompleteFilesExistTest extends BaseIntegrationTest {
     createVideoAt(archiveDirectory.resolve("vid3.mp4.part"), unencodedVideo1);
 
     // When
-    boolean result = app.run(inputDirectory, outputDirectory, archiveDirectory);
+    boolean result = runApp(inputDirectory, outputDirectory, archiveDirectory);
 
     // Then
     assertThat(result).isTrue();

@@ -40,7 +40,6 @@ abstract class BaseIntegrationTest {
 
   @BeforeAll
   static void setUp() throws Exception {
-    app = new App(new VideoEncoder(HandBrake.newInstance()), new VideoArchiver());
     testParentDirectory = Path.of("Test");
     unencodedVideo1 = Path.of(Resources.getResource("Big_Buck_Bunny_360_10s_1MB.mp4").toURI());
     encodedVideo1 = Path.of(Resources.getResource("Big_Buck_Bunny_360_10s_1MB.cfr.mp4").toURI());
@@ -51,6 +50,15 @@ abstract class BaseIntegrationTest {
   @AfterEach
   void tearDown() throws IOException {
     FileUtils.deleteDirectory(testParentDirectory.toFile());
+  }
+
+  protected static boolean runApp(Path inputDirectory, Path outputDirectory, Path archiveDirectory)
+      throws Exception {
+    app =
+        new App(
+            new DirectoryScanner(inputDirectory, outputDirectory, archiveDirectory),
+            new JobQueue(new VideoEncoder(HandBrake.newInstance()), new VideoArchiver()));
+    return app.run();
   }
 
   @CanIgnoreReturnValue
