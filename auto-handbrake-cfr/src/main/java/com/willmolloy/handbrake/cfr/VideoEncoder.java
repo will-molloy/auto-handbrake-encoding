@@ -91,7 +91,7 @@ class VideoEncoder {
     } finally {
       // ensure unlocked (i.e. if method returns exceptionally)
       release();
-      log.info("Elapsed: {}", stopwatch.elapsed());
+      log.info("Elapsed: {}", stopwatch);
     }
   }
 

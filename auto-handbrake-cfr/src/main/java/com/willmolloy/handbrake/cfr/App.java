@@ -35,7 +35,7 @@ class App {
       logBreak();
       return jobQueue.encodeAndArchiveVideos(unencodedVideos);
     } finally {
-      log.info("Elapsed: {}", stopwatch.elapsed());
+      log.info("Elapsed: {}", stopwatch);
     }
   }
 

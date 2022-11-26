@@ -59,7 +59,7 @@ class VideoArchiver {
       log.error("Error archiving: %s".formatted(video), e);
       return false;
     } finally {
-      log.info("Elapsed: {}", stopwatch.elapsed());
+      log.info("Elapsed: {}", stopwatch);
     }
   }
 }
