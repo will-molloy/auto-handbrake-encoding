@@ -22,7 +22,7 @@ class VideoArchiver {
    * @param video video to archive
    * @return {@code true} if archiving was successful
    */
-  public boolean archive(UnencodedVideo video) {
+  boolean archive(UnencodedVideo video) {
     Stopwatch stopwatch = Stopwatch.createStarted();
     try {
       if (video.originalPath().equals(video.archivedPath())) {

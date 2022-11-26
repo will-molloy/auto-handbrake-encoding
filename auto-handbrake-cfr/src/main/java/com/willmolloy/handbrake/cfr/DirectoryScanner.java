@@ -18,7 +18,7 @@ import org.apache.logging.log4j.Logger;
  *
  * @author <a href=https://willmolloy.com>Will Molloy</a>
  */
-public class DirectoryScanner {
+class DirectoryScanner {
 
   private static final Logger log = LogManager.getLogger();
 
@@ -27,7 +27,7 @@ public class DirectoryScanner {
   private final Path archiveDirectory;
   private final UnencodedVideo.Factory factory;
 
-  public DirectoryScanner(Path inputDirectory, Path outputDirectory, Path archiveDirectory) {
+  DirectoryScanner(Path inputDirectory, Path outputDirectory, Path archiveDirectory) {
     this.inputDirectory = checkNotNull(inputDirectory);
     this.outputDirectory = checkNotNull(outputDirectory);
     this.archiveDirectory = checkNotNull(archiveDirectory);

@@ -35,7 +35,7 @@ class VideoEncoder {
   }
 
   /** Acquires the instance. Must call before {@link #encode}. */
-  public void acquire() {
+  void acquire() {
     lock.lock();
   }
 
@@ -45,7 +45,7 @@ class VideoEncoder {
    * @param video video to encode
    * @return {@code true} if encoding was successful
    */
-  public boolean encode(UnencodedVideo video) {
+  boolean encode(UnencodedVideo video) {
     checkState(lock.isHeldByCurrentThread(), "Not acquired");
 
     Stopwatch stopwatch = Stopwatch.createStarted();
