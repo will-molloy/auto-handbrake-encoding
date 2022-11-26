@@ -1,12 +1,13 @@
 package com.willmolloy.handbrake.cfr;
 
-import static org.mockito.Mockito.inOrder;
+import static org.mockito.ArgumentMatchers.same;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -24,14 +25,16 @@ class AppTest {
   @InjectMocks private App app;
 
   @Test
-  void scansAndEncodesVideos() throws IOException {
+  void orchestratesScanningAndProcessing() throws IOException {
+    // Given
+    List<UnencodedVideo> videos = List.of();
+    when(mockDirectoryScanner.scan()).thenReturn(videos);
+
     // When
     app.run();
 
     // Then
-    InOrder inOrder = inOrder(mockDirectoryScanner, mockJobQueue);
-    inOrder.verify(mockDirectoryScanner).deleteIncompleteEncodingsAndArchives();
-    inOrder.verify(mockDirectoryScanner).getUnencodedVideos();
-    inOrder.verify(mockJobQueue).encodeAndArchiveVideos(List.of());
+    verify(mockDirectoryScanner).scan();
+    verify(mockJobQueue).process(same(videos));
   }
 }

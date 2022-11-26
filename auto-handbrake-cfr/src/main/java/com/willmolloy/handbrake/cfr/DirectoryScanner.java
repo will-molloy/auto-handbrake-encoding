@@ -34,7 +34,12 @@ class DirectoryScanner {
     factory = new UnencodedVideo.Factory(inputDirectory, outputDirectory, archiveDirectory);
   }
 
-  void deleteIncompleteEncodingsAndArchives() throws IOException {
+  List<UnencodedVideo> scan() throws IOException {
+    deleteIncompleteEncodingsAndArchives();
+    return getUnencodedVideos();
+  }
+
+  private void deleteIncompleteEncodingsAndArchives() throws IOException {
     List<Path> tempFiles =
         Stream.of(inputDirectory, outputDirectory, archiveDirectory)
             .distinct()
@@ -62,7 +67,7 @@ class DirectoryScanner {
     }
   }
 
-  List<UnencodedVideo> getUnencodedVideos() throws IOException {
+  private List<UnencodedVideo> getUnencodedVideos() throws IOException {
     try (Stream<Path> directoryWalk = Files.walk(inputDirectory)) {
       List<UnencodedVideo> videos =
           directoryWalk

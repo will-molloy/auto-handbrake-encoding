@@ -31,10 +31,9 @@ class App {
 
     Stopwatch stopwatch = Stopwatch.createStarted();
     try {
-      directoryScanner.deleteIncompleteEncodingsAndArchives();
-      List<UnencodedVideo> unencodedVideos = directoryScanner.getUnencodedVideos();
+      List<UnencodedVideo> unencodedVideos = directoryScanner.scan();
       logBreak();
-      return jobQueue.encodeAndArchiveVideos(unencodedVideos);
+      return jobQueue.process(unencodedVideos);
     } finally {
       log.info("Elapsed: {}", stopwatch);
     }

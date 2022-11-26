@@ -51,35 +51,35 @@ class DirectoryScannerTest {
   }
 
   @Test
-  void deleteIncompleteEncodingsAndArchives_deletesIncompleteEncodings() throws Exception {
+  void deletesIncompleteEncodings() throws Exception {
     // Given
     Files.copy(testVideo, inputDirectory.resolve("video1.cfr.mp4.part"));
     Files.copy(testVideo, outputDirectory.resolve("video2.cfr.mp4.part"));
     Files.copy(testVideo, archiveDirectory.resolve("video3.cfr.mp4.part"));
 
     // When
-    directoryScanner.deleteIncompleteEncodingsAndArchives();
+    directoryScanner.scan();
 
     // Then
     assertThatTestDirectory().isEmpty();
   }
 
   @Test
-  void deleteIncompleteEncodingsAndArchives_deletesIncompleteArchives() throws Exception {
+  void deletesIncompleteArchives() throws Exception {
     // Given
     Files.copy(testVideo, inputDirectory.resolve("video1.mp4.part"));
     Files.copy(testVideo, outputDirectory.resolve("video2.mp4.part"));
     Files.copy(testVideo, archiveDirectory.resolve("video3.mp4.part"));
 
     // When
-    directoryScanner.deleteIncompleteEncodingsAndArchives();
+    directoryScanner.scan();
 
     // Then
     assertThatTestDirectory().isEmpty();
   }
 
   @Test
-  void getUnencodedVideos_getsVideosToEncodeFromInputDirectory() throws Exception {
+  void getsVideosToEncodeFromInputDirectory() throws Exception {
     // Given
     // expected
     Files.copy(testVideo, inputDirectory.resolve("video1.mp4"));
@@ -101,7 +101,7 @@ class DirectoryScannerTest {
     Files.copy(testVideo, archiveDirectory.resolve("video.cfr.mp4.part"));
 
     // When
-    List<UnencodedVideo> videos = directoryScanner.getUnencodedVideos();
+    List<UnencodedVideo> videos = directoryScanner.scan();
 
     // Then
     assertThat(videos.stream().map(UnencodedVideo::originalPath))

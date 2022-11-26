@@ -83,7 +83,7 @@ class JobQueueTest {
             factory.newUnencodedVideo(inputDirectory.resolve("video3.mp4")));
 
     // When
-    boolean result = jobQueue.encodeAndArchiveVideos(videos);
+    boolean result = jobQueue.process(videos);
 
     // Then
     assertThat(result).isTrue();
@@ -116,7 +116,7 @@ class JobQueueTest {
             factory.newUnencodedVideo(inputDirectory.resolve("video3.mp4")));
 
     // When
-    boolean result = jobQueue.encodeAndArchiveVideos(videos);
+    boolean result = jobQueue.process(videos);
 
     // Then
     assertThat(result).isFalse();
@@ -157,7 +157,7 @@ class JobQueueTest {
             factory.newUnencodedVideo(inputDirectory.resolve("video3.mp4")));
 
     // When
-    boolean result = jobQueue.encodeAndArchiveVideos(videos);
+    boolean result = jobQueue.process(videos);
 
     // Then
     assertThat(result).isFalse();
@@ -182,7 +182,7 @@ class JobQueueTest {
             .toList();
 
     // When
-    boolean result = jobQueue.encodeAndArchiveVideos(videos);
+    boolean result = jobQueue.process(videos);
 
     // Then
     assertThat(result).isTrue();

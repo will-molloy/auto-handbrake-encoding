@@ -27,7 +27,7 @@ class JobQueue {
     this.videoArchiver = checkNotNull(videoArchiver);
   }
 
-  boolean encodeAndArchiveVideos(List<UnencodedVideo> videos) {
+  boolean process(List<UnencodedVideo> videos) {
     List<CountDownLatch> latches =
         // extra latch to avoid IOOB
         rangeClosed(0, videos.size())
@@ -70,8 +70,8 @@ class JobQueue {
                 future.complete(videoEncoder.encode(video) && videoArchiver.archive(video));
 
               } catch (InterruptedException e) {
+                future.complete(false);
                 Thread.currentThread().interrupt();
-                throw new RuntimeException(e);
               }
             });
 
