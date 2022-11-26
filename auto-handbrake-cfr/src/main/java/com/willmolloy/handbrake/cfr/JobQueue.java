@@ -70,7 +70,12 @@ class JobQueue {
         .start(
             () -> {
               try {
-                // ensure acquired in order so videos are processed in order
+                // latch ensures videos are processed in order
+                // while lock ensures a single instance of handbrake is running (at one time)
+
+                // all jobs await the latch, until the previous job has started
+                // then a single job awaits the lock, until the previous job has finished encoding
+
                 latch.await();
                 videoEncoder.acquire();
                 nextLatch.countDown();
