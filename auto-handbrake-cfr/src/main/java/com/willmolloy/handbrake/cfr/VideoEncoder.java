@@ -1,6 +1,7 @@
 package com.willmolloy.handbrake.cfr;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.base.Stopwatch;
 import com.willmolloy.handbrake.cfr.util.Files2;
@@ -12,9 +13,7 @@ import com.willmolloy.handbrake.core.options.Output;
 import com.willmolloy.handbrake.core.options.Preset;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
+import java.util.concurrent.locks.ReentrantLock;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -27,13 +26,17 @@ class VideoEncoder {
 
   private static final Logger log = LogManager.getLogger();
 
-  private final Executor executor =
-      Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("video-encoder-", 0).factory());
+  private final ReentrantLock lock = new ReentrantLock();
 
   private final HandBrake handBrake;
 
   VideoEncoder(HandBrake handBrake) {
     this.handBrake = checkNotNull(handBrake);
+  }
+
+  /** Acquires the instance. Must call before {@link #encode}. */
+  void acquire() {
+    lock.lock();
   }
 
   /**
@@ -42,18 +45,11 @@ class VideoEncoder {
    * @param video video to encode
    * @return {@code true} if encoding was successful
    */
-  public boolean encode(UnencodedVideo video) {
-    // atm running encode on another thread purely to make the logs easier to follow (could set up
-    // structured logging?)
-    // TODO parts of the encode process would benefit from async - e.g. verifying temp file contents
-    return CompletableFuture.supplyAsync(() -> doEncode(video), executor).join();
-  }
+  boolean encode(UnencodedVideo video) {
+    checkState(lock.isHeldByCurrentThread(), "Not acquired");
 
-  private boolean doEncode(UnencodedVideo video) {
     Stopwatch stopwatch = Stopwatch.createStarted();
     try {
-      log.debug("Encoding: {} -> {}", video.originalPath(), video.encodedPath());
-
       if (Files.exists(video.encodedPath())) {
         log.warn("Encoded file ({}) already exists", video.encodedPath());
       }
@@ -70,27 +66,38 @@ class VideoEncoder {
               Encoder.h264(),
               FrameRateControl.constant());
 
-      if (handBrakeSuccessful) {
-        if (Files.exists(video.encodedPath())) {
-          log.info("Verifying encoded file contents");
-          if (!Files2.contentsSimilar(video.encodedPath(), video.tempEncodedPath())) {
-            log.error("Existing encoded file contents differ. Aborting encode process");
-            return false;
-          }
-        }
-        Files.move(
-            video.tempEncodedPath(), video.encodedPath(), StandardCopyOption.REPLACE_EXISTING);
-        log.info("Encoded: {}", video.encodedPath());
-        return true;
-      } else {
+      release();
+
+      if (!handBrakeSuccessful) {
         log.error("Error encoding: {}", video);
         return false;
       }
+
+      if (Files.exists(video.encodedPath())) {
+        log.info("Verifying existing encoded file contents");
+        if (!Files2.contentsSimilar(video.encodedPath(), video.tempEncodedPath())) {
+          log.error("Existing encoded file contents differ. Aborting encode process");
+          return false;
+        }
+      }
+
+      Files.move(video.tempEncodedPath(), video.encodedPath(), StandardCopyOption.REPLACE_EXISTING);
+
+      log.info("Encoded: {}", video.encodedPath());
+      return true;
     } catch (Exception e) {
       log.error("Error encoding: %s".formatted(video), e);
       return false;
     } finally {
-      log.info("Elapsed: {}", stopwatch.elapsed());
+      // ensure unlocked (i.e. if method returns exceptionally)
+      release();
+      log.info("Elapsed: {}", stopwatch);
+    }
+  }
+
+  private void release() {
+    if (lock.isHeldByCurrentThread()) {
+      lock.unlock();
     }
   }
 }

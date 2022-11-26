@@ -133,7 +133,7 @@ class UnencodedVideoTest {
   @Test
   void factory_newUnencodedVideo_rejectsTempArchivedMp4File() {
     // Given
-    Path tempArchivedMp4File = inputDirectory.resolve("file.archived.mp4.part");
+    Path tempArchivedMp4File = inputDirectory.resolve("file.mp4.part");
 
     // When & Then
     IllegalArgumentException thrown =

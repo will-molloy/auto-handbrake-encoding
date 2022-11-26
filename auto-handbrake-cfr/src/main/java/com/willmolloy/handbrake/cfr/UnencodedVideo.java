@@ -33,29 +33,29 @@ final class UnencodedVideo {
     this.tempArchivedPath = tempArchivedPath;
   }
 
-  @Override
-  public String toString() {
-    return originalPath.toString();
-  }
-
-  public Path originalPath() {
+  Path originalPath() {
     return originalPath;
   }
 
-  public Path encodedPath() {
+  Path encodedPath() {
     return encodedPath;
   }
 
-  public Path tempEncodedPath() {
+  Path tempEncodedPath() {
     return tempEncodedPath;
   }
 
-  public Path archivedPath() {
+  Path archivedPath() {
     return archivedPath;
   }
 
-  public Path tempArchivedPath() {
+  Path tempArchivedPath() {
     return tempArchivedPath;
+  }
+
+  @Override
+  public String toString() {
+    return originalPath.toString();
   }
 
   // TODO videos don't have to be .mp4
@@ -64,19 +64,19 @@ final class UnencodedVideo {
   private static final String TEMP_ENCODED_SUFFIX = ".cfr.mp4.part";
   private static final String TEMP_ARCHIVED_SUFFIX = ".mp4.part";
 
-  public static boolean isMp4(Path path) {
+  static boolean isMp4(Path path) {
     return fileName(path).endsWith(MP4_SUFFIX);
   }
 
-  public static boolean isEncodedMp4(Path path) {
+  static boolean isEncodedMp4(Path path) {
     return fileName(path).endsWith(ENCODED_SUFFIX);
   }
 
-  public static boolean isTempEncodedMp4(Path path) {
+  static boolean isTempEncodedMp4(Path path) {
     return fileName(path).endsWith(TEMP_ENCODED_SUFFIX);
   }
 
-  public static boolean isTempArchivedMp4(Path path) {
+  static boolean isTempArchivedMp4(Path path) {
     return fileName(path).endsWith(TEMP_ARCHIVED_SUFFIX);
   }
 
@@ -110,7 +110,7 @@ final class UnencodedVideo {
       this.archiveDirectory = archiveDirectory;
     }
 
-    public UnencodedVideo newUnencodedVideo(Path videoPath) {
+    UnencodedVideo newUnencodedVideo(Path videoPath) {
       checkArgument(
           !isTempEncodedMp4(videoPath),
           "videoPath (%s) represents an incomplete encoded .mp4 file",

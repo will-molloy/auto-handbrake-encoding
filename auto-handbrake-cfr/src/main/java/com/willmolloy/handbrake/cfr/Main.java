@@ -23,9 +23,17 @@ final class Main {
       Path outputDirectory = Path.of(args[1]);
       Path archiveDirectory = Path.of(args[2]);
 
-      App app = new App(new VideoEncoder(HandBrake.newInstance()), new VideoArchiver());
+      log.info(
+          "inputDirectory={}, outputDirectory={}, archiveDirectory={}",
+          inputDirectory,
+          outputDirectory,
+          archiveDirectory);
 
-      if (!app.run(inputDirectory, outputDirectory, archiveDirectory)) {
+      App app =
+          new App(
+              new DirectoryScanner(inputDirectory, outputDirectory, archiveDirectory),
+              new JobQueue(new VideoEncoder(HandBrake.newInstance()), new VideoArchiver()));
+      if (!app.run()) {
         System.exit(1);
       }
     } catch (Throwable t) {

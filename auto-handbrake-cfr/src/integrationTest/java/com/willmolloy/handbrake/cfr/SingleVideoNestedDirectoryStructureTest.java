@@ -25,7 +25,7 @@ class SingleVideoNestedDirectoryStructureTest extends BaseIntegrationTest {
     createVideoAt(inputDirectory.resolve("League of Legends/ranked_game1.mp4"), unencodedVideo1);
 
     // When
-    boolean result = app.run(inputDirectory, outputDirectory, archiveDirectory);
+    boolean result = runApp(inputDirectory, outputDirectory, archiveDirectory);
 
     // Then
     assertThat(result).isTrue();
