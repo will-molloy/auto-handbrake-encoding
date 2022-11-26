@@ -5,6 +5,7 @@ import static java.util.stream.IntStream.range;
 import static java.util.stream.IntStream.rangeClosed;
 
 import com.google.common.base.Stopwatch;
+import com.google.common.primitives.Booleans;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -12,10 +13,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -125,38 +123,44 @@ class App {
       }
     }
 
-    List<CompletableFuture<Boolean>> futures = new ArrayList<>();
+    List<Thread> threads = new ArrayList<>();
+    boolean[] results = new boolean[videos.size()];
 
-    try (ExecutorService executor =
-        Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("job-", 1).factory())) {
+    for (int i : range(0, videos.size()).toArray()) {
+      UnencodedVideo video = videos.get(i);
+      CountDownLatch latch = latches.get(i);
+      CountDownLatch nextLatch = latches.get(i + 1);
 
-      for (int i : range(0, videos.size()).toArray()) {
-        UnencodedVideo video = videos.get(i);
-        CountDownLatch latch = latches.get(i);
-        CountDownLatch nextLatch = latches.get(i + 1);
+      Thread thread =
+          Thread.ofVirtual()
+              .name("job-", i)
+              .start(
+                  () -> {
+                    try {
+                      // ensure acquired in order so videos are processed in order
+                      latch.await();
+                      videoEncoder.acquire();
+                      nextLatch.countDown();
 
-        CompletableFuture<Boolean> future =
-            CompletableFuture.supplyAsync(
-                () -> {
-                  try {
-                    // ensure acquired in order so videos are processed in order
-                    latch.await();
-                    videoEncoder.acquire();
-                    nextLatch.countDown();
+                      log.info("Encoding ({}/{}): {}", i + 1, videos.size(), video);
+                      results[i] = videoEncoder.encode(video) && videoArchiver.archive(video);
+                    } catch (InterruptedException e) {
+                      Thread.currentThread().interrupt();
+                    }
+                  });
 
-                    log.info("Encoding ({}/{}): {}", i + 1, videos.size(), video);
-                    return videoEncoder.encode(video) && videoArchiver.archive(video);
-                  } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    return false;
-                  }
-                },
-                executor);
-        futures.add(future);
+      threads.add(thread);
+    }
+
+    for (Thread thread : threads) {
+      try {
+        thread.join();
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
       }
     }
 
-    return futures.stream().map(CompletableFuture::join).reduce(true, Boolean::logicalAnd);
+    return Booleans.asList(results).stream().reduce(true, Boolean::logicalAnd);
   }
 
   private static void logBreak() {

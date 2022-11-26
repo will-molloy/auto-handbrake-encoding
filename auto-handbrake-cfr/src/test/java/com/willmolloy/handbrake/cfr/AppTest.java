@@ -16,6 +16,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
@@ -48,6 +49,9 @@ class AppTest {
   @Mock private VideoEncoder mockVideoEncoder;
   @Mock private VideoArchiver mockVideoArchiver;
   @InjectMocks private App app;
+
+  // simulate the locking (ugly but best tradeoff?)
+  private ReentrantLock lock = new ReentrantLock();
 
   @BeforeEach
   void setUp() throws Exception {
