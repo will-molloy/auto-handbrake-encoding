@@ -18,7 +18,6 @@ import com.willmolloy.handbrake.core.options.Preset;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -234,8 +233,6 @@ class VideoEncoderTest {
   }
 
   private StreamSubject assertThatTestDirectory() throws IOException {
-    try (Stream<Path> directoryWalk = Files.walk(testDirectory)) {
-      return assertThat(directoryWalk.filter(Files::isRegularFile));
-    }
+    return assertThat(Files.walk(testDirectory).filter(Files::isRegularFile));
   }
 }

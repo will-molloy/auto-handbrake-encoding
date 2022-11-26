@@ -68,23 +68,21 @@ class DirectoryScanner {
   }
 
   private List<UnencodedVideo> getUnencodedVideos() throws IOException {
-    try (Stream<Path> directoryWalk = Files.walk(inputDirectory)) {
-      List<UnencodedVideo> videos =
-          directoryWalk
-              .filter(Files::isRegularFile)
-              .filter(UnencodedVideo::isMp4)
-              // don't include paths that represent already encoded videos
-              .filter(path -> !UnencodedVideo.isEncodedMp4(path))
-              .map(factory::newUnencodedVideo)
-              .sorted(Comparator.comparing(video -> video.originalPath().toString()))
-              .toList();
+    List<UnencodedVideo> videos =
+        Files.walk(inputDirectory)
+            .filter(Files::isRegularFile)
+            .filter(UnencodedVideo::isMp4)
+            // don't include paths that represent already encoded videos
+            .filter(path -> !UnencodedVideo.isEncodedMp4(path))
+            .map(factory::newUnencodedVideo)
+            .sorted(Comparator.comparing(video -> video.originalPath().toString()))
+            .toList();
 
-      log.info("Detected {} video(s) to encode", videos.size());
-      for (int i : IntStream.range(0, videos.size()).toArray()) {
-        log.info("Detected ({}/{}): {}", i + 1, videos.size(), videos.get(i));
-      }
-
-      return videos;
+    log.info("Detected {} video(s) to encode", videos.size());
+    for (int i : IntStream.range(0, videos.size()).toArray()) {
+      log.info("Detected ({}/{}): {}", i + 1, videos.size(), videos.get(i));
     }
+
+    return videos;
   }
 }

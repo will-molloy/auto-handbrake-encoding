@@ -8,7 +8,6 @@ import com.google.common.truth.StreamSubject;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,15 +55,16 @@ class VideoArchiverTest {
   @Test
   void movesInputFileToArchiveDirectory() throws IOException {
     // Given
-    Path unencodedMp4File = Files.copy(testVideo, inputDirectory.resolve("file.mp4"));
-    UnencodedVideo unencodedVideo = unencodedVideoFactory.newUnencodedVideo(unencodedMp4File);
+    UnencodedVideo unencodedVideo =
+        unencodedVideoFactory.newUnencodedVideo(
+            Files.copy(testVideo, inputDirectory.resolve("file.mp4")));
 
     // When
     boolean result = videoArchiver.archive(unencodedVideo);
 
     // Then
     assertThat(result).isTrue();
-    assertThatTestDirectory().containsExactly(archiveDirectory.resolve("file.mp4"));
+    assertThatTestDirectory().containsExactly(unencodedVideo.archivedPath());
   }
 
   @Test
@@ -72,15 +72,16 @@ class VideoArchiverTest {
       throws IOException {
     // Given
     Files.createDirectories(inputDirectory.resolve("Halo/Campaign"));
-    Path unencodedMp4File = Files.copy(testVideo, inputDirectory.resolve("Halo/Campaign/file.mp4"));
-    UnencodedVideo unencodedVideo = unencodedVideoFactory.newUnencodedVideo(unencodedMp4File);
+    UnencodedVideo unencodedVideo =
+        unencodedVideoFactory.newUnencodedVideo(
+            Files.copy(testVideo, inputDirectory.resolve("Halo/Campaign/file.mp4")));
 
     // When
     boolean result = videoArchiver.archive(unencodedVideo);
 
     // Then
     assertThat(result).isTrue();
-    assertThatTestDirectory().containsExactly(archiveDirectory.resolve("Halo/Campaign/file.mp4"));
+    assertThatTestDirectory().containsExactly(unencodedVideo.archivedPath());
   }
 
   @Test
@@ -88,15 +89,16 @@ class VideoArchiverTest {
     // Given
     Files.copy(testVideo, archiveDirectory.resolve("file.mp4"));
 
-    Path unencodedMp4File = Files.copy(testVideo, inputDirectory.resolve("file.mp4"));
-    UnencodedVideo unencodedVideo = unencodedVideoFactory.newUnencodedVideo(unencodedMp4File);
+    UnencodedVideo unencodedVideo =
+        unencodedVideoFactory.newUnencodedVideo(
+            Files.copy(testVideo, inputDirectory.resolve("file.mp4")));
 
     // When
     boolean result = videoArchiver.archive(unencodedVideo);
 
     // Then
     assertThat(result).isTrue();
-    assertThatTestDirectory().containsExactly(archiveDirectory.resolve("file.mp4"));
+    assertThatTestDirectory().containsExactly(unencodedVideo.archivedPath());
   }
 
   @Test
@@ -105,8 +107,9 @@ class VideoArchiverTest {
     // Given
     Files.copy(testVideo2, archiveDirectory.resolve("file.mp4"));
 
-    Path unencodedMp4File = Files.copy(testVideo, inputDirectory.resolve("file.mp4"));
-    UnencodedVideo unencodedVideo = unencodedVideoFactory.newUnencodedVideo(unencodedMp4File);
+    UnencodedVideo unencodedVideo =
+        unencodedVideoFactory.newUnencodedVideo(
+            Files.copy(testVideo, inputDirectory.resolve("file.mp4")));
 
     // When
     boolean result = videoArchiver.archive(unencodedVideo);
@@ -114,23 +117,23 @@ class VideoArchiverTest {
     // Then
     assertThat(result).isFalse();
     assertThatTestDirectory()
-        .containsExactly(inputDirectory.resolve("file.mp4"), archiveDirectory.resolve("file.mp4"));
+        .containsExactly(unencodedVideo.originalPath(), unencodedVideo.archivedPath());
   }
 
   @Test
   void whenInputDirectoryIsArchiveDirectory_retainsOriginal_andReturnsTrue() throws IOException {
     // Given
-    Path unencodedMp4File = Files.copy(testVideo, inputDirectory.resolve("file.mp4"));
-    UnencodedVideo.Factory unencodedVideoFactory =
+    UnencodedVideo.Factory factory =
         new UnencodedVideo.Factory(inputDirectory, inputDirectory, inputDirectory);
-    UnencodedVideo unencodedVideo = unencodedVideoFactory.newUnencodedVideo(unencodedMp4File);
+    UnencodedVideo unencodedVideo =
+        factory.newUnencodedVideo(Files.copy(testVideo, inputDirectory.resolve("file.mp4")));
 
     // When
     boolean result = videoArchiver.archive(unencodedVideo);
 
     // Then
     assertThat(result).isTrue();
-    assertThatTestDirectory().containsExactly(inputDirectory.resolve("file.mp4"));
+    assertThatTestDirectory().containsExactly(unencodedVideo.originalPath());
   }
 
   @Test
@@ -144,8 +147,6 @@ class VideoArchiverTest {
   }
 
   private StreamSubject assertThatTestDirectory() throws IOException {
-    try (Stream<Path> directoryWalk = Files.walk(testDirectory)) {
-      return assertThat(directoryWalk.filter(Files::isRegularFile));
-    }
+    return assertThat(Files.walk(testDirectory).filter(Files::isRegularFile));
   }
 }
