@@ -1,7 +1,6 @@
 package com.willmolloy.handbrake.cfr;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.util.stream.IntStream.range;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -9,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -60,7 +60,7 @@ class DirectoryScanner {
 
     if (!tempFiles.isEmpty()) {
       log.warn("Detected {} incomplete encoding(s)/archives(s)", tempFiles.size());
-      for (int i : range(0, tempFiles.size()).toArray()) {
+      for (int i : IntStream.range(0, tempFiles.size()).toArray()) {
         log.warn("Deleting ({}/{}): {}", i + 1, tempFiles.size(), tempFiles.get(i));
         Files.deleteIfExists(tempFiles.get(i));
       }
@@ -80,7 +80,7 @@ class DirectoryScanner {
               .toList();
 
       log.info("Detected {} video(s) to encode", videos.size());
-      for (int i : range(0, videos.size()).toArray()) {
+      for (int i : IntStream.range(0, videos.size()).toArray()) {
         log.info("Detected ({}/{}): {}", i + 1, videos.size(), videos.get(i));
       }
 

@@ -1,12 +1,11 @@
 package com.willmolloy.handbrake.cfr;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.util.stream.IntStream.range;
-import static java.util.stream.IntStream.rangeClosed;
 
+import com.google.common.primitives.Booleans;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
+import java.util.stream.IntStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -30,7 +29,7 @@ class JobQueue {
   boolean process(List<UnencodedVideo> videos) {
     List<CountDownLatch> latches =
         // extra latch to avoid IOOB
-        rangeClosed(0, videos.size())
+        IntStream.rangeClosed(0, videos.size())
             .mapToObj(
                 i -> {
                   if (i == 0) {
@@ -42,21 +41,31 @@ class JobQueue {
                 })
             .toList();
 
-    return range(0, videos.size())
-        .mapToObj(i -> startJob(i, videos, latches))
-        .map(CompletableFuture::join)
-        .reduce(true, Boolean::logicalAnd);
+    boolean[] results = new boolean[videos.size()];
+
+    List<Thread> threads =
+        IntStream.range(0, videos.size())
+            .mapToObj(i -> startJob(i, videos, latches, results))
+            .toList();
+
+    for (Thread thread : threads) {
+      try {
+        thread.join();
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+      }
+    }
+
+    return Booleans.asList(results).stream().reduce(true, Boolean::logicalAnd);
   }
 
-  private CompletableFuture<Boolean> startJob(
-      int i, List<UnencodedVideo> videos, List<CountDownLatch> latches) {
-    CompletableFuture<Boolean> future = new CompletableFuture<>();
-
+  private Thread startJob(
+      int i, List<UnencodedVideo> videos, List<CountDownLatch> latches, boolean[] results) {
     UnencodedVideo video = videos.get(i);
     CountDownLatch latch = latches.get(i);
     CountDownLatch nextLatch = latches.get(i + 1);
 
-    Thread.ofVirtual()
+    return Thread.ofVirtual()
         .name("job-", i + 1)
         .start(
             () -> {
@@ -67,14 +76,11 @@ class JobQueue {
                 nextLatch.countDown();
 
                 log.info("Encoding ({}/{}): {}", i + 1, videos.size(), video);
-                future.complete(videoEncoder.encode(video) && videoArchiver.archive(video));
+                results[i] = videoEncoder.encode(video) && videoArchiver.archive(video);
 
               } catch (InterruptedException e) {
-                future.complete(false);
                 Thread.currentThread().interrupt();
               }
             });
-
-    return future;
   }
 }

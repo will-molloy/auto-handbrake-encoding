@@ -1,7 +1,6 @@
 package com.willmolloy.handbrake.cfr;
 
 import static com.google.common.truth.Truth.assertThat;
-import static java.util.stream.IntStream.rangeClosed;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.doAnswer;
@@ -16,6 +15,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
@@ -175,7 +175,7 @@ class JobQueueTest {
     when(mockVideoArchiver.archive(any())).thenReturn(true);
 
     List<UnencodedVideo> videos =
-        rangeClosed(1, 1000)
+        IntStream.rangeClosed(1, 1000)
             .mapToObj(
                 i ->
                     factory.newUnencodedVideo(inputDirectory.resolve("video%03d.mp4".formatted(i))))
