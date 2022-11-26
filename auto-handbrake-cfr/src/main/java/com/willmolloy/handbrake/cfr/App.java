@@ -133,7 +133,7 @@ class App {
 
       Thread thread =
           Thread.ofVirtual()
-              .name("job-", i)
+              .name("job-", i + 1)
               .start(
                   () -> {
                     try {
@@ -148,7 +148,6 @@ class App {
                       Thread.currentThread().interrupt();
                     }
                   });
-
       threads.add(thread);
     }
 

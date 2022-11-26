@@ -25,7 +25,7 @@ class HandBrakeLogger implements Consumer<String> {
 
   // HandBrake output logs look like:
   // Encoding: task 1 of 1, 1.63 % (60.56 fps, avg 83.01 fps, ETA 00h22m29s)
-  // (always task 1 of 1 since HandBrakeCLI called 1 video at a time)
+  // (always task 1 of 1 since HandBrakeImpl called 1 video at a time)
   private static final Pattern ENCODING_ETA_PATTERN =
       Pattern.compile(
           "Encoding: task 1 of 1, ((\\d+)[.]\\d+ % [(]\\d+[.]\\d+ fps, avg \\d+[.]\\d+ fps, ETA \\d+h\\d+m\\d+s[)])");
