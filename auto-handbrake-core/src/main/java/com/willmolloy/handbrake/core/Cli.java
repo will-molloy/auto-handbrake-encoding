@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.List;
@@ -43,10 +44,12 @@ class Cli {
     try {
       process = processBuilderSupplier.get().command(command).redirectErrorStream(true).start();
 
-      BufferedReader bufferedReader =
-          new BufferedReader(
-              new InputStreamReader(process.getInputStream(), Charset.defaultCharset()));
-      bufferedReader.lines().forEach(processLogConsumer);
+      try (InputStream inputStream = process.getInputStream()) {
+        try (BufferedReader reader =
+            new BufferedReader(new InputStreamReader(inputStream, Charset.defaultCharset()))) {
+          reader.lines().forEach(processLogConsumer);
+        }
+      }
 
       int exitCode = process.waitFor();
       if (exitCode != 0) {
