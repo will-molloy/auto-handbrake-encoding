@@ -28,6 +28,7 @@ class App {
   boolean run() throws IOException {
     log.info("run started");
     logBreak();
+
     Stopwatch stopwatch = Stopwatch.createStarted();
     try {
       directoryScanner.deleteIncompleteEncodingsAndArchives();
