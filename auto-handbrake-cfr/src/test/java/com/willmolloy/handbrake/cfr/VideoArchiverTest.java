@@ -8,6 +8,7 @@ import com.google.common.truth.StreamSubject;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -147,6 +148,8 @@ class VideoArchiverTest {
   }
 
   private StreamSubject assertThatTestDirectory() throws IOException {
-    return assertThat(Files.walk(testDirectory).filter(Files::isRegularFile));
+    try (Stream<Path> testFiles = Files.walk(testDirectory)) {
+      return assertThat(testFiles.filter(Files::isRegularFile));
+    }
   }
 }

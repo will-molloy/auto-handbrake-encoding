@@ -78,8 +78,10 @@ abstract class BaseIntegrationTest {
 
   protected static IterableSubject.UsingCorrespondence<Path, PathAndContents>
       assertThatTestDirectory() throws IOException {
-    return assertThat(Files.walk(testParentDirectory).filter(Files::isRegularFile).toList())
-        .comparingElementsUsing(PathAndContents.EQUIVALENCE);
+    try (Stream<Path> testFiles = Files.walk(testParentDirectory)) {
+      return assertThat(testFiles.filter(Files::isRegularFile).toList())
+          .comparingElementsUsing(PathAndContents.EQUIVALENCE);
+    }
   }
 
   protected static PathAndContents pathAndContents(Path path, Path contents) {
