@@ -8,4 +8,4 @@ if [ -z "$(ls -A /archive)" ]; then
   exit 1
 fi
 
-./gradlew :auto-handbrake-cfr:run -PinputDirectory="/input" -PoutputDirectory="/output" -ParchiveDirectory="/archive"
+./gradlew :auto-handbrake-cfr:run --no-daemon -PinputDirectory="/input" -PoutputDirectory="/output" -ParchiveDirectory="/archive"

@@ -2,14 +2,12 @@ package com.willmolloy.handbrake.core;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.util.concurrent.MoreExecutors;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import org.apache.logging.log4j.LogManager;
@@ -43,10 +41,15 @@ class Cli {
     log.info("Executing: {}", command);
 
     Process process = null;
-    CompletableFuture<?> processLoggerFuture = null;
     try {
       process = processBuilderSupplier.get().command(command).redirectErrorStream(true).start();
-      processLoggerFuture = consumeStreamAsync(process.getInputStream(), processLogConsumer);
+
+      try (InputStream inputStream = process.getInputStream()) {
+        try (BufferedReader reader =
+            new BufferedReader(new InputStreamReader(inputStream, Charset.defaultCharset()))) {
+          reader.lines().forEach(processLogConsumer);
+        }
+      }
 
       int exitCode = process.waitFor();
       if (exitCode != 0) {
@@ -65,20 +68,6 @@ class Cli {
           process.destroyForcibly();
         }
       }
-      if (processLoggerFuture != null) {
-        processLoggerFuture.join();
-      }
     }
-  }
-
-  private CompletableFuture<Void> consumeStreamAsync(
-      InputStream inputStream, Consumer<String> consumer) {
-    return CompletableFuture.runAsync(
-        () -> {
-          BufferedReader bufferedReader =
-              new BufferedReader(new InputStreamReader(inputStream, Charset.defaultCharset()));
-          bufferedReader.lines().forEach(consumer);
-        },
-        MoreExecutors.directExecutor());
   }
 }

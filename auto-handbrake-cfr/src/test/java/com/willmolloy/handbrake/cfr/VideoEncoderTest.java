@@ -2,6 +2,7 @@ package com.willmolloy.handbrake.cfr;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -17,6 +18,7 @@ import com.willmolloy.handbrake.core.options.Preset;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -78,6 +80,7 @@ class VideoEncoderTest {
             Files.copy(testVideo, inputDirectory.resolve("file.mp4")));
 
     // When
+    videoEncoder.acquire();
     boolean result = videoEncoder.encode(unencodedVideo);
 
     // Then
@@ -99,6 +102,7 @@ class VideoEncoderTest {
             Files.copy(testVideo, inputDirectory.resolve("Halo/Campaign/file.mp4")));
 
     // When
+    videoEncoder.acquire();
     boolean result = videoEncoder.encode(unencodedVideo);
 
     // Then
@@ -118,6 +122,7 @@ class VideoEncoderTest {
             Files.copy(testVideo, inputDirectory.resolve("file.mp4")));
 
     // When
+    videoEncoder.acquire();
     boolean result = videoEncoder.encode(unencodedVideo);
 
     // Then
@@ -137,6 +142,7 @@ class VideoEncoderTest {
             Files.copy(testVideo, inputDirectory.resolve("file.mp4")));
 
     // When
+    videoEncoder.acquire();
     boolean result = videoEncoder.encode(unencodedVideo);
 
     // Then
@@ -157,6 +163,7 @@ class VideoEncoderTest {
             Files.copy(testVideo, inputDirectory.resolve("file.mp4")));
 
     // When
+    videoEncoder.acquire();
     boolean result = videoEncoder.encode(unencodedVideo);
 
     // Then
@@ -179,6 +186,7 @@ class VideoEncoderTest {
             Files.copy(testVideo, inputDirectory.resolve("file.mp4")));
 
     // When
+    videoEncoder.acquire();
     boolean result = videoEncoder.encode(unencodedVideo);
 
     // Then
@@ -191,6 +199,16 @@ class VideoEncoderTest {
             unencodedVideo.encodedPath());
   }
 
+  @Test
+  void whenNotAcquired_throwsException() {
+    // When
+    IllegalStateException thrown =
+        assertThrows(IllegalStateException.class, () -> videoEncoder.encode(null));
+
+    // Then
+    assertThat(thrown).hasMessageThat().isEqualTo("Not acquired");
+  }
+
   private void whenHandBrakeReturns(boolean result) {
     when(mockHandBrake.encode(any(), any(), any()))
         .then(
@@ -198,8 +216,8 @@ class VideoEncoderTest {
                 invocation -> {
                   // bit of an ugly hack...
                   // need to create the temp encoded file as its expected as output from HandBrake
-                  Path originalPath = ((Input) invocation.getArgument(0)).path();
-                  Path tempEncodedPath = ((Output) invocation.getArgument(1)).path();
+                  Path originalPath = invocation.getArgument(0, Input.class).path();
+                  Path tempEncodedPath = invocation.getArgument(1, Output.class).path();
                   Files.copy(originalPath, tempEncodedPath);
                   return result;
                 });
@@ -216,6 +234,8 @@ class VideoEncoderTest {
   }
 
   private StreamSubject assertThatTestDirectory() throws IOException {
-    return assertThat(Files.walk(testDirectory).filter(Files::isRegularFile));
+    try (Stream<Path> testFiles = Files.walk(testDirectory)) {
+      return assertThat(testFiles.filter(Files::isRegularFile));
+    }
   }
 }
