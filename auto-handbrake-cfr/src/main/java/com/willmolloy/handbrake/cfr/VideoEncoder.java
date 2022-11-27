@@ -66,12 +66,12 @@ class VideoEncoder {
               Encoder.h264(),
               FrameRateControl.constant());
 
-      release();
-
       if (!handBrakeSuccessful) {
         log.error("Error encoding: {}", video);
         return false;
       }
+
+      release();
 
       if (Files.exists(video.encodedPath())) {
         log.info("Verifying existing encoded file contents");

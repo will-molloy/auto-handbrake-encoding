@@ -31,27 +31,25 @@ class VideoArchiver {
       }
 
       if (Files.exists(video.archivedPath())) {
+        log.warn("Archived file ({}) already exists", video.archivedPath());
+
         log.info("Verifying existing archived file contents");
         if (Files.mismatch(video.originalPath(), video.archivedPath()) != -1) {
-          log.error(
-              "Archive file ({}) already exists but contents differ. Skipping archive process",
-              video.archivedPath());
+          log.error("Existing archived file contents differ. Skipping archive process");
           return false;
         } else {
-          log.warn("Archive file ({}) already exists", video.archivedPath());
           log.info("Deleting: {}", video.originalPath());
           Files.delete(video.originalPath());
-          return true;
         }
+      } else {
+        Files.createDirectories(checkNotNull(video.archivedPath().getParent()));
+
+        log.info("Moving: {} -> {}", video.originalPath(), video.archivedPath());
+        // archive to a temp file first in case something goes wrong
+        // (e.g. app crash while it's uploading to NAS)
+        Files.move(video.originalPath(), video.tempArchivedPath());
+        Files.move(video.tempArchivedPath(), video.archivedPath());
       }
-
-      Files.createDirectories(checkNotNull(video.archivedPath().getParent()));
-
-      log.info("Moving: {} -> {}", video.originalPath(), video.archivedPath());
-      // archive to a temp file first in case something goes wrong
-      // (e.g. app crash while it's uploading to NAS)
-      Files.move(video.originalPath(), video.tempArchivedPath());
-      Files.move(video.tempArchivedPath(), video.archivedPath());
 
       log.info("Archived: {}", video.archivedPath());
       return true;
