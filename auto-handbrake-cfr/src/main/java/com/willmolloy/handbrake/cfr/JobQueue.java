@@ -65,9 +65,8 @@ class JobQueue {
     CountDownLatch latch = latches.get(i);
     CountDownLatch nextLatch = latches.get(i + 1);
 
-    return Thread.ofVirtual()
-        .name("job-", i + 1)
-        .start(
+    Thread thread =
+        new Thread(
             () -> {
               try {
                 // latch ensures videos are processed in order
@@ -86,6 +85,9 @@ class JobQueue {
               } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
               }
-            });
+            },
+            "job-%d".formatted(i + 1));
+    thread.start();
+    return thread;
   }
 }
