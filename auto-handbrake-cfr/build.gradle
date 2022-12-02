@@ -3,9 +3,6 @@ plugins {
 }
 
 jib {
-  from {
-    image = "openjdk:19"
-  }
   to {
     image = "auto-handbrake-cfr:latest"
   }
