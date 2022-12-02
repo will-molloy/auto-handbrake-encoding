@@ -1,3 +1,5 @@
+# base HandBrake + Java image
+
 FROM amazoncorretto:19-alpine3.14
 
 # Compile HandBrake
@@ -51,13 +53,6 @@ RUN \
                 --launch-jobs=$(nproc) \
                 --launch
 
-COPY . /app
-WORKDIR /app
-
-RUN ./gradlew clean assemble --no-daemon --refresh-dependencies
-
 VOLUME /input
 VOLUME /output
 VOLUME /archive
-
-ENTRYPOINT ./entrypoint.sh

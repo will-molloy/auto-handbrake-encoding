@@ -15,5 +15,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2.4.0
 
-      - name: Build Dockerfile
-        run: docker build -t handbrake .
+      - name: Build base image
+        run: docker build -t handbrake-java-base .
+
+      - name: Build auto-handbrake-cfr image
+        run: ./gradlew :auto-handbrake-cfr:jibDockerBuild

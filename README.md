@@ -37,18 +37,6 @@ The app requires the following arguments:
 - `archiveDirectory` where you want archived files to be saved
 - (These can all be the same directory, personally I record and encode to an SSD, then archive to NAS)
 
-##### Run with Gradle (requires Java 19 and HandBrakeCLI installed)
-
-1. Build:
-   ```bash
-   ./gradlew build
-   ```
-
-2. Run:
-   ```bash
-   ./gradlew :auto-handbrake-cfr:run -PinputDirectory="" -PoutputDirectory="" -ParchiveDirectory=""
-   ```
-
 ##### Run with Docker
 
 1. Build:
