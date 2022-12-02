@@ -4,7 +4,7 @@ plugins {
 
 jib {
   from {
-    image = "docker://handbrake-java-base"
+    image = "openjdk:19"
   }
   to {
     image = "auto-handbrake-cfr:latest"
