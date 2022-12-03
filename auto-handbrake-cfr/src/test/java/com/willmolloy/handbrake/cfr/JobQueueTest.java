@@ -9,7 +9,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -190,7 +189,6 @@ class JobQueueTest {
     }
   }
 
-  @SuppressFBWarnings("SIC_INNER_SHOULD_BE_STATIC_ANON")
   private void whenVideoEncoderReturns(boolean... results) {
     // simulate the locking behaviour of VideoEncoder
     // TODO kinda ugly (leaky abstraction), but best tradeoff?
