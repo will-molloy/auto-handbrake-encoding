@@ -27,9 +27,7 @@ Automating HandBrake encoding
       - I recommend deleting the encoded file after using it, and retaining the original archived file
 3. Archives original videos
 
-#### Usage:
-
-You can run with either Gradle directly or with Docker.
+#### Run with Docker:
 
 The app requires the following arguments:
 - `inputDirectory` directory containing `.mp4` files to encode
@@ -39,14 +37,19 @@ The app requires the following arguments:
 
 ##### Run with Docker
 
-1. Build:
+1. Build base image:
    ```bash
-   docker build -t handbrake .
+   docker build -t handbrake-java-base .
    ```
 
-2. Run:
+2. Build auto-handbrake-cfr image:
    ```bash
-   docker run --rm -v <INPUT_DIR>:/input -v <OUTPUT_DIR>:/output -v <ARCHIVE_DIR>:/archive handbrake
+   ./gradlew :auto-handbrake-cfr:jibDockerBuild
+   ```
+
+3. Run:
+   ```bash
+   docker run --rm -v <INPUT_DIR>:/input -v <OUTPUT_DIR>:/output -v <ARCHIVE_DIR>:/archive auto-handbrake-cfr
    ```
    - (If you need to mount a network drive, [this stackoverflow answer](https://stackoverflow.com/a/57510166/6122976) worked for me)
 
