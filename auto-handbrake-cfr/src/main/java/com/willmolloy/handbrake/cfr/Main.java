@@ -26,6 +26,13 @@ final class Main {
       Path inputDirectory = Path.of(args[0]);
       Path outputDirectory = Path.of(args[1]);
       Path archiveDirectory = Path.of(args[2]);
+
+      log.info(
+          "inputDirectory={}, outputDirectory={}, archiveDirectory={}",
+          inputDirectory,
+          outputDirectory,
+          archiveDirectory);
+
       checkArgument(
           Files.isDirectory(inputDirectory),
           "inputDirectory (%s) is not a directory",
@@ -41,20 +48,14 @@ final class Main {
 
       if (isRunningInsideDocker()) {
         try (Stream<Path> archiveDirStream = Files.list(archiveDirectory)) {
-          // test archive directory is non-empty, ensures volume is mounted correctly to avoid data
-          // loss - hacky but good to be safe
+          // test archive directory is non-empty, ensures volume is mounted correctly
+          // hacky but good to be safe
           checkArgument(
               archiveDirStream.findAny().isPresent(),
               "archiveDirectory (%s) directory empty, network drive not mounted?",
               archiveDirectory);
         }
       }
-
-      log.info(
-          "inputDirectory={}, outputDirectory={}, archiveDirectory={}",
-          inputDirectory,
-          outputDirectory,
-          archiveDirectory);
 
       App app =
           new App(

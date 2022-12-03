@@ -22,7 +22,7 @@ jobs:
           java-version: 19
 
       - name: Build base image
-        run: docker build -t handbrake-java-base .
+        run: docker build -t handbrake-java-base -f base.Dockerfile .
 
       - name: Run Jib
         run: ./gradlew jibDockerBuild

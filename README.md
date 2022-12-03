@@ -4,7 +4,7 @@
 [![integration-test](https://github.com/will-molloy/auto-handbrake-encoding/workflows/integration-test/badge.svg?branch=main)](https://github.com/will-molloy/auto-handbrake-encoding/actions?query=workflow%3Aintegration-test)
 [![codecov](https://codecov.io/gh/will-molloy/auto-handbrake-encoding/branch/main/graph/badge.svg)](https://codecov.io/gh/will-molloy/auto-handbrake-encoding)
 
-Automating HandBrake encoding
+Automating HandBrake encoding with Java
 
 ## Use cases
 
@@ -30,16 +30,14 @@ Automating HandBrake encoding
 #### Run with Docker:
 
 The app requires the following arguments:
-- `inputDirectory` directory containing `.mp4` files to encode
-- `outputDirectory` where you want encoded files to be saved
-- `archiveDirectory` where you want archived files to be saved
+- `input` directory containing `.mp4` files to encode
+- `output` where you want encoded files to be saved
+- `archive` where you want archived files to be saved
 - (These can all be the same directory, personally I record and encode to an SSD, then archive to NAS)
-
-##### Run with Docker
 
 1. Build base image:
    ```bash
-   docker build -t handbrake-java-base .
+   docker build -t handbrake-java-base -f base.Dockerfile .
    ```
 
 2. Build auto-handbrake-cfr image:
