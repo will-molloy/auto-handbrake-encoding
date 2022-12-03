@@ -12,8 +12,13 @@ jib {
   container {
     mainClass = 'com.willmolloy.handbrake.cfr.Main'
     args = ["/input", "/output", "/archive"]
-    creationTime = "USE_CURRENT_TIMESTAMP"
+    creationTime = getGitCommitTime()
   }
+}
+
+static def getGitCommitTime() {
+  String[] parts = 'git show -s --format=%ci'.execute().text.trim().split(" ")
+  return (parts[0]+'T'+parts[1]+parts[2])
 }
 
 dependencies {
