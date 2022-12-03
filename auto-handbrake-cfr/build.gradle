@@ -1,11 +1,25 @@
-String inputDirectory = project.getProperties().getOrDefault("inputDirectory", "")
-String outputDirectory = project.getProperties().getOrDefault("outputDirectory", "")
-String archiveDirectory = project.getProperties().getOrDefault("archiveDirectory", "")
+plugins {
+  id 'com.google.cloud.tools.jib' version '3.3.1'
+}
 
-task run(type: JavaExec) {
-  classpath = sourceSets.main.runtimeClasspath
-  main = 'com.willmolloy.handbrake.cfr.Main'
-  args = [inputDirectory, outputDirectory, archiveDirectory]
+jib {
+  from {
+    image = "docker://handbrake-java-base"
+  }
+  to {
+    image = "auto-handbrake-cfr:latest"
+  }
+  container {
+    mainClass = 'com.willmolloy.handbrake.cfr.Main'
+    args = ["/input", "/output", "/archive"]
+    creationTime = getGitCommitTime()
+    jvmFlags = ['--enable-preview']
+  }
+}
+
+static def getGitCommitTime() {
+  String[] parts = 'git show -s --format=%ci'.execute().text.trim().split(" ")
+  return (parts[0]+'T'+parts[1]+parts[2])
 }
 
 dependencies {

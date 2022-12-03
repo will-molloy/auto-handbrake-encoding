@@ -4,7 +4,7 @@
 [![integration-test](https://github.com/will-molloy/auto-handbrake-encoding/workflows/integration-test/badge.svg?branch=main)](https://github.com/will-molloy/auto-handbrake-encoding/actions?query=workflow%3Aintegration-test)
 [![codecov](https://codecov.io/gh/will-molloy/auto-handbrake-encoding/branch/main/graph/badge.svg)](https://codecov.io/gh/will-molloy/auto-handbrake-encoding)
 
-Automating HandBrake encoding
+Automating HandBrake encoding with Java
 
 ## Use cases
 
@@ -27,38 +27,27 @@ Automating HandBrake encoding
       - I recommend deleting the encoded file after using it, and retaining the original archived file
 3. Archives original videos
 
-#### Usage:
-
-You can run with either Gradle directly or with Docker.
+#### Run with Docker:
 
 The app requires the following arguments:
-- `inputDirectory` directory containing `.mp4` files to encode
-- `outputDirectory` where you want encoded files to be saved
-- `archiveDirectory` where you want archived files to be saved
+- `input` directory containing `.mp4` files to encode
+- `output` where you want encoded files to be saved
+- `archive` where you want archived files to be saved
 - (These can all be the same directory, personally I record and encode to an SSD, then archive to NAS)
 
-##### Run with Gradle (requires Java 19 and HandBrakeCLI installed)
-
-1. Build:
+1. Build base image:
    ```bash
-   ./gradlew build
+   docker build -t handbrake-java-base -f base.Dockerfile .
    ```
 
-2. Run:
+2. Build auto-handbrake-cfr image:
    ```bash
-   ./gradlew :auto-handbrake-cfr:run -PinputDirectory="" -PoutputDirectory="" -ParchiveDirectory=""
+   ./gradlew :auto-handbrake-cfr:jibDockerBuild
    ```
 
-##### Run with Docker
-
-1. Build:
+3. Run:
    ```bash
-   docker build -t handbrake .
-   ```
-
-2. Run:
-   ```bash
-   docker run --rm -v <INPUT_DIR>:/input -v <OUTPUT_DIR>:/output -v <ARCHIVE_DIR>:/archive handbrake
+   docker run --rm -v <INPUT_DIR>:/input -v <OUTPUT_DIR>:/output -v <ARCHIVE_DIR>:/archive auto-handbrake-cfr
    ```
    - (If you need to mount a network drive, [this stackoverflow answer](https://stackoverflow.com/a/57510166/6122976) worked for me)
 
