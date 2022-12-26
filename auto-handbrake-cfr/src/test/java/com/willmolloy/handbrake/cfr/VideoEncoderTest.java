@@ -8,6 +8,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.io.Resources;
+import com.google.common.jimfs.Configuration;
+import com.google.common.jimfs.Jimfs;
 import com.google.common.truth.StreamSubject;
 import com.willmolloy.handbrake.core.HandBrake;
 import com.willmolloy.handbrake.core.options.Encoder;
@@ -16,10 +18,10 @@ import com.willmolloy.handbrake.core.options.Input;
 import com.willmolloy.handbrake.core.options.Output;
 import com.willmolloy.handbrake.core.options.Preset;
 import java.io.IOException;
+import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Stream;
-import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,7 +39,7 @@ import org.mockito.stubbing.Answer;
 @ExtendWith(MockitoExtension.class)
 class VideoEncoderTest {
 
-  private Path testDirectory;
+  private FileSystem fileSystem;
   private Path inputDirectory;
   private Path outputDirectory;
   private Path testVideo;
@@ -50,10 +52,12 @@ class VideoEncoderTest {
 
   @BeforeEach
   void setUp() throws Exception {
-    testDirectory = Path.of(this.getClass().getSimpleName());
-    inputDirectory = testDirectory.resolve("input/Videos/Gameplay");
-    outputDirectory = testDirectory.resolve("output/Videos/Encoded Gameplay");
-    Path archiveDirectory = testDirectory.resolve("archive/Videos/Gameplay");
+    fileSystem = Jimfs.newFileSystem(Configuration.unix());
+
+    inputDirectory = fileSystem.getPath("/input/Videos/Gameplay");
+    outputDirectory = fileSystem.getPath("/output/Videos/Encoded Gameplay");
+    Path archiveDirectory = fileSystem.getPath("/archive/Videos/Gameplay");
+
     testVideo = Path.of(Resources.getResource("Big_Buck_Bunny_360_10s_1MB.mp4").toURI());
     testVideo2 = Path.of(Resources.getResource("Big_Buck_Bunny_360_10s_2MB.mp4").toURI());
 
@@ -67,7 +71,7 @@ class VideoEncoderTest {
 
   @AfterEach
   void tearDown() throws IOException {
-    FileUtils.deleteDirectory(testDirectory.toFile());
+    fileSystem.close();
   }
 
   @Test
@@ -234,7 +238,7 @@ class VideoEncoderTest {
   }
 
   private StreamSubject assertThatTestDirectory() throws IOException {
-    try (Stream<Path> testFiles = Files.walk(testDirectory)) {
+    try (Stream<Path> testFiles = Files.walk(fileSystem.getPath("/"))) {
       return assertThat(testFiles.filter(Files::isRegularFile));
     }
   }

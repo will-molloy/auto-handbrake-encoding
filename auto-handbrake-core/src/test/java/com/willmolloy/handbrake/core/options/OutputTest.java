@@ -1,6 +1,5 @@
 package com.willmolloy.handbrake.core.options;
 
-import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 
 import java.nio.file.Path;

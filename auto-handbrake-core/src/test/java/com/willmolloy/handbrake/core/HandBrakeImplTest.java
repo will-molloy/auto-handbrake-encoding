@@ -8,15 +8,21 @@ import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.common.jimfs.Configuration;
+import com.google.common.jimfs.Jimfs;
 import com.willmolloy.handbrake.core.options.Encoder;
 import com.willmolloy.handbrake.core.options.FrameRateControl;
 import com.willmolloy.handbrake.core.options.Input;
 import com.willmolloy.handbrake.core.options.Output;
 import com.willmolloy.handbrake.core.options.Preset;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
+import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -35,11 +41,27 @@ class HandBrakeImplTest {
 
   @InjectMocks private HandBrakeImpl handBrake;
 
+  @SuppressFBWarnings("UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR")
+  private FileSystem fileSystem;
+
+  private Path input;
+  private Path output;
+
+  @BeforeEach
+  void setUp() {
+    fileSystem = Jimfs.newFileSystem(Configuration.unix());
+
+    input = fileSystem.getPath("input.mp4");
+    output = fileSystem.getPath("output.mp4");
+  }
+
+  @AfterEach
+  void tearDown() throws IOException {
+    fileSystem.close();
+  }
+
   @Test
   void successfulEncodingReturnsTrue() {
-    Path input = Path.of("input.mp4");
-    Path output = Path.of("output.mp4");
-
     when(mockCli.execute(anyList(), any())).thenReturn(true);
 
     assertThat(
@@ -69,28 +91,18 @@ class HandBrakeImplTest {
 
   @Test
   void outputAlreadyExistsOverwrites() throws IOException {
-    Path input = Path.of("input.mp4");
-    Path output = Path.of("output.mp4");
-
     when(mockCli.execute(anyList(), any())).thenReturn(true);
+    Files.createFile(output);
 
-    try {
-      Files.createFile(output);
-      assertThat(handBrake.encode(Input.of(input), Output.of(output))).isTrue();
-      verify(mockCli)
-          .execute(
-              eq(List.of("HandBrakeCLI", "--input", "input.mp4", "--output", "output.mp4")),
-              isA(HandBrakeLogger.class));
-    } finally {
-      Files.delete(output);
-    }
+    assertThat(handBrake.encode(Input.of(input), Output.of(output))).isTrue();
+    verify(mockCli)
+        .execute(
+            eq(List.of("HandBrakeCLI", "--input", "input.mp4", "--output", "output.mp4")),
+            isA(HandBrakeLogger.class));
   }
 
   @Test
   void unsuccessfulEncodingReturnsFalse() {
-    Path input = Path.of("input.mp4");
-    Path output = Path.of("output.mp4");
-
     when(mockCli.execute(anyList(), any())).thenReturn(false);
 
     assertThat(handBrake.encode(Input.of(input), Output.of(output))).isFalse();
@@ -98,9 +110,6 @@ class HandBrakeImplTest {
 
   @Test
   void exceptionThrownReturnsFalse() {
-    Path input = Path.of("input.mp4");
-    Path output = Path.of("output.mp4");
-
     when(mockCli.execute(anyList(), any())).thenThrow(new RuntimeException("error"));
 
     assertThat(handBrake.encode(Input.of(input), Output.of(output))).isFalse();
