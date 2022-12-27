@@ -4,10 +4,12 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.google.common.jimfs.Configuration;
+import com.google.common.jimfs.Jimfs;
 import java.io.IOException;
+import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,7 +21,7 @@ import org.junit.jupiter.api.Test;
  */
 class UnencodedVideoTest {
 
-  private Path testDirectory;
+  private FileSystem fileSystem;
   private Path inputDirectory;
   private Path outputDirectory;
   private Path archiveDirectory;
@@ -28,10 +30,11 @@ class UnencodedVideoTest {
 
   @BeforeEach
   void setUp() throws Exception {
-    testDirectory = Path.of(this.getClass().getSimpleName());
-    inputDirectory = testDirectory.resolve("input");
-    outputDirectory = testDirectory.resolve("output");
-    archiveDirectory = testDirectory.resolve("archive");
+    fileSystem = Jimfs.newFileSystem(Configuration.unix());
+
+    inputDirectory = fileSystem.getPath("input");
+    outputDirectory = fileSystem.getPath("output");
+    archiveDirectory = fileSystem.getPath("archive");
 
     Files.createDirectories(inputDirectory);
     Files.createDirectories(outputDirectory);
@@ -42,7 +45,7 @@ class UnencodedVideoTest {
 
   @AfterEach
   void tearDown() throws IOException {
-    FileUtils.deleteDirectory(testDirectory.toFile());
+    fileSystem.close();
   }
 
   @Test

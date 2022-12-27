@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -75,7 +74,6 @@ class DirectoryScanner {
               .filter(UnencodedVideo::isMp4)
               .filter(path -> !UnencodedVideo.isEncodedMp4(path))
               .map(factory::newUnencodedVideo)
-              .sorted(Comparator.comparing(video -> video.originalPath().toString()))
               .toList();
 
       log.info("Detected {} video(s) to encode", videos.size());

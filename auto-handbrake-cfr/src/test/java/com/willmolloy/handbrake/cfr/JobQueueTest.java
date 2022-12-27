@@ -9,7 +9,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.common.jimfs.Configuration;
+import com.google.common.jimfs.Jimfs;
 import java.io.IOException;
+import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -17,7 +20,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,16 +46,17 @@ class JobQueueTest {
   @Mock private VideoArchiver mockVideoArchiver;
   @InjectMocks private JobQueue jobQueue;
 
-  private Path testDirectory;
+  private FileSystem fileSystem;
   private Path inputDirectory;
   private UnencodedVideo.Factory factory;
 
   @BeforeEach
   void setUp() throws Exception {
-    testDirectory = Path.of(this.getClass().getSimpleName());
-    inputDirectory = testDirectory.resolve("input");
-    Path outputDirectory = testDirectory.resolve("output");
-    Path archiveDirectory = testDirectory.resolve("archive");
+    fileSystem = Jimfs.newFileSystem(Configuration.unix());
+
+    inputDirectory = fileSystem.getPath("input");
+    Path outputDirectory = fileSystem.getPath("output");
+    Path archiveDirectory = fileSystem.getPath("archive");
 
     Files.createDirectories(inputDirectory);
     Files.createDirectories(outputDirectory);
@@ -64,7 +67,7 @@ class JobQueueTest {
 
   @AfterEach
   void tearDown() throws IOException {
-    FileUtils.deleteDirectory(testDirectory.toFile());
+    fileSystem.close();
   }
 
   @Test
