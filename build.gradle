@@ -8,7 +8,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath group: 'com.diffplug.spotless', name: 'spotless-plugin-gradle', version: '6.11.0'
+    classpath group: 'com.diffplug.spotless', name: 'spotless-plugin-gradle', version: '6.12.1'
     classpath group: 'com.github.spotbugs.snom', name: 'spotbugs-gradle-plugin', version: '5.0.13'
     classpath group: 'com.asarkar.gradle', name: 'build-time-tracker', version: '4.3.0'
     classpath group: 'org.unbroken-dome.gradle-plugins', name: 'gradle-testsets-plugin', version: '4.0.0'
