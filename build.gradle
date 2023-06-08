@@ -121,7 +121,7 @@ subprojects {
   // pin dependency versions
   ext {
     // production
-    guavaVersion = '31.1-jre'
+    guavaVersion = '32.0.0-jre'
     log4jVersion = '2.17.0'
 
     // test
@@ -134,7 +134,6 @@ subprojects {
     implementation group: 'com.google.guava', name: 'guava', version: "$guavaVersion"
     implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: "$log4jVersion"
     implementation group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: '4.7.3'
-    implementation group: 'commons-io', name: 'commons-io', version: '2.11.0'
 
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: "$junitVersion"
     testImplementation group: 'com.google.truth', name: 'truth', version: "$truthVersion"

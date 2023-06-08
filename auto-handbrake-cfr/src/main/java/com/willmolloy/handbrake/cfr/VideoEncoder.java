@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.base.Stopwatch;
+import com.google.common.io.MoreFiles;
 import com.willmolloy.handbrake.cfr.util.Files2;
 import com.willmolloy.handbrake.core.HandBrake;
 import com.willmolloy.handbrake.core.options.Encoder;
@@ -54,7 +55,7 @@ class VideoEncoder {
         log.warn("Encoded file ({}) already exists", video.encodedPath());
       }
 
-      Files.createDirectories(checkNotNull(video.encodedPath().getParent()));
+      MoreFiles.createParentDirectories(video.encodedPath());
 
       // to avoid leaving encoded files in an 'incomplete' state, encode to a temp file in case
       // something goes wrong

@@ -1,8 +1,7 @@
 package com.willmolloy.handbrake.cfr;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.google.common.base.Stopwatch;
+import com.google.common.io.MoreFiles;
 import java.nio.file.Files;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -42,7 +41,7 @@ class VideoArchiver {
           Files.delete(video.originalPath());
         }
       } else {
-        Files.createDirectories(checkNotNull(video.archivedPath().getParent()));
+        MoreFiles.createParentDirectories(video.archivedPath());
 
         log.info("Moving: {} -> {}", video.originalPath(), video.archivedPath());
         // archive to a temp file first in case something goes wrong

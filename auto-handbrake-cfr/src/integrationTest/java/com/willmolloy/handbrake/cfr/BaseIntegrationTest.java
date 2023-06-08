@@ -1,8 +1,9 @@
 package com.willmolloy.handbrake.cfr;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.truth.Truth.assertThat;
 
+import com.google.common.io.MoreFiles;
+import com.google.common.io.RecursiveDeleteOption;
 import com.google.common.io.Resources;
 import com.google.common.truth.Correspondence;
 import com.google.common.truth.IterableSubject;
@@ -13,7 +14,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Stream;
-import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -49,7 +49,7 @@ abstract class BaseIntegrationTest {
 
   @AfterEach
   void tearDown() throws IOException {
-    FileUtils.deleteDirectory(testParentDirectory.toFile());
+    MoreFiles.deleteRecursively(testParentDirectory, RecursiveDeleteOption.ALLOW_INSECURE);
   }
 
   protected static boolean runApp(Path inputDirectory, Path outputDirectory, Path archiveDirectory)
@@ -71,7 +71,7 @@ abstract class BaseIntegrationTest {
 
   @CanIgnoreReturnValue
   protected static Path createVideoAt(Path path, Path videoToCopy) throws IOException {
-    Files.createDirectories(checkNotNull(path.getParent()));
+    MoreFiles.createParentDirectories(path);
     Files.copy(videoToCopy, path);
     return path;
   }
