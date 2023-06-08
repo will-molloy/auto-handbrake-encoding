@@ -15,6 +15,7 @@ import com.willmolloy.handbrake.core.HandBrake;
 import com.willmolloy.handbrake.core.options.Encoder;
 import com.willmolloy.handbrake.core.options.FrameRateControl;
 import com.willmolloy.handbrake.core.options.Input;
+import com.willmolloy.handbrake.core.options.Option;
 import com.willmolloy.handbrake.core.options.Output;
 import com.willmolloy.handbrake.core.options.Preset;
 import java.io.IOException;
@@ -214,8 +215,8 @@ class VideoEncoderTest {
   }
 
   private void whenHandBrakeReturns(boolean result) {
-    when(mockHandBrake.encode(any(), any(), any()))
-        .then(
+    when(mockHandBrake.encode(any(Input.class), any(Output.class), any(Option[].class)))
+        .thenAnswer(
             (Answer<Boolean>)
                 invocation -> {
                   // bit of an ugly hack...
