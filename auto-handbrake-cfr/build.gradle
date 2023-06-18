@@ -7,7 +7,7 @@ jib {
     image = "docker://handbrake-java-base"
   }
   to {
-    image = "auto-handbrake-cfr:latest"
+    image = "ghcr.io/will-molloy/auto-handbrake-cfr"
   }
   container {
     mainClass = 'com.willmolloy.handbrake.cfr.Main'
