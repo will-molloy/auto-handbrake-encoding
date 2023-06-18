@@ -36,21 +36,10 @@ The app requires the following arguments:
 - `archive` where you want archived files to be saved
 - (These can all be the same directory, personally I record and encode to an SSD, then archive to NAS)
 
-1. Build base image:
-   ```bash
-   docker build -t handbrake-java-base -f base.Dockerfile .
-   ```
-
-2. Build auto-handbrake-cfr image:
-   ```bash
-   ./gradlew :auto-handbrake-cfr:jibDockerBuild
-   ```
-
-3. Run:
-   ```bash
-   docker run --rm -v <INPUT_DIR>:/input -v <OUTPUT_DIR>:/output -v <ARCHIVE_DIR>:/archive auto-handbrake-cfr
-   ```
-   - (If you need to mount a network drive, [this stackoverflow answer](https://stackoverflow.com/a/57510166/6122976) worked for me)
+```bash
+docker pull ghcr.io/will-molloy/auto-handbrake-cfr:latest
+docker run --rm -v <INPUT_DIR>:/input -v <OUTPUT_DIR>:/output -v <ARCHIVE_DIR>:/archive ghcr.io/will-molloy/auto-handbrake-cfr
+```
 
 ## Project layout
 
