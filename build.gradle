@@ -11,7 +11,6 @@ buildscript {
     classpath group: 'com.diffplug.spotless', name: 'spotless-plugin-gradle', version: '6.19.0'
     classpath group: 'com.github.spotbugs.snom', name: 'spotbugs-gradle-plugin', version: '5.0.14'
     classpath group: 'com.asarkar.gradle', name: 'build-time-tracker', version: '4.3.0'
-    classpath group: 'org.unbroken-dome.gradle-plugins', name: 'gradle-testsets-plugin', version: '4.0.0'
   }
 }
 
@@ -98,13 +97,6 @@ subprojects {
     }
   }
   test.finalizedBy jacocoTestReport
-
-  // Integration test support
-  apply plugin: 'org.unbroken-dome.test-sets'
-  testSets {
-    integrationTest
-  }
-  integrationTest.finalizedBy jacocoIntegrationTestReport
 
   // enable preview features
   tasks.withType(JavaCompile) {
