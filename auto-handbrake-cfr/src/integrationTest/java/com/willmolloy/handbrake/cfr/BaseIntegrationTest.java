@@ -13,6 +13,7 @@ import com.willmolloy.handbrake.core.HandBrake;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Random;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -37,10 +38,11 @@ abstract class BaseIntegrationTest {
   protected static Path encodedVideo1;
   protected static Path unencodedVideo2;
   protected static Path encodedVideo2;
+  private static final Random RANDOM = new Random();
 
   @BeforeAll
   static void setUp() throws Exception {
-    testParentDirectory = Path.of("Test");
+    testParentDirectory = Path.of("out/Test" + RANDOM.nextLong());
     unencodedVideo1 = Path.of(Resources.getResource("Big_Buck_Bunny_360_10s_1MB.mp4").toURI());
     encodedVideo1 = Path.of(Resources.getResource("Big_Buck_Bunny_360_10s_1MB.cfr.mp4").toURI());
     unencodedVideo2 = Path.of(Resources.getResource("Big_Buck_Bunny_360_10s_2MB.mp4").toURI());
