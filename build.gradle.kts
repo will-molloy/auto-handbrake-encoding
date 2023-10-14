@@ -11,8 +11,8 @@ logger.quiet("Gradle version: ${gradle.gradleVersion}")
 
 plugins {
   id("java-library")
-  id("com.diffplug.gradle.spotless") version "6.19.0" apply (false)
-  id("com.github.spotbugs") version "5.0.14" apply (false)
+  id("com.diffplug.gradle.spotless") version "6.22.0" apply (false)
+  id("com.github.spotbugs") version "5.1.5" apply (false)
   id("com.asarkar.gradle.build-time-tracker") version "4.3.0"
 }
 
@@ -26,8 +26,8 @@ allprojects {
 subprojects {
   apply(plugin = "java")
   configure<JavaPluginExtension> {
-    sourceCompatibility = JavaVersion.VERSION_19
-    targetCompatibility = JavaVersion.VERSION_19
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
   }
 
   apply(plugin = "com.diffplug.spotless")
@@ -87,17 +87,6 @@ subprojects {
     reports {
       xml.required.set(true)
     }
-  }
-
-  val previewFeatures = listOf("--enable-preview")
-  tasks.withType<JavaCompile> {
-    options.compilerArgs = previewFeatures
-  }
-  tasks.withType<Test> {
-    jvmArgs = previewFeatures
-  }
-  tasks.withType<JavaExec> {
-    jvmArgs = previewFeatures
   }
 
   dependencies {
