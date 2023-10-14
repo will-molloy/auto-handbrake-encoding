@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <FindBugsFilter>
-
-  <!-- False positive with records -->
   <Match>
-    <Bug pattern="EQ_UNUSUAL" />
+    <Bug pattern="PI_DO_NOT_REUSE_PUBLIC_IDENTIFIERS_CLASS_NAMES"/>
   </Match>
-
 </FindBugsFilter>

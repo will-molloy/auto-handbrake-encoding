@@ -1,6 +1,6 @@
 # base HandBrake + Java image
 
-FROM amazoncorretto:19-alpine3.14
+FROM amazoncorretto:21-alpine3.14
 
 # Compile HandBrake
 # credit: https://github.com/txstate-etc/mediaflo-encoder/blob/77bda38311f97903bd11d4fe10a0c516e8d8d145/worker/Dockerfile
