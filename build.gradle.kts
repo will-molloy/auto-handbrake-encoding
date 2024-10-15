@@ -11,8 +11,8 @@ logger.quiet("Gradle version: ${gradle.gradleVersion}")
 
 plugins {
   id("java-library")
-  id("com.diffplug.gradle.spotless") version "6.22.0" apply (false)
-  id("com.github.spotbugs") version "5.1.5" apply (false)
+  id("com.diffplug.gradle.spotless") version "6.25.0" apply (false)
+  id("com.github.spotbugs") version "6.0.25" apply (false)
   id("com.asarkar.gradle.build-time-tracker") version "4.3.0"
 }
 
@@ -90,15 +90,15 @@ subprojects {
   }
 
   dependencies {
-    val log4jVersion = "2.20.0"
-    val guavaVersion = "32.1.3-jre"
+    val log4jVersion = "2.24.1"
+    val guavaVersion = "33.3.1-jre"
     implementation("org.apache.logging.log4j:log4j-core:$log4jVersion")
-    implementation("com.github.spotbugs:spotbugs-annotations:4.8.0")
+    implementation("com.github.spotbugs:spotbugs-annotations:4.8.6")
     implementation("com.google.guava:guava:$guavaVersion")
 
-    val junitVersion = "5.10.0"
-    val truthVersion = "1.1.5"
-    val mockitoVersion = "5.6.0"
+    val junitVersion = "5.11.2"
+    val truthVersion = "1.4.4"
+    val mockitoVersion = "5.14.2"
     testImplementation("org.junit.jupiter:junit-jupiter:$junitVersion")
     testImplementation("com.google.truth:truth:$truthVersion")
     testImplementation("com.google.truth.extensions:truth-java8-extension:$truthVersion")
