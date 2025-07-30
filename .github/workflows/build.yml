@@ -32,6 +32,7 @@ jobs:
         with:
           flags: unit-tests
           fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   integration-test:
     runs-on: ubuntu-latest
@@ -70,6 +71,7 @@ jobs:
         with:
           flags: integration-tests
           fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   docker-build:
     runs-on: ubuntu-latest
