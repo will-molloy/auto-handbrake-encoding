@@ -5,8 +5,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.willmolloy.handbrake.core.options.Input;
 import com.willmolloy.handbrake.core.options.Option;
 import com.willmolloy.handbrake.core.options.Output;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import java.io.File;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
@@ -48,15 +46,7 @@ class HandBrakeImpl implements HandBrake {
   }
 
   private List<String> getCommand(Stream<Option> options) {
-    return Stream.concat(
-            // TODO ugly hack... can't seem to install HandBrake in docker with HandBrakeCLI on path
-            Stream.of(isRunningInsideDocker() ? "/HandBrake/build/HandBrakeCLI" : "HandBrakeCLI"),
-            options.flatMap(Option::handBrakeCliArgs))
+    return Stream.concat(Stream.of("HandBrakeCLI"), options.flatMap(Option::handBrakeCliArgs))
         .toList();
-  }
-
-  @SuppressFBWarnings("DMI_HARDCODED_ABSOLUTE_FILENAME")
-  private static boolean isRunningInsideDocker() {
-    return new File("/.dockerenv").exists();
   }
 }
