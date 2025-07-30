@@ -107,15 +107,20 @@ jobs:
           name: docker-tar
           path: auto-handbrake-cfr/build
 
-      - name: Load and test Docker image
+      - name: Load docker image
+        run: docker load -i auto-handbrake-cfr/build/jib-image.tar
+
+      - name: Test docker image
         run: |
-          docker load -i auto-handbrake-cfr/build/jib-image.tar
           mkdir -p test-input test-output test-archive
           cp auto-handbrake-cfr/src/integrationTest/resources/Big_Buck_Bunny_360_10s_1MB.mp4 test-input/
           docker run --rm -v $(pwd)/test-input:/input -v $(pwd)/test-output:/output -v $(pwd)/test-archive:/archive ghcr.io/will-molloy/auto-handbrake-cfr
-          # Verify encoded file was created
+          # Verify encoded file was created in output directory
           ls test-output/*.cfr.mp4
-          echo "Docker smoke test passed - HandBrake successfully encoded video"
+          # Verify original file was moved to archive directory
+          ls test-archive/*.mp4
+          # Verify input directory is now empty
+          [ -z "$(ls -A test-input)" ] || exit 1
 
   release:
     needs: [ build, integration-test, smoke-test ]
