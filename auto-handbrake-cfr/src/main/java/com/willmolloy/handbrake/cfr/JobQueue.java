@@ -56,7 +56,7 @@ class JobQueue {
       }
     }
 
-    return Booleans.asList(results).stream().reduce(true, Boolean::logicalAnd);
+    return Booleans.asList(results).stream().allMatch(x -> x);
   }
 
   private Thread startJob(

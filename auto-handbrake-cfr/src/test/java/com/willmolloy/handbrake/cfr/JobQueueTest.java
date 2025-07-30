@@ -26,7 +26,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
@@ -96,20 +95,20 @@ class JobQueueTest {
     }
   }
 
-  static Stream<Arguments> anyEncodeOrArchiveFailed() {
+  static Stream<boolean[]> anyEncodeOrArchiveFailed() {
     return Stream.of(
-        Arguments.of(true, true, false),
-        Arguments.of(true, false, true),
-        Arguments.of(false, true, true));
+        new boolean[] {true, true, false},
+        new boolean[] {true, false, true},
+        new boolean[] {false, true, true});
   }
 
   @ParameterizedTest
   @MethodSource("anyEncodeOrArchiveFailed")
   void
       whenEncodingFails_skipsArchiving_andStillEncodesAndArchivesOtherVideos_andReturnsFalseOverall(
-          boolean result1, boolean result2, boolean result3) throws Exception {
+          boolean[] encodeResults) throws Exception {
     // Given
-    whenVideoEncoderReturns(result1, result2, result3);
+    whenVideoEncoderReturns(encodeResults);
     when(mockVideoArchiver.archive(any())).thenReturn(true);
 
     Files.createDirectories(inputDirectory.resolve("NestedFolder"));
@@ -128,18 +127,19 @@ class JobQueueTest {
     for (UnencodedVideo video : videos) {
       verify(mockVideoEncoder).encode(same(video));
     }
-    verify(mockVideoArchiver, times(result1 ? 1 : 0)).archive(same(videos.get(0)));
-    verify(mockVideoArchiver, times(result2 ? 1 : 0)).archive(same(videos.get(1)));
-    verify(mockVideoArchiver, times(result3 ? 1 : 0)).archive(same(videos.get(2)));
+    verify(mockVideoArchiver, times(encodeResults[0] ? 1 : 0)).archive(same(videos.get(0)));
+    verify(mockVideoArchiver, times(encodeResults[1] ? 1 : 0)).archive(same(videos.get(1)));
+    verify(mockVideoArchiver, times(encodeResults[2] ? 1 : 0)).archive(same(videos.get(2)));
   }
 
   @ParameterizedTest
   @MethodSource("anyEncodeOrArchiveFailed")
   void whenArchivingFails_stillEncodesAndArchivesOtherVideos_andReturnsFalseOverall(
-      boolean result1, boolean result2, boolean result3) throws Exception {
+      boolean[] archiveResults) throws Exception {
     // Given
     whenVideoEncoderReturns(true);
-    when(mockVideoArchiver.archive(any())).thenReturn(result1, result2, result3);
+    when(mockVideoArchiver.archive(any()))
+        .thenReturn(archiveResults[0], archiveResults[1], archiveResults[2]);
 
     Files.createDirectories(inputDirectory.resolve("NestedFolder"));
 
