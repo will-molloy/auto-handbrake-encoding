@@ -16,7 +16,6 @@ import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.IntStream;
@@ -200,12 +199,13 @@ class JobQueueTest {
     when(mockVideoEncoder.encode(any()))
         .then(
             new Answer<Boolean>() {
-              final AtomicInteger i = new AtomicInteger();
+              int i;
 
               @Override
               public Boolean answer(InvocationOnMock invocation) {
+                boolean result = results[i++ % results.length];
                 lock.unlock();
-                return results[i.getAndIncrement() % results.length];
+                return result;
               }
             });
   }
