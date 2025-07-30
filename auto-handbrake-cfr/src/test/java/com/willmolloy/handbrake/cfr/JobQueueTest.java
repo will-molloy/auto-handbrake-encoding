@@ -16,6 +16,7 @@ import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.IntStream;
@@ -95,17 +96,20 @@ class JobQueueTest {
     }
   }
 
+  static Stream<Arguments> anyEncodeOrArchiveFailed() {
+    return Stream.of(
+        Arguments.of(true, true, false),
+        Arguments.of(true, false, true),
+        Arguments.of(false, true, true));
+  }
+
   @ParameterizedTest
   @MethodSource("anyEncodeOrArchiveFailed")
   void
       whenEncodingFails_skipsArchiving_andStillEncodesAndArchivesOtherVideos_andReturnsFalseOverall(
-          boolean firstEncodingSuccessful,
-          boolean secondEncodingSuccessful,
-          boolean thirdEncodingSuccessful)
-          throws Exception {
+          boolean result1, boolean result2, boolean result3) throws Exception {
     // Given
-    whenVideoEncoderReturns(
-        firstEncodingSuccessful, secondEncodingSuccessful, thirdEncodingSuccessful);
+    whenVideoEncoderReturns(result1, result2, result3);
     when(mockVideoArchiver.archive(any())).thenReturn(true);
 
     Files.createDirectories(inputDirectory.resolve("NestedFolder"));
@@ -124,29 +128,18 @@ class JobQueueTest {
     for (UnencodedVideo video : videos) {
       verify(mockVideoEncoder).encode(same(video));
     }
-    verify(mockVideoArchiver, times(firstEncodingSuccessful ? 1 : 0)).archive(same(videos.get(0)));
-    verify(mockVideoArchiver, times(secondEncodingSuccessful ? 1 : 0)).archive(same(videos.get(1)));
-    verify(mockVideoArchiver, times(thirdEncodingSuccessful ? 1 : 0)).archive(same(videos.get(2)));
-  }
-
-  static Stream<Arguments> anyEncodeOrArchiveFailed() {
-    return Stream.of(
-        Arguments.of(true, true, false),
-        Arguments.of(true, false, true),
-        Arguments.of(false, true, true));
+    verify(mockVideoArchiver, times(result1 ? 1 : 0)).archive(same(videos.get(0)));
+    verify(mockVideoArchiver, times(result2 ? 1 : 0)).archive(same(videos.get(1)));
+    verify(mockVideoArchiver, times(result3 ? 1 : 0)).archive(same(videos.get(2)));
   }
 
   @ParameterizedTest
   @MethodSource("anyEncodeOrArchiveFailed")
   void whenArchivingFails_stillEncodesAndArchivesOtherVideos_andReturnsFalseOverall(
-      boolean firstArchingSuccessful,
-      boolean secondArchivingSuccessful,
-      boolean thirdArchivingSuccessful)
-      throws Exception {
+      boolean result1, boolean result2, boolean result3) throws Exception {
     // Given
     whenVideoEncoderReturns(true);
-    when(mockVideoArchiver.archive(any()))
-        .thenReturn(firstArchingSuccessful, secondArchivingSuccessful, thirdArchivingSuccessful);
+    when(mockVideoArchiver.archive(any())).thenReturn(result1, result2, result3);
 
     Files.createDirectories(inputDirectory.resolve("NestedFolder"));
 
@@ -207,15 +200,12 @@ class JobQueueTest {
     when(mockVideoEncoder.encode(any()))
         .then(
             new Answer<Boolean>() {
-              int i;
+              final AtomicInteger i = new AtomicInteger();
 
               @Override
               public Boolean answer(InvocationOnMock invocation) {
                 lock.unlock();
-
-                boolean result = results[i];
-                i = (i + 1) % results.length;
-                return result;
+                return results[i.getAndIncrement() % results.length];
               }
             });
   }
