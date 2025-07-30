@@ -1,8 +1,5 @@
 # base HandBrake + Java image
-FROM eclipse-temurin:21
+FROM eclipse-temurin:21-jre-alpine
 
-# Install HandBrake from Ubuntu packages
-RUN apt-get update && \
-    apt-get install -y handbrake-cli && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+# Install HandBrake from Alpine packages
+RUN apk add --no-cache handbrake
