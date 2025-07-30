@@ -1,6 +1,5 @@
 # base HandBrake + Java image
-
-FROM amazoncorretto:21
+FROM eclipse-temurin:21
 
 # Install HandBrake from Ubuntu packages
 RUN apt-get update && \
