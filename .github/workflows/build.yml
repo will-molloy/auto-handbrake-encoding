@@ -113,6 +113,7 @@ jobs:
       - name: Test docker image
         run: |
           mkdir -p test-input test-output test-archive
+          touch test-archive/.keep
           cp auto-handbrake-cfr/src/integrationTest/resources/Big_Buck_Bunny_360_10s_1MB.mp4 test-input/
           docker run --rm -v $(pwd)/test-input:/input -v $(pwd)/test-output:/output -v $(pwd)/test-archive:/archive ghcr.io/will-molloy/auto-handbrake-cfr
           # Verify encoded file was created in output directory
