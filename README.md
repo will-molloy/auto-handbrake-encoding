@@ -1,6 +1,6 @@
 # auto-handbrake-encoding
 
-[![build](https://github.com/will-molloy/auto-handbrake-encoding/workflows/build/badge.svg?branch=main)](https://github.com/will-molloy/auto-handbrake-encoding/actions?query=workflow%3Abuild)
+[![build](https://github.com/will-molloy/auto-handbrake-encoding/actions/workflows/build.yml/badge.svg?branch=main&event=push)](https://github.com/will-molloy/auto-handbrake-encoding/actions/workflows/build.yml)
 [![codecov](https://codecov.io/gh/will-molloy/auto-handbrake-encoding/branch/main/graph/badge.svg)](https://codecov.io/gh/will-molloy/auto-handbrake-encoding)
 
 Automating HandBrake encoding with Java
