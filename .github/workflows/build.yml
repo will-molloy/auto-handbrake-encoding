@@ -28,7 +28,7 @@ jobs:
           ./gradlew projects clean build --no-daemon --refresh-dependencies
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3.1.4
+        uses: codecov/codecov-action@v5.4.3
         with:
           flags: unit-tests
           fail_ci_if_error: true
@@ -58,7 +58,7 @@ jobs:
 
       - name: Integration test
         # use retry cause the integration tests can be flaky. E.g. HandBrake crashing on the agent.
-        uses: nick-fields/retry@v2
+        uses: nick-fields/retry@v3
         with:
           timeout_minutes: 10
           max_attempts: 10
@@ -67,7 +67,7 @@ jobs:
             ./gradlew projects clean integrationTest --no-daemon --refresh-dependencies
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3.1.4
+        uses: codecov/codecov-action@v5.4.3
         with:
           flags: integration-tests
           fail_ci_if_error: true
