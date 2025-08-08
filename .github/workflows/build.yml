@@ -46,7 +46,9 @@ jobs:
           java-version: 21
 
       - name: Setup HandBrake
-        run: sudo apt install handbrake-cli
+        run: |
+          sudo apt update
+          sudo apt install -y handbrake-cli
 
       # Need to generate encoded files for the integration tests on the GitHub Actions agent.
       # Can't simply use the ones stored in git.
