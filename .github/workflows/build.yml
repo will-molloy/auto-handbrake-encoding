@@ -46,7 +46,9 @@ jobs:
           java-version: 21
 
       - name: Setup HandBrake
-        run: sudo apt install handbrake-cli
+        run: |
+          sudo apt update
+          sudo apt install -y handbrake-cli
 
       # Need to generate encoded files for the integration tests on the GitHub Actions agent.
       # Can't simply use the ones stored in git.
@@ -94,6 +96,8 @@ jobs:
         with:
           name: docker-tar
           path: auto-handbrake-cfr/build/jib-image.tar
+          retention-days: 1
+          if-no-files-found: error
 
   smoke-test:
     needs: [ docker ]
@@ -171,3 +175,20 @@ jobs:
         with:
           tag_name: ${{ steps.version.outputs.version_tag }}
           generate_release_notes: true
+
+  cleanup:
+    needs: [ smoke-test, release ]
+    if: always()
+    concurrency:
+      group: cleanup-${{ github.run_id }}
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cleanup artifacts
+        uses: jimschubert/delete-artifacts-action@v1
+        with:
+          log_level: 'debug'
+          min_bytes: '0'
+          run_id: ${{ github.run_id }}
