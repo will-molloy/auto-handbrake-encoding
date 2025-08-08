@@ -187,7 +187,6 @@ jobs:
       - name: Cleanup artifacts
         uses: jimschubert/delete-artifacts-action@v1
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           log_level: 'debug'
           min_bytes: '0'
           run_id: ${{ github.run_id }}
