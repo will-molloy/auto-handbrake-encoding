@@ -94,6 +94,8 @@ jobs:
         with:
           name: docker-tar
           path: auto-handbrake-cfr/build/jib-image.tar
+          retention-days: 1
+          if-no-files-found: error
 
   smoke-test:
     needs: [ docker ]
@@ -171,3 +173,18 @@ jobs:
         with:
           tag_name: ${{ steps.version.outputs.version_tag }}
           generate_release_notes: true
+
+  cleanup:
+    needs: [ smoke-test, release ]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cleanup artifacts
+        uses: jimschubert/delete-artifacts-action@v1
+        with:
+          GITHUB_TOKEN: ${{ secrets.DELETE_ARTIFACT_TOKEN }}
+          log_level: 'debug'
+          min_bytes: '0'
+          run_id: ${{ github.run_id }}
