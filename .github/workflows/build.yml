@@ -119,15 +119,15 @@ jobs:
           mkdir -p test-input test-output test-archive
           touch test-archive/.keep
           cp auto-handbrake-cfr/src/integrationTest/resources/Big_Buck_Bunny_360_10s_1MB.mp4 test-input/
-          
+
           docker run --rm -v $(pwd)/test-input:/input -v $(pwd)/test-output:/output -v $(pwd)/test-archive:/archive ghcr.io/will-molloy/auto-handbrake-cfr
-          
+
           # Verify encoded file was created in output directory
           ls test-output/*.cfr.mp4
-          
+
           # Verify original file was moved to archive directory
           ls test-archive/*.mp4
-          
+
           # Verify input directory is now empty
           [ -z "$(ls -A test-input)" ] || exit 1
 
@@ -187,8 +187,6 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Cleanup artifacts
-        uses: jimschubert/delete-artifacts-action@v1
+        uses: geekyeggo/delete-artifact@v5
         with:
-          log_level: 'debug'
-          min_bytes: '0'
-          run_id: ${{ github.run_id }}
+          name: docker-tar
