@@ -87,7 +87,7 @@ class VideoEncoder {
       log.info("Encoded: {}", video.encodedPath());
       return true;
     } catch (Exception e) {
-      log.error("Error encoding: %s".formatted(video), e);
+      log.error("Error encoding: {}", video, e);
       return false;
     } finally {
       // ensure unlocked (i.e. if method returns exceptionally)

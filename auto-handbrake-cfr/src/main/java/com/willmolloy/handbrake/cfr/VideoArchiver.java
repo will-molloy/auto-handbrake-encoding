@@ -53,7 +53,7 @@ class VideoArchiver {
       log.info("Archived: {}", video.archivedPath());
       return true;
     } catch (Exception e) {
-      log.error("Error archiving: %s".formatted(video), e);
+      log.error("Error archiving: {}", video, e);
       return false;
     } finally {
       log.info("Elapsed: {}", stopwatch);

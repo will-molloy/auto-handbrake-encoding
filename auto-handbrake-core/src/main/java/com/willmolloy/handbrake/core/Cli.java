@@ -58,7 +58,7 @@ class Cli {
       }
       return true;
     } catch (Exception e) {
-      log.error("Error executing: %s".formatted(command), e);
+      log.error("Error executing: {}", command, e);
       return false;
     } finally {
       if (process != null) {
