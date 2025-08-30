@@ -11,9 +11,9 @@ logger.quiet("Gradle version: ${gradle.gradleVersion}")
 
 plugins {
   id("java-library")
-  id("com.diffplug.gradle.spotless") version "6.22.0" apply (false)
-  id("com.github.spotbugs") version "5.1.5" apply (false)
-  id("com.asarkar.gradle.build-time-tracker") version "4.3.0"
+  id("com.diffplug.gradle.spotless") version "7.2.1" apply (false)
+  id("com.github.spotbugs") version "6.2.6" apply (false)
+  id("com.asarkar.gradle.build-time-tracker") version "5.0.1"
 }
 
 allprojects {
@@ -90,21 +90,21 @@ subprojects {
   }
 
   dependencies {
-    val log4jVersion = "2.20.0"
-    val guavaVersion = "32.1.3-jre"
+    val log4jVersion = "2.25.1"
+    val guavaVersion = "33.4.8-jre"
     implementation("org.apache.logging.log4j:log4j-core:$log4jVersion")
-    implementation("com.github.spotbugs:spotbugs-annotations:4.8.0")
+    implementation("com.github.spotbugs:spotbugs-annotations:4.9.4")
     implementation("com.google.guava:guava:$guavaVersion")
 
-    val junitVersion = "5.10.0"
-    val truthVersion = "1.1.5"
-    val mockitoVersion = "5.6.0"
+    val junitVersion = "5.13.4"
+    val truthVersion = "1.4.4"
+    val mockitoVersion = "5.19.0"
     testImplementation("org.junit.jupiter:junit-jupiter:$junitVersion")
     testImplementation("com.google.truth:truth:$truthVersion")
     testImplementation("com.google.truth.extensions:truth-java8-extension:$truthVersion")
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
     testImplementation("org.mockito:mockito-junit-jupiter:$mockitoVersion")
-    testImplementation("com.google.jimfs:jimfs:1.3.0")
+    testImplementation("com.google.jimfs:jimfs:1.3.1")
 
     configurations.all {
       exclude("org.assertj")
