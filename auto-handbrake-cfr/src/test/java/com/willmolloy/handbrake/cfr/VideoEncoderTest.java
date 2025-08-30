@@ -18,6 +18,7 @@ import com.willmolloy.handbrake.core.options.Option;
 import com.willmolloy.handbrake.core.options.Output;
 import com.willmolloy.handbrake.core.options.Preset;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -51,7 +52,7 @@ class VideoEncoderTest {
   @InjectMocks private VideoEncoder videoEncoder;
 
   @BeforeEach
-  void setUp() throws Exception {
+  void setUp() throws IOException, URISyntaxException {
     fileSystem = Jimfs.newFileSystem(Configuration.unix());
 
     inputDirectory = fileSystem.getPath("/input/Videos/Gameplay");

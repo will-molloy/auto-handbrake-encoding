@@ -7,6 +7,7 @@ import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
 import com.google.common.truth.StreamSubject;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,7 +34,7 @@ class VideoArchiverTest {
   private final VideoArchiver videoArchiver = new VideoArchiver();
 
   @BeforeEach
-  void setUp() throws Exception {
+  void setUp() throws IOException, URISyntaxException {
     fileSystem = Jimfs.newFileSystem(Configuration.unix());
 
     inputDirectory = fileSystem.getPath("/input/Videos/Gameplay");

@@ -45,7 +45,7 @@ class CliTest {
   }
 
   @AfterEach
-  void tearDown() throws Exception {
+  void tearDown() {
     verify(mockProcessBuilder).redirectErrorStream(true);
     verify(mockProcessBuilder).start();
     verify(mockProcess).getInputStream();
@@ -53,7 +53,7 @@ class CliTest {
   }
 
   @Test
-  void successfulExecutionOfCommandReturnsTrue() throws Exception {
+  void successfulExecutionOfCommandReturnsTrue() {
     when(mockProcess.waitFor()).thenReturn(0);
 
     assertThat(cli.execute(List.of("ls"), new EmptyConsumer())).isTrue();
@@ -61,7 +61,7 @@ class CliTest {
   }
 
   @Test
-  void nonZeroExitCodeReturnsFalse() throws Exception {
+  void nonZeroExitCodeReturnsFalse() {
     when(mockProcess.waitFor()).thenReturn(1);
 
     assertThat(cli.execute(List.of("abc"), new EmptyConsumer())).isFalse();
@@ -69,7 +69,7 @@ class CliTest {
   }
 
   @Test
-  void exceptionThrownReturnsFalse() throws Exception {
+  void exceptionThrownReturnsFalse() {
     when(mockProcess.waitFor()).thenThrow(new RuntimeException("error"));
 
     assertThat(cli.execute(List.of("xyz"), new EmptyConsumer())).isFalse();

@@ -11,6 +11,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.willmolloy.handbrake.cfr.util.Files2;
 import com.willmolloy.handbrake.core.HandBrake;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Random;
@@ -41,7 +42,7 @@ abstract class BaseIntegrationTest {
   private static final Random RANDOM = new Random();
 
   @BeforeAll
-  static void setUp() throws Exception {
+  static void setUp() throws URISyntaxException {
     testParentDirectory = Path.of("out/Test" + RANDOM.nextLong());
     unencodedVideo1 = Path.of(Resources.getResource("Big_Buck_Bunny_360_10s_1MB.mp4").toURI());
     encodedVideo1 = Path.of(Resources.getResource("Big_Buck_Bunny_360_10s_1MB.cfr.mp4").toURI());
@@ -55,7 +56,7 @@ abstract class BaseIntegrationTest {
   }
 
   protected static boolean runApp(Path inputDirectory, Path outputDirectory, Path archiveDirectory)
-      throws Exception {
+      throws IOException {
     app =
         new App(
             new DirectoryScanner(inputDirectory, outputDirectory, archiveDirectory),
@@ -122,7 +123,8 @@ abstract class BaseIntegrationTest {
   /** Encode and archive to the same directory (i.e. {@code inputDirectory}). */
   protected static class EncodeAndArchiveToSameDirectory implements ArgumentsProvider {
     @Override
-    public Stream<? extends Arguments> provideArguments(ExtensionContext context) throws Exception {
+    public Stream<? extends Arguments> provideArguments(ExtensionContext context)
+        throws IOException {
       Path inputDirectory = createDirectoryAt(testParentDirectory.resolve("Gameplay"));
       return Stream.of(Arguments.of(inputDirectory, inputDirectory, inputDirectory));
     }
@@ -131,7 +133,8 @@ abstract class BaseIntegrationTest {
   /** Encode to a different directory. */
   protected static class EncodeToDifferentDirectory implements ArgumentsProvider {
     @Override
-    public Stream<? extends Arguments> provideArguments(ExtensionContext context) throws Exception {
+    public Stream<? extends Arguments> provideArguments(ExtensionContext context)
+        throws IOException {
       Path inputDirectory = createDirectoryAt(testParentDirectory.resolve("Gameplay"));
       Path outputDirectory = createDirectoryAt(testParentDirectory.resolve("Gameplay Encoded"));
       return Stream.of(Arguments.of(inputDirectory, outputDirectory, inputDirectory));
@@ -141,7 +144,8 @@ abstract class BaseIntegrationTest {
   /** Archive to a different directory. */
   protected static class ArchiveToDifferentDirectory implements ArgumentsProvider {
     @Override
-    public Stream<? extends Arguments> provideArguments(ExtensionContext context) throws Exception {
+    public Stream<? extends Arguments> provideArguments(ExtensionContext context)
+        throws IOException {
       Path inputDirectory = createDirectoryAt(testParentDirectory.resolve("Gameplay"));
       Path archiveDirectory = createDirectoryAt(testParentDirectory.resolve("Gameplay Archive"));
       return Stream.of(Arguments.of(inputDirectory, inputDirectory, archiveDirectory));
@@ -151,7 +155,8 @@ abstract class BaseIntegrationTest {
   /** Encode and archive to a different directory. */
   protected static class EncodeAndArchiveToDifferentDirectory implements ArgumentsProvider {
     @Override
-    public Stream<? extends Arguments> provideArguments(ExtensionContext context) throws Exception {
+    public Stream<? extends Arguments> provideArguments(ExtensionContext context)
+        throws IOException {
       Path inputDirectory = createDirectoryAt(testParentDirectory.resolve("Gameplay"));
       Path outputDirectory = createDirectoryAt(testParentDirectory.resolve("Gameplay Encoded"));
       Path archiveDirectory = createDirectoryAt(testParentDirectory.resolve("Gameplay Archive"));

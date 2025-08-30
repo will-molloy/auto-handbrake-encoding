@@ -28,7 +28,7 @@ class UnencodedVideoTest {
   private UnencodedVideo.Factory factory;
 
   @BeforeEach
-  void setUp() throws Exception {
+  void setUp() throws IOException {
     fileSystem = Jimfs.newFileSystem(Configuration.unix());
 
     inputDirectory = fileSystem.getPath("input");

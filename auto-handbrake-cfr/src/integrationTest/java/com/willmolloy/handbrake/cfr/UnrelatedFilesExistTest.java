@@ -2,6 +2,7 @@ package com.willmolloy.handbrake.cfr;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
@@ -19,7 +20,7 @@ class UnrelatedFilesExistTest extends BaseIntegrationTest {
   @ArgumentsSource(ArchiveToDifferentDirectory.class)
   @ArgumentsSource(EncodeAndArchiveToDifferentDirectory.class)
   void retainsUnrelatedFilesInAllDirectories(
-      Path inputDirectory, Path outputDirectory, Path archiveDirectory) throws Exception {
+      Path inputDirectory, Path outputDirectory, Path archiveDirectory) throws IOException {
     // Given
     // video to encode
     createVideoAt(inputDirectory.resolve("my video.mp4"), unencodedVideo1);
@@ -52,7 +53,7 @@ class UnrelatedFilesExistTest extends BaseIntegrationTest {
   @ArgumentsSource(ArchiveToDifferentDirectory.class)
   @ArgumentsSource(EncodeAndArchiveToDifferentDirectory.class)
   void retainsUnrelatedCompleteEncodingsAndArchives(
-      Path inputDirectory, Path outputDirectory, Path archiveDirectory) throws Exception {
+      Path inputDirectory, Path outputDirectory, Path archiveDirectory) throws IOException {
     // Given
     // video to encode
     createVideoAt(inputDirectory.resolve("my video.mp4"), unencodedVideo1);

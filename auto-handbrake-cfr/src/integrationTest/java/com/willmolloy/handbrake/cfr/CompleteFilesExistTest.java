@@ -2,6 +2,7 @@ package com.willmolloy.handbrake.cfr;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
@@ -19,7 +20,7 @@ class CompleteFilesExistTest extends BaseIntegrationTest {
   @ArgumentsSource(ArchiveToDifferentDirectory.class)
   @ArgumentsSource(EncodeAndArchiveToDifferentDirectory.class)
   void when_encodingExists_continuesByOverwritingExistingEncoding(
-      Path inputDirectory, Path outputDirectory, Path archiveDirectory) throws Exception {
+      Path inputDirectory, Path outputDirectory, Path archiveDirectory) throws IOException {
     // Given
     // video to encode
     createVideoAt(inputDirectory.resolve("my video.mp4"), unencodedVideo1);
@@ -46,7 +47,7 @@ class CompleteFilesExistTest extends BaseIntegrationTest {
   @ArgumentsSource(ArchiveToDifferentDirectory.class)
   @ArgumentsSource(EncodeAndArchiveToDifferentDirectory.class)
   void when_encodingExistsButContentsDiffer_abortsEncoding_andSkipsArchiving(
-      Path inputDirectory, Path outputDirectory, Path archiveDirectory) throws Exception {
+      Path inputDirectory, Path outputDirectory, Path archiveDirectory) throws IOException {
     // Given
     // video to encode
     createVideoAt(inputDirectory.resolve("my video.mp4"), unencodedVideo1);
@@ -73,7 +74,7 @@ class CompleteFilesExistTest extends BaseIntegrationTest {
   @ArgumentsSource(ArchiveToDifferentDirectory.class)
   @ArgumentsSource(EncodeAndArchiveToDifferentDirectory.class)
   void when_archiveExists_stillDeletesOriginal(
-      Path inputDirectory, Path outputDirectory, Path archiveDirectory) throws Exception {
+      Path inputDirectory, Path outputDirectory, Path archiveDirectory) throws IOException {
     // Given
     // video to encode
     createVideoAt(inputDirectory.resolve("my video.mp4"), unencodedVideo1);
@@ -98,7 +99,7 @@ class CompleteFilesExistTest extends BaseIntegrationTest {
   @ArgumentsSource(ArchiveToDifferentDirectory.class)
   @ArgumentsSource(EncodeAndArchiveToDifferentDirectory.class)
   void when_archiveExistsButContentsDiffer_skipsArchiving(
-      Path inputDirectory, Path outputDirectory, Path archiveDirectory) throws Exception {
+      Path inputDirectory, Path outputDirectory, Path archiveDirectory) throws IOException {
     // Given
     // video to encode
     createVideoAt(inputDirectory.resolve("my video.mp4"), unencodedVideo1);
@@ -126,7 +127,7 @@ class CompleteFilesExistTest extends BaseIntegrationTest {
   @ArgumentsSource(EncodeAndArchiveToDifferentDirectory.class)
   void
       when_encodingExists_and_archiveExists_continuesByOverwritingExistingEncoding_andStillDeletesOriginal(
-          Path inputDirectory, Path outputDirectory, Path archiveDirectory) throws Exception {
+          Path inputDirectory, Path outputDirectory, Path archiveDirectory) throws IOException {
     // Given
     // video to encode
     createVideoAt(inputDirectory.resolve("my video.mp4"), unencodedVideo1);
@@ -154,7 +155,7 @@ class CompleteFilesExistTest extends BaseIntegrationTest {
   @ArgumentsSource(ArchiveToDifferentDirectory.class)
   @ArgumentsSource(EncodeAndArchiveToDifferentDirectory.class)
   void when_encodingExistsButContentsDiffer_and_archiveExists_abortsEncoding_andSkipsArchiving(
-      Path inputDirectory, Path outputDirectory, Path archiveDirectory) throws Exception {
+      Path inputDirectory, Path outputDirectory, Path archiveDirectory) throws IOException {
     // Given
     // video to encode
     createVideoAt(inputDirectory.resolve("my video.mp4"), unencodedVideo1);
@@ -187,7 +188,7 @@ class CompleteFilesExistTest extends BaseIntegrationTest {
   @ArgumentsSource(EncodeAndArchiveToDifferentDirectory.class)
   void
       when_encodingExists_and_archiveExistsButContentsDiffer_continuesByOverwritingExistingEncoding_andSkipsArchiving(
-          Path inputDirectory, Path outputDirectory, Path archiveDirectory) throws Exception {
+          Path inputDirectory, Path outputDirectory, Path archiveDirectory) throws IOException {
     // Given
     // video to encode
     createVideoAt(inputDirectory.resolve("my video.mp4"), unencodedVideo1);
@@ -218,7 +219,7 @@ class CompleteFilesExistTest extends BaseIntegrationTest {
   @ArgumentsSource(EncodeAndArchiveToDifferentDirectory.class)
   void
       when_encodingExistsButContentsDiffer_and_archiveExistsButContentsDiffer_abortsEncoding_andSkipsArchiving(
-          Path inputDirectory, Path outputDirectory, Path archiveDirectory) throws Exception {
+          Path inputDirectory, Path outputDirectory, Path archiveDirectory) throws IOException {
     // Given
     // video to encode
     createVideoAt(inputDirectory.resolve("my video.mp4"), unencodedVideo1);
