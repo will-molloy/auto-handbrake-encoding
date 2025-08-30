@@ -1,6 +1,6 @@
 package com.willmolloy.handbrake.core.options;
 
-import static com.google.common.truth.Truth8.assertThat;
+import static com.google.common.truth.Truth.assertThat;
 
 import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;

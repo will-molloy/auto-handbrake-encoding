@@ -40,7 +40,7 @@ class HandBrakeImpl implements HandBrake {
     try {
       return cli.execute(command, new HandBrakeLogger());
     } catch (Exception e) {
-      log.error("Error encoding: %s".formatted(input), e);
+      log.error("Error encoding: {}", input, e);
       return false;
     }
   }

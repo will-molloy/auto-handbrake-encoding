@@ -1,12 +1,13 @@
 package com.willmolloy.handbrake.cfr;
 
-import static com.google.common.truth.Truth8.assertThat;
+import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.io.Resources;
 import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
 import com.google.common.truth.StreamSubject;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -32,7 +33,7 @@ class DirectoryScannerTest {
   private DirectoryScanner directoryScanner;
 
   @BeforeEach
-  void setUp() throws Exception {
+  void setUp() throws IOException, URISyntaxException {
     fileSystem = Jimfs.newFileSystem(Configuration.unix());
 
     inputDirectory = fileSystem.getPath("input");
@@ -54,7 +55,7 @@ class DirectoryScannerTest {
   }
 
   @Test
-  void deletesIncompleteEncodings() throws Exception {
+  void deletesIncompleteEncodings() throws IOException {
     // Given
     Files.copy(testVideo, inputDirectory.resolve("video1.cfr.mp4.part"));
     Files.copy(testVideo, outputDirectory.resolve("video2.cfr.mp4.part"));
@@ -68,7 +69,7 @@ class DirectoryScannerTest {
   }
 
   @Test
-  void deletesIncompleteArchives() throws Exception {
+  void deletesIncompleteArchives() throws IOException {
     // Given
     Files.copy(testVideo, inputDirectory.resolve("video1.mp4.part"));
     Files.copy(testVideo, outputDirectory.resolve("video2.mp4.part"));
@@ -82,7 +83,7 @@ class DirectoryScannerTest {
   }
 
   @Test
-  void getsVideosToEncodeFromInputDirectory() throws Exception {
+  void getsVideosToEncodeFromInputDirectory() throws IOException {
     // Given
     // expected
     Files.copy(testVideo, inputDirectory.resolve("video1.mp4"));
@@ -115,8 +116,7 @@ class DirectoryScannerTest {
   }
 
   private StreamSubject assertThatTestDirectory() throws IOException {
-    try (Stream<Path> testFiles = Files.walk(fileSystem.getPath("/"))) {
-      return assertThat(testFiles.filter(Files::isRegularFile));
-    }
+    Stream<Path> testFiles = Files.walk(fileSystem.getPath("/"));
+    return assertThat(testFiles.filter(Files::isRegularFile));
   }
 }

@@ -1,7 +1,6 @@
 package com.willmolloy.handbrake.cfr;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.google.common.jimfs.Configuration;
@@ -29,7 +28,7 @@ class UnencodedVideoTest {
   private UnencodedVideo.Factory factory;
 
   @BeforeEach
-  void setUp() throws Exception {
+  void setUp() throws IOException {
     fileSystem = Jimfs.newFileSystem(Configuration.unix());
 
     inputDirectory = fileSystem.getPath("input");

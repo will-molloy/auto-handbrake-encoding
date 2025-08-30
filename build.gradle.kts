@@ -11,9 +11,9 @@ logger.quiet("Gradle version: ${gradle.gradleVersion}")
 
 plugins {
   id("java-library")
-  id("com.diffplug.gradle.spotless") version "6.22.0" apply (false)
-  id("com.github.spotbugs") version "5.1.5" apply (false)
-  id("com.asarkar.gradle.build-time-tracker") version "4.3.0"
+  alias(libs.plugins.spotless)
+  alias(libs.plugins.spotbugs)
+  alias(libs.plugins.buildtimetracker)
 }
 
 allprojects {
@@ -48,7 +48,7 @@ subprojects {
 
   apply(plugin = "checkstyle")
   configure<CheckstyleExtension> {
-    toolVersion = "10.12.0"
+    toolVersion = rootProject.libs.versions.checkstyle.get()
     configFile = rootProject.file("./checkstyle.xml")
     maxErrors = 0
     maxWarnings = 0
@@ -98,21 +98,15 @@ subprojects {
   }
 
   dependencies {
-    val log4jVersion = "2.20.0"
-    val guavaVersion = "32.1.3-jre"
-    implementation("org.apache.logging.log4j:log4j-core:$log4jVersion")
-    implementation("com.github.spotbugs:spotbugs-annotations:4.8.0")
-    implementation("com.google.guava:guava:$guavaVersion")
+    implementation(rootProject.libs.log4j.core)
+    implementation(rootProject.libs.spotbugs.annotations)
+    implementation(rootProject.libs.guava)
 
-    val junitVersion = "5.10.0"
-    val truthVersion = "1.1.5"
-    val mockitoVersion = "5.6.0"
-    testImplementation("org.junit.jupiter:junit-jupiter:$junitVersion")
-    testImplementation("com.google.truth:truth:$truthVersion")
-    testImplementation("com.google.truth.extensions:truth-java8-extension:$truthVersion")
-    testImplementation("org.mockito:mockito-core:$mockitoVersion")
-    testImplementation("org.mockito:mockito-junit-jupiter:$mockitoVersion")
-    testImplementation("com.google.jimfs:jimfs:1.3.0")
+    testImplementation(rootProject.libs.junit)
+    testImplementation(rootProject.libs.truth)
+    testImplementation(rootProject.libs.mockito.core)
+    testImplementation(rootProject.libs.mockito.junit)
+    testImplementation(rootProject.libs.jimfs)
 
     testRuntimeOnly(group = "org.junit.platform", name = "junit-platform-launcher")
 
@@ -120,7 +114,7 @@ subprojects {
       exclude("org.assertj")
       exclude("junit")
       resolutionStrategy {
-        force("com.google.guava:guava:$guavaVersion") // exclude android version
+        force(rootProject.libs.guava.get()) // exclude android version
       }
     }
   }

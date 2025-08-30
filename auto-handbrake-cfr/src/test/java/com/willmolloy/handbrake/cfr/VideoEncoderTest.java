@@ -1,7 +1,6 @@
 package com.willmolloy.handbrake.cfr;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -19,6 +18,7 @@ import com.willmolloy.handbrake.core.options.Option;
 import com.willmolloy.handbrake.core.options.Output;
 import com.willmolloy.handbrake.core.options.Preset;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -52,7 +52,7 @@ class VideoEncoderTest {
   @InjectMocks private VideoEncoder videoEncoder;
 
   @BeforeEach
-  void setUp() throws Exception {
+  void setUp() throws IOException, URISyntaxException {
     fileSystem = Jimfs.newFileSystem(Configuration.unix());
 
     inputDirectory = fileSystem.getPath("/input/Videos/Gameplay");
@@ -239,8 +239,7 @@ class VideoEncoderTest {
   }
 
   private StreamSubject assertThatTestDirectory() throws IOException {
-    try (Stream<Path> testFiles = Files.walk(fileSystem.getPath("/"))) {
-      return assertThat(testFiles.filter(Files::isRegularFile));
-    }
+    Stream<Path> testFiles = Files.walk(fileSystem.getPath("/"));
+    return assertThat(testFiles.filter(Files::isRegularFile));
   }
 }

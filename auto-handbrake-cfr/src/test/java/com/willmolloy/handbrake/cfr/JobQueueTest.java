@@ -50,7 +50,7 @@ class JobQueueTest {
   private UnencodedVideo.Factory factory;
 
   @BeforeEach
-  void setUp() throws Exception {
+  void setUp() throws IOException {
     fileSystem = Jimfs.newFileSystem(Configuration.unix());
 
     inputDirectory = fileSystem.getPath("input");
@@ -70,7 +70,7 @@ class JobQueueTest {
   }
 
   @Test
-  void encodesVideoFilesAndArchivesOriginals() throws Exception {
+  void encodesVideoFilesAndArchivesOriginals() throws IOException {
     // Given
     whenVideoEncoderReturns(true);
     when(mockVideoArchiver.archive(any())).thenReturn(true);
@@ -105,7 +105,7 @@ class JobQueueTest {
   @MethodSource("anyEncodeOrArchiveFailed")
   void
       whenEncodingFails_skipsArchiving_andStillEncodesAndArchivesOtherVideos_andReturnsFalseOverall(
-          boolean[] encodeResults) throws Exception {
+          boolean[] encodeResults) throws IOException {
     // Given
     whenVideoEncoderReturns(encodeResults);
     when(mockVideoArchiver.archive(any())).thenReturn(true);
@@ -134,7 +134,7 @@ class JobQueueTest {
   @ParameterizedTest
   @MethodSource("anyEncodeOrArchiveFailed")
   void whenArchivingFails_stillEncodesAndArchivesOtherVideos_andReturnsFalseOverall(
-      boolean[] archiveResults) throws Exception {
+      boolean[] archiveResults) throws IOException {
     // Given
     whenVideoEncoderReturns(true);
     when(mockVideoArchiver.archive(any()))
