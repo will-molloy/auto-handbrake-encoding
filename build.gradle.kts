@@ -106,6 +106,8 @@ subprojects {
     testImplementation("org.mockito:mockito-junit-jupiter:$mockitoVersion")
     testImplementation("com.google.jimfs:jimfs:1.3.0")
 
+    testRuntimeOnly(group = "org.junit.platform", name = "junit-platform-launcher")
+
     configurations.all {
       exclude("org.assertj")
       exclude("junit")
