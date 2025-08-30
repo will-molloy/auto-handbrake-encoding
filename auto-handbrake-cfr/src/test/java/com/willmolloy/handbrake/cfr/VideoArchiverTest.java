@@ -152,8 +152,7 @@ class VideoArchiverTest {
   }
 
   private StreamSubject assertThatTestDirectory() throws IOException {
-    try (Stream<Path> testFiles = Files.walk(fileSystem.getPath("/"))) {
-      return assertThat(testFiles.filter(Files::isRegularFile));
-    }
+    Stream<Path> testFiles = Files.walk(fileSystem.getPath("/"));
+    return assertThat(testFiles.filter(Files::isRegularFile));
   }
 }
