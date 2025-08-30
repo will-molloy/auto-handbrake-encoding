@@ -1,7 +1,6 @@
 package com.willmolloy.handbrake.cfr;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 
 import com.google.common.io.Resources;
 import com.google.common.jimfs.Configuration;
