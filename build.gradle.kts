@@ -11,9 +11,9 @@ logger.quiet("Gradle version: ${gradle.gradleVersion}")
 
 plugins {
   id("java-library")
-  id("com.diffplug.gradle.spotless") version "7.2.1" apply (false)
-  id("com.github.spotbugs") version "6.2.6" apply (false)
-  id("com.asarkar.gradle.build-time-tracker") version "5.0.1"
+  alias(libs.plugins.spotless)
+  alias(libs.plugins.spotbugs)
+  alias(libs.plugins.buildtimetracker)
 }
 
 allprojects {
@@ -40,7 +40,7 @@ subprojects {
 
   apply(plugin = "checkstyle")
   configure<CheckstyleExtension> {
-    toolVersion = "10.12.0"
+    toolVersion = rootProject.libs.versions.checkstyle.get()
     configFile = rootProject.file("./checkstyle.xml")
     maxErrors = 0
     maxWarnings = 0
@@ -90,26 +90,21 @@ subprojects {
   }
 
   dependencies {
-    val log4jVersion = "2.25.1"
-    val guavaVersion = "33.4.8-jre"
-    implementation("org.apache.logging.log4j:log4j-core:$log4jVersion")
-    implementation("com.github.spotbugs:spotbugs-annotations:4.9.4")
-    implementation("com.google.guava:guava:$guavaVersion")
+    implementation(rootProject.libs.log4j.core)
+    implementation(rootProject.libs.spotbugs.annotations)
+    implementation(rootProject.libs.guava)
 
-    val junitVersion = "5.13.4"
-    val truthVersion = "1.4.4"
-    val mockitoVersion = "5.19.0"
-    testImplementation("org.junit.jupiter:junit-jupiter:$junitVersion")
-    testImplementation("com.google.truth:truth:$truthVersion")
-    testImplementation("org.mockito:mockito-core:$mockitoVersion")
-    testImplementation("org.mockito:mockito-junit-jupiter:$mockitoVersion")
-    testImplementation("com.google.jimfs:jimfs:1.3.1")
+    testImplementation(rootProject.libs.junit)
+    testImplementation(rootProject.libs.truth)
+    testImplementation(rootProject.libs.mockito.core)
+    testImplementation(rootProject.libs.mockito.junit)
+    testImplementation(rootProject.libs.jimfs)
 
     configurations.all {
       exclude("org.assertj")
       exclude("junit")
       resolutionStrategy {
-        force("com.google.guava:guava:$guavaVersion") // exclude android version
+        force(rootProject.libs.guava.get()) // exclude android version
       }
     }
   }
