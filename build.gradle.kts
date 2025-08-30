@@ -35,6 +35,14 @@ subprojects {
     java {
       removeUnusedImports()
       googleJavaFormat()
+      trimTrailingWhitespace()
+      endWithNewline()
+    }
+    // https://github.com/diffplug/spotless/tree/main/plugin-gradle#kotlin
+    kotlinGradle {
+      ktlint().editorConfigOverride(mapOf("ktlint_standard_no-empty-file" to "disabled"))
+      trimTrailingWhitespace()
+      endWithNewline()
     }
   }
 
@@ -99,6 +107,8 @@ subprojects {
     testImplementation(rootProject.libs.mockito.core)
     testImplementation(rootProject.libs.mockito.junit)
     testImplementation(rootProject.libs.jimfs)
+
+    testRuntimeOnly(group = "org.junit.platform", name = "junit-platform-launcher")
 
     configurations.all {
       exclude("org.assertj")
