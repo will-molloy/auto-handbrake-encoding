@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -30,7 +29,6 @@ class CliTest {
 
   @Mock private Process mockProcess;
 
-  @SuppressFBWarnings("UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR")
   private Cli cli;
 
   @BeforeEach

@@ -15,7 +15,6 @@ import com.willmolloy.handbrake.core.options.FrameRateControl;
 import com.willmolloy.handbrake.core.options.Input;
 import com.willmolloy.handbrake.core.options.Output;
 import com.willmolloy.handbrake.core.options.Preset;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
@@ -41,7 +40,6 @@ class HandBrakeImplTest {
 
   @InjectMocks private HandBrakeImpl handBrake;
 
-  @SuppressFBWarnings("UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR")
   private FileSystem fileSystem;
 
   private Path input;
