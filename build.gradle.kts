@@ -35,6 +35,14 @@ subprojects {
     java {
       removeUnusedImports()
       googleJavaFormat()
+      trimTrailingWhitespace()
+      endWithNewline()
+    }
+    // https://github.com/diffplug/spotless/tree/main/plugin-gradle#kotlin
+    kotlinGradle {
+      ktlint().editorConfigOverride(mapOf("ktlint_standard_no-empty-file" to "disabled"))
+      trimTrailingWhitespace()
+      endWithNewline()
     }
   }
 
