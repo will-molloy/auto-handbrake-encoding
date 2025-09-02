@@ -26,7 +26,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Build and test
-        run: ./gradlew build
+        run: ./gradlew build --no-daemon
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
@@ -68,7 +68,7 @@ jobs:
         with:
           timeout_minutes: 10
           max_attempts: 10
-          command: ./gradlew integrationTest
+          command: ./gradlew integrationTest --no-daemon
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
@@ -94,7 +94,7 @@ jobs:
       - name: Docker build
         run: |
           docker build -t handbrake-java-base -f base.Dockerfile .
-          ./gradlew jibBuildTar
+          ./gradlew jibBuildTar --no-daemon
 
       - name: Upload docker tar
         uses: actions/upload-artifact@v4
