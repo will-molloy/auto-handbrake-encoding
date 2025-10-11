@@ -23,7 +23,7 @@ jobs:
           java-version: 25
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
 
       - name: Build and test
         run: ./gradlew build --no-daemon
@@ -47,7 +47,7 @@ jobs:
           java-version: 25
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
 
       - name: Setup HandBrake
         run: |
@@ -89,7 +89,7 @@ jobs:
           java-version: 25
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
 
       - name: Docker build
         run: |
@@ -176,7 +176,7 @@ jobs:
           done
 
       - name: Create GitHub tag and release
-        uses: softprops/action-gh-release@v2.3.2
+        uses: softprops/action-gh-release@v2.4.1
         with:
           tag_name: ${{ steps.version.outputs.version_tag }}
           generate_release_notes: true
