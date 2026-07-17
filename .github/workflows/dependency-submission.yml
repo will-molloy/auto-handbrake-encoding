@@ -1,15 +1,19 @@
-name: Dependency Submission
+name: dependency-submission
+run-name: dependency-submission by @${{ github.actor }}
 
 on:
   push:
-    branches: [ 'main' ]
+    branches: [ main ]
 
-permissions:
-  contents: write
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: false
 
 jobs:
   dependency-submission:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-java@v5

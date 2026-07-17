@@ -8,7 +8,7 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   build:
@@ -184,13 +184,8 @@ jobs:
   cleanup:
     needs: [ smoke-test, release ]
     if: always()
-    concurrency:
-      group: cleanup-${{ github.run_id }}
-      cancel-in-progress: false
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-
       - name: Cleanup artifacts
         uses: geekyeggo/delete-artifact@v5
         with:
