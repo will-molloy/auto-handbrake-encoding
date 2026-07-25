@@ -184,7 +184,7 @@ jobs:
   cleanup:
     needs: [ smoke-test, release ]
     if: always()
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
       - name: Cleanup artifacts
         uses: geekyeggo/delete-artifact@v5
