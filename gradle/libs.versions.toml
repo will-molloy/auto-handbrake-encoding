@@ -1,5 +1,5 @@
 [versions]
-log4j = "2.25.1"
+log4j = "2.25.4"
 guava = "33.4.8-jre"
 spotbugs-annotations = "4.9.4"
 # test libs
