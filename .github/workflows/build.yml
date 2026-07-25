@@ -150,7 +150,7 @@ jobs:
 
       - name: Bump version
         id: version
-        uses: paulhatch/semantic-version@v5.4.0
+        uses: paulhatch/semantic-version@v6.0.2
 
       - name: Download docker tar
         uses: actions/download-artifact@v5
