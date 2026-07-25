@@ -150,7 +150,7 @@ jobs:
 
       - name: Bump version
         id: version
-        uses: paulhatch/semantic-version@v5.4.0
+        uses: paulhatch/semantic-version@v6.0.2
 
       - name: Download docker tar
         uses: actions/download-artifact@v5
@@ -184,7 +184,7 @@ jobs:
   cleanup:
     needs: [ smoke-test, release ]
     if: always()
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
       - name: Cleanup artifacts
         uses: geekyeggo/delete-artifact@v5
