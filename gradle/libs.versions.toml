@@ -1,20 +1,20 @@
 [versions]
 log4j = "2.25.1"
-guava = "33.4.8-jre"
-spotbugs-annotations = "4.9.4"
+guava = "33.7.1-jre"
+spotbugs-annotations = "4.10.4"
 # test libs
-junit = "5.13.4"
-truth = "1.4.4"
-mockito = "5.19.0"
-jimfs = "1.3.1"
+junit = "6.1.3"
+truth = "1.4.5"
+mockito = "5.23.0"
+jimfs = "1.3.2"
 # plugins
-spotless = "8.0.0"
+spotless = "8.10.2"
 checkstyle = "10.12.0"
-spotbugs-plugin = "6.2.5"
-buildtimetracker = "5.0.1"
+spotbugs-plugin = "6.5.11"
+buildtimetracker = "5.0.2"
 test-sets = "4.1.0"
-jib = "3.4.5"
-grgit = "5.3.2"
+jib = "3.5.4"
+grgit = "5.3.3"
 
 [libraries]
 log4j-core = { module = "org.apache.logging.log4j:log4j-core", version.ref = "log4j" }
