@@ -1,7 +1,6 @@
 > [!WARNING]
 > This project is no longer maintained.
-> Its successor is [video-tools](https://github.com/will-molloy/video-tools), which will cover everything this project does and more.
-> It diagnoses A/V sync problems first, so it only re-encodes when a recording actually needs it.
+> Its successor is [video-tools](https://github.com/will-molloy/video-tools).
 
 # auto-handbrake-encoding
 
